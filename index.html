@@ -22,14 +22,14 @@
       padding: 15px;
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
       box-sizing: border-box;
-      height: 790px;
+      height: 800px;
       display: flex;
       flex-direction: column;
     }
 
     /* 4 Column Layout */
     .calc-box { width: 380px; overflow-y: auto; }
-    .diagram-box { width: 320px; align-items: center; }
+    .diagram-box { width: 330px; align-items: center; }
     .guidance-box { width: 280px; overflow-y: auto; }
     .advanced-box { width: 380px; overflow-y: auto; }
 
@@ -89,13 +89,14 @@
       overflow-y: auto; padding-top: 5px;
     }
     .structure-part { font-size: 35px; line-height: 1; }
-    .truck-part { font-size: 40px; line-height: 1; margin: 4px 0; }
+    .truck-part { font-size: 55px; line-height: 1; margin: 6px 0; } /* Larger Truck */
 
     .multi-lines-wrapper { display: flex; justify-content: space-around; width: 100%; }
     .line-column { display: flex; flex-direction: column; align-items: center; width: 23%; }
     
     .line-label { font-size: 9px; font-weight: bold; margin-bottom: 2px; text-align: center; }
     .flow-label { font-size: 8px; color: #38bdf8; font-weight: bold; text-align: center; margin-bottom: 2px; }
+    .nozzle-type-label { font-size: 8px; color: #fde047; font-weight: bold; text-align: center; margin-bottom: 2px; }
 
     .gate-indicator { font-size: 8px; padding: 2px 3px; border-radius: 3px; font-weight: bold; margin-bottom: 2px; text-align: center; }
     .gate-full { background: #16a34a; color: white; }
@@ -139,7 +140,7 @@
     /* Supply Diagram Area */
     .supply-area { display: flex; flex-direction: column; align-items: center; margin-top: 4px; width: 100%; }
     .supply-hose { width: 10px; height: 30px; background: #0284c7; border: 1px solid #0369a1; border-radius: 2px; }
-    .supply-icon { font-size: 30px; line-height: 1; text-align: center; }
+    .supply-icon { font-size: 32px; line-height: 1; text-align: center; }
 
     /* Warnings & Cards */
     .warning-card {
@@ -218,12 +219,6 @@
       <button class="supply-btn" id="btn-nursing" onclick="setSupply('Nursing')">Nursing (Relay)</button>
     </div>
 
-    <!-- Appliances / Standpipe -->
-    <div class="btn-group">
-      <h3>Appliances / Connections</h3>
-      <button onclick="toggleStandpipe()">Toggle Standpipe / Wye (+70 kPa FL)</button>
-    </div>
-
     <!-- Nozzle Controls -->
     <div class="btn-group">
       <h3>1. Nozzle Selection</h3>
@@ -245,6 +240,12 @@
       <h3>3. Elevation Adjustment (10 kPa / floor / 10ft)</h3>
       <button onclick="addElevation(10)">+ 1 Floor Up (+10 kPa)</button>
       <button onclick="addElevation(-10)">- 1 Floor Down (-10 kPa)</button>
+    </div>
+
+    <!-- Appliances / Standpipe (Moved to Bottom for Better Flow) -->
+    <div class="btn-group">
+      <h3>4. Appliances / Connections</h3>
+      <button onclick="toggleStandpipe()">Toggle Standpipe / Wye (+70 kPa FL)</button>
     </div>
 
     <button class="reset" onclick="resetActiveLine()">Reset Active Line</button>
@@ -362,7 +363,6 @@
     let currentLineKey = 'attack1';
     let supplyMode = 'None';
 
-    // Volume Capacities (Liters)
     let volumes = {
       board: 2500,
       dump: 10000,
@@ -411,7 +411,7 @@
     function setNozzle(name, pressure) {
       lines[currentLineKey].nozzleName = name;
       lines[currentLineKey].np = pressure;
-      lines[currentLineKey].customFlow = 0; // Reset custom flow on nozzle change
+      lines[currentLineKey].customFlow = 0;
       updateDashboard();
     }
 
@@ -442,12 +442,19 @@
         let popped = lines[currentLineKey].hoses.pop();
         lines[currentLineKey].fl -= popped.fl;
         if (lines[currentLineKey].fl < 0) lines[currentLineKey].fl = 0;
-        updateDashboard();
       }
+      // Reset elevation to 0 if no hoses remain on line
+      if (lines[currentLineKey].hoses.length === 0) {
+        lines[currentLineKey].elev = 0;
+      }
+      updateDashboard();
     }
 
     function addElevation(val) {
-      lines[currentLineKey].elev += val;
+      // Elevation only applies if there is at least one hose length
+      if (lines[currentLineKey].hoses.length > 0) {
+        lines[currentLineKey].elev += val;
+      }
       updateDashboard();
     }
 
@@ -485,7 +492,17 @@
 
     function updateDashboard() {
       const activeLine = lines[currentLineKey];
-      const activePDP = activeLine.np + activeLine.fl + activeLine.elev + activeLine.appliance;
+      
+      // Enforce zero elevation if line has no hose
+      if (activeLine.hoses.length === 0) {
+        activeLine.elev = 0;
+      }
+
+      // Calculate Line PDP
+      let activePDP = 0;
+      if (activeLine.hoses.length > 0 || activeLine.nozzleName !== "None") {
+        activePDP = activeLine.np + activeLine.fl + activeLine.elev + activeLine.appliance;
+      }
 
       document.getElementById('pdp-gauge').innerText = activePDP;
 
@@ -493,10 +510,13 @@
       let totalLPM = 0;
 
       Object.keys(lines).forEach(key => {
-        let lPdp = lines[key].np + lines[key].fl + lines[key].elev + lines[key].appliance;
+        let l = lines[key];
+        if (l.hoses.length === 0) l.elev = 0;
+
+        let lPdp = (l.hoses.length > 0 || l.nozzleName !== "None") ? (l.np + l.fl + l.elev + l.appliance) : 0;
         if (lPdp > maxPDP) maxPDP = lPdp;
 
-        let flow = calculateFlow(lines[key]);
+        let flow = calculateFlow(l);
         totalLPM += flow.lpm;
       });
 
@@ -524,7 +544,6 @@
     function updateTimer(totalLPM) {
       const clockElem = document.getElementById('tte-clock');
       
-      // Hydrant has continuous supply unless low pressure
       if (supplyMode === 'Hydrant') {
         clockElem.innerText = "∞ (HYDRANT)";
         clockElem.style.color = "#39ff14";
@@ -604,7 +623,7 @@
 
       Object.keys(lines).forEach(key => {
         const line = lines[key];
-        let linePDP = line.np + line.fl + line.elev + line.appliance;
+        let linePDP = (line.hoses.length > 0 || line.nozzleName !== "None") ? (line.np + line.fl + line.elev + line.appliance) : 0;
         let flow = calculateFlow(line);
 
         const col = document.createElement('div');
@@ -630,6 +649,12 @@
             nozzleWrap.appendChild(smoothBore);
           }
           col.appendChild(nozzleWrap);
+
+          // Explicit Nozzle Type Text Label
+          const nozzleTypeDiv = document.createElement('div');
+          nozzleTypeDiv.className = 'nozzle-type-label';
+          nozzleTypeDiv.innerText = line.nozzleName === "Fog Nozzle" ? '[FOG]' : '[SMOOTH BORE]';
+          col.appendChild(nozzleTypeDiv);
         }
 
         // 2. Flow Label
