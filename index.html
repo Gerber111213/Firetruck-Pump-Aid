@@ -215,52 +215,94 @@
       margin-top: 4px;
     }
 
-    /* Diagram Styling */
-    .diagram-container {
-      background: rgba(0, 0, 0, 0.2);
+    /* Visual Lay Diagram Graphic View */
+    .visual-diagram {
+      background: rgba(0, 0, 0, 0.25);
       border-radius: 8px;
-      padding: 12px;
-      min-height: 250px;
+      padding: 16px 12px;
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      align-items: center;
+      gap: 12px;
       border: 1px dashed var(--card-border);
+      position: relative;
     }
 
-    .line-indicator {
+    .scene-top {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
       width: 100%;
+    }
+
+    .structure-icon {
+      font-size: 2.2rem;
+    }
+
+    .hose-lines-container {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin: 6px 0;
+    }
+
+    .diagram-line-card {
       background: var(--button-bg);
       border: 1px solid var(--card-border);
       border-radius: 6px;
-      padding: 10px;
+      padding: 8px 10px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      font-size: 0.85rem;
       cursor: pointer;
+      font-size: 0.8rem;
+      transition: border-color 0.2s ease;
     }
 
-    .line-indicator.active-line {
+    .diagram-line-card.active-line {
       border: 2px solid var(--accent-green);
       background: rgba(0, 230, 118, 0.1);
     }
 
-    .line-details {
+    .diagram-line-info {
       display: flex;
       flex-direction: column;
       gap: 2px;
     }
 
-    /* Inline Alert Badges */
+    .scene-bottom {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      width: 100%;
+      border-top: 1px dashed var(--card-border);
+      padding-top: 10px;
+      margin-top: 4px;
+    }
+
+    .truck-icon {
+      font-size: 2.4rem;
+    }
+
+    .water-source-graphic {
+      font-size: 1.8rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
     .alert-badge {
       background-color: #b71c1c;
       color: #ffffff;
-      font-size: 0.7rem;
+      font-size: 0.65rem;
       font-weight: bold;
-      padding: 4px 8px;
+      padding: 2px 6px;
       border-radius: 4px;
       display: none;
-      margin-top: 4px;
+      margin-top: 2px;
     }
 
     /* Tank Manager */
@@ -362,63 +404,74 @@
       </div>
     </div>
 
-    <!-- COLUMN 2: LAY DIAGRAM & MASTER PDP -->
+    <!-- COLUMN 2: LAY DIAGRAM WITH GRAPHICS & MASTER PDP -->
     <div class="panel">
       <div class="panel-header">
         <span class="panel-title">Lay Diagram</span>
       </div>
 
-      <!-- Master PDP Box Relocated Here -->
+      <!-- Master PDP Box -->
       <div class="master-pdp-box">
         <div class="master-pdp-label">Master Pump Discharge Pressure (Highest Required)</div>
         <div class="master-pdp-value" id="master-pdp">700 <span style="font-size: 1rem;">kPa</span></div>
       </div>
 
-      <div class="diagram-container">
-        <div style="font-size: 1.5rem; text-align: center;">🏠🔥</div>
-
-        <div class="line-indicator active-line" id="diag-line-attack1" onclick="selectLine('attack1')">
-          <div class="line-details">
-            <strong>💦 Attack 1</strong>
-            <span style="font-size: 0.75rem; color: var(--text-sub);" id="diag-sub-attack1">Fog | 0m Hose | 0 Floors</span>
-            <div class="alert-badge" id="alert-attack1">⚠️ HIGH FRICTION LOSS (>300 kPa)</div>
-          </div>
-          <div><strong id="diag-pdp-attack1">700 kPa</strong></div>
+      <!-- Restored Graphical Lay Diagram -->
+      <div class="visual-diagram">
+        <div class="scene-top">
+          <span class="structure-icon">🏠🔥</span>
+          <span style="font-size: 0.8rem; font-weight: bold; color: var(--text-sub);">FIRE INCIDENT GROUND</span>
         </div>
 
-        <div class="line-indicator" id="diag-line-attack2" onclick="selectLine('attack2')">
-          <div class="line-details">
-            <strong>💦 Attack 2</strong>
-            <span style="font-size: 0.75rem; color: var(--text-sub);" id="diag-sub-attack2">Fog | 0m Hose | 0 Floors</span>
-            <div class="alert-badge" id="alert-attack2">⚠️ HIGH FRICTION LOSS (>300 kPa)</div>
+        <div class="hose-lines-container">
+          <div class="diagram-line-card active-line" id="diag-line-attack1" onclick="selectLine('attack1')">
+            <div class="diagram-line-info">
+              <strong>💦 Attack 1</strong>
+              <span style="font-size: 0.7rem; color: var(--text-sub);" id="diag-sub-attack1">FOG | 0m Hose | 470 L/m</span>
+              <div class="alert-badge" id="alert-attack1">⚠️ HIGH FRICTION LOSS (>300 kPa)</div>
+            </div>
+            <div><strong id="diag-pdp-attack1">700 kPa</strong></div>
           </div>
-          <div><strong id="diag-pdp-attack2">700 kPa</strong></div>
+
+          <div class="diagram-line-card" id="diag-line-attack2" onclick="selectLine('attack2')">
+            <div class="diagram-line-info">
+              <strong>💦 Attack 2</strong>
+              <span style="font-size: 0.7rem; color: var(--text-sub);" id="diag-sub-attack2">FOG | 0m Hose | 470 L/m</span>
+              <div class="alert-badge" id="alert-attack2">⚠️ HIGH FRICTION LOSS (>300 kPa)</div>
+            </div>
+            <div><strong id="diag-pdp-attack2">700 kPa</strong></div>
+          </div>
+
+          <div class="diagram-line-card" id="diag-line-bumper" onclick="selectLine('bumper')">
+            <div class="diagram-line-info">
+              <strong>💦 Bumper Line</strong>
+              <span style="font-size: 0.7rem; color: var(--text-sub);" id="diag-sub-bumper">FOG | 0m Hose | 470 L/m</span>
+              <div class="alert-badge" id="alert-bumper">⚠️ HIGH FRICTION LOSS (>300 kPa)</div>
+            </div>
+            <div><strong id="diag-pdp-bumper">700 kPa</strong></div>
+          </div>
+
+          <div class="diagram-line-card" id="diag-line-monitor" onclick="selectLine('monitor')">
+            <div class="diagram-line-info">
+              <strong>💦 Monitor</strong>
+              <span style="font-size: 0.7rem; color: var(--text-sub);" id="diag-sub-monitor">FOG | 0m Hose | 470 L/m</span>
+              <div class="alert-badge" id="alert-monitor">⚠️ HIGH FRICTION LOSS (>300 kPa)</div>
+            </div>
+            <div><strong id="diag-pdp-monitor">700 kPa</strong></div>
+          </div>
         </div>
 
-        <div class="line-indicator" id="diag-line-bumper" onclick="selectLine('bumper')">
-          <div class="line-details">
-            <strong>💦 Bumper Line</strong>
-            <span style="font-size: 0.75rem; color: var(--text-sub);" id="diag-sub-bumper">Fog | 0m Hose | 0 Floors</span>
-            <div class="alert-badge" id="alert-bumper">⚠️ HIGH FRICTION LOSS (>300 kPa)</div>
+        <div class="scene-bottom">
+          <span class="truck-icon">🚒</span>
+          <div class="water-source-graphic">
+            <span>🌊</span>
+            <span style="font-size: 0.8rem; font-weight: bold; color: var(--accent-blue);" id="supply-label-display">STATIC DUMP TANK</span>
           </div>
-          <div><strong id="diag-pdp-bumper">700 kPa</strong></div>
         </div>
-
-        <div class="line-indicator" id="diag-line-monitor" onclick="selectLine('monitor')">
-          <div class="line-details">
-            <strong>💦 Monitor</strong>
-            <span style="font-size: 0.75rem; color: var(--text-sub);" id="diag-sub-monitor">Fog | 0m Hose | 0 Floors</span>
-            <div class="alert-badge" id="alert-monitor">⚠️ HIGH FRICTION LOSS (>300 kPa)</div>
-          </div>
-          <div><strong id="diag-pdp-monitor">700 kPa</strong></div>
-        </div>
-
-        <div style="font-size: 1.8rem; text-align: center; margin-top: auto;">🚒 🌊</div>
-        <div style="font-size: 0.8rem; font-weight: bold; color: var(--accent-blue); text-align: center;" id="supply-label-display">STATIC DUMP TANK</div>
       </div>
     </div>
 
-    <!-- COLUMN 3: WATER SUPPLY & TANK MANAGER -->
+    <!-- COLUMN 3: WATER SUPPLY & TANK CAPACITY MANAGER -->
     <div class="panel">
       <div class="panel-header">
         <span class="panel-title">Water Supply & Tank Manager</span>
@@ -430,17 +483,17 @@
         <div style="font-size: 0.8rem; color: var(--text-sub);">Total Discharge Flow: <strong id="total-flow">470 L/m</strong></div>
       </div>
 
-      <div class="section-label" id="tank-capacity-label">ACTIVE TANK: ENGINE (2500 L)</div>
+      <div class="section-label" id="tank-capacity-label">ACTIVE SOURCE: DRAFT DUMP TANK (10000 L)</div>
       <div style="width: 100%; background-color: var(--button-bg); height: 12px; border-radius: 6px; overflow: hidden;">
         <div id="tank-bar" style="width: 100%; height: 100%; background-color: var(--accent-green); transition: width 0.3s ease;"></div>
       </div>
 
-      <!-- Tanks -->
+      <!-- Tanks with Capacity Sizing Adjustments -->
       <div class="tank-row">
         <div style="font-size: 0.85rem; font-weight: bold;">On-Board Engine Tank: <span id="engine-tank-val">2500 L / 2500 L</span></div>
         <div class="tank-controls">
-          <button class="btn btn-red" onclick="adjustTank('engine', -500)">- 500L</button>
-          <button class="btn" onclick="adjustTank('engine', 500)">+ 500L</button>
+          <button class="btn btn-red" onclick="adjustTankCapacity('engine', -500)">- 500L Size</button>
+          <button class="btn" onclick="adjustTankCapacity('engine', 500)">+ 500L Size</button>
           <button class="btn btn-blue" onclick="refillTank('engine')">FULL</button>
         </div>
       </div>
@@ -448,8 +501,8 @@
       <div class="tank-row">
         <div style="font-size: 0.85rem; font-weight: bold;">Draft Dump Tank: <span id="draft-tank-val">10000 L / 10000 L</span></div>
         <div class="tank-controls">
-          <button class="btn btn-red" onclick="adjustTank('draft', -500)">- 500L</button>
-          <button class="btn" onclick="adjustTank('draft', 500)">+ 500L</button>
+          <button class="btn btn-red" onclick="adjustTankCapacity('draft', -500)">- 500L Size</button>
+          <button class="btn" onclick="adjustTankCapacity('draft', 500)">+ 500L Size</button>
           <button class="btn btn-blue" onclick="refillTank('draft')">FULL</button>
         </div>
       </div>
@@ -457,8 +510,8 @@
       <div class="tank-row">
         <div style="font-size: 0.85rem; font-weight: bold;">Nursing Tender: <span id="nursing-tank-val">12000 L / 12000 L</span></div>
         <div class="tank-controls">
-          <button class="btn btn-red" onclick="adjustTank('nursing', -500)">- 500L</button>
-          <button class="btn" onclick="adjustTank('nursing', 500)">+ 500L</button>
+          <button class="btn btn-red" onclick="adjustTankCapacity('nursing', -500)">- 500L Size</button>
+          <button class="btn" onclick="adjustTankCapacity('nursing', 500)">+ 500L Size</button>
           <button class="btn btn-blue" onclick="refillTank('nursing')">FULL</button>
         </div>
       </div>
@@ -479,7 +532,7 @@
   </div>
 
   <script>
-    // State Management Data Structure
+    // State Management
     const defaultLineState = () => ({
       nozzleType: 'fog',
       nozzlePressure: 700,
@@ -606,8 +659,16 @@
       updateUI();
     }
 
-    function adjustTank(type, amount) {
-      tanks[type].current = Math.max(0, Math.min(tanks[type].max, tanks[type].current + amount));
+    /* Adjusts the overall max capacity of a tank/tender */
+    function adjustTankCapacity(type, amount) {
+      const tank = tanks[type];
+      const newMax = Math.max(500, tank.max + amount);
+      tank.max = newMax;
+      if (tank.current > newMax) {
+        tank.current = newMax;
+      } else if (tank.current === tank.max - amount) {
+        tank.current = newMax; // Auto-scale current water if it was full
+      }
       updateUI();
     }
 
@@ -657,7 +718,6 @@
         document.getElementById(`diag-pdp-${k}`).innerText = `${pdp} kPa`;
         document.getElementById(`diag-sub-${k}`).innerText = `${l.nozzleType.toUpperCase()} | ${l.hoses.length * 30}m Hose | ${l.flowLpm} L/m`;
 
-        // Friction loss warnings inside individual diagram cards
         const alertEl = document.getElementById(`alert-${k}`);
         if (l.hoseLoss >= 300) {
           alertEl.style.display = 'block';
@@ -678,7 +738,7 @@
       if (supplyMode === 'drafting') activeTank = tanks.draft;
       if (supplyMode === 'nursing') activeTank = tanks.nursing;
 
-      document.getElementById('tank-capacity-label').innerText = `ACTIVE SOURCE: ${supplyMode.toUpperCase()} (${activeTank.current} L)`;
+      document.getElementById('tank-capacity-label').innerText = `ACTIVE SOURCE: ${supplyMode.toUpperCase()} (${activeTank.current} L / ${activeTank.max} L)`;
       const pct = (activeTank.current / activeTank.max) * 100;
       document.getElementById('tank-bar').style.width = `${pct}%`;
 
@@ -696,7 +756,7 @@
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         const swCode = `
-          const CACHE_NAME = 'pdp-dash-v2';
+          const CACHE_NAME = 'pdp-dash-v3';
           self.addEventListener('install', (e) => {
             e.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(['./'])));
           });
