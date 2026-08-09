@@ -1,774 +1,539 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Engine PDP Dashboard</title>
+
+  <!-- PWA Manifest embedded via Data URI for seamless GitHub Pages deployment -->
+  <link rel="manifest" href='data:application/manifest+json,{"name":"Engine PDP Dashboard","short_name":"PDP Dash","start_url":".","display":"standalone","background_color":"#121212","theme_color":"#121212","icons":[{"src":"https://fav.farm/🚒","sizes":"192x192","type":"image/png"}]}' />
+  <meta name="theme-color" content="#121212" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
   <style>
-    body {
-      background-color: #121212;
-      color: #e0e0e0;
-      min-height: 100vh;
-      margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      padding: 15px;
-      gap: 15px;
+    /* CSS Variables for Dynamic Theme & Contrast Switching */
+    :root {
+      --bg-color: #121212;
+      --card-bg: #1e1e1e;
+      --card-border: #333333;
+      --text-main: #ffffff;
+      --text-sub: #b0b0b0;
+      --accent-orange: #ff6b00;
+      --accent-green: #00e676;
+      --accent-blue: #0288d1;
+      --active-border: #00ff66;
+      --button-bg: #2a2a2a;
+      --button-hover: #3a3a3a;
+      --shadow-color: rgba(0, 0, 0, 0.5);
     }
 
-    .box {
-      background-color: #1e1e1e;
-      border: 1px solid #333;
-      border-radius: 12px;
-      padding: 16px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+    /* Direct Sunlight High-Contrast Theme */
+    body.sunlight-mode {
+      --bg-color: #ffffff;
+      --card-bg: #f4f4f6;
+      --card-border: #000000;
+      --text-main: #000000;
+      --text-sub: #333333;
+      --accent-orange: #d84315;
+      --accent-green: #1b5e20;
+      --accent-blue: #0d47a1;
+      --active-border: #000000;
+      --button-bg: #e0e0e0;
+      --button-hover: #cccccc;
+      --shadow-color: rgba(0, 0, 0, 0.1);
+    }
+
+    * {
       box-sizing: border-box;
-      height: 820px;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      user-select: none; /* Prevents text selection accidental highlights during rapid touch inputs */
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      padding: 12px;
+      transition: background-color 0.2s ease, color 0.2s ease;
+    }
+
+    /* Warning Banner */
+    .alert-banner {
+      background-color: #b71c1c;
+      color: #ffffff;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: bold;
+      margin-bottom: 12px;
       display: flex;
       flex-direction: column;
+      gap: 4px;
     }
 
-    /* Streamlined 3 Column Layout */
-    .calc-box { width: 420px; overflow-y: auto; }
-    .diagram-box { width: 400px; align-items: center; }
-    .advanced-box { width: 440px; overflow-y: auto; }
+    /* Dashboard Layout: Responsive Grid/Flex Stacking */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
 
-    h1, h2, h3 { margin-top: 0; text-align: center; color: #fff; }
+    /* Tablet Portrait & Smaller Screens (Stack automatically) */
+    @media (max-width: 1024px) {
+      .dashboard-grid {
+        grid-template-columns: 1fr;
+      }
+    }
 
-    /* Master Engine Gauge (Centerpiece on Diagram Column) */
-    .master-gauge {
-      background: #000;
-      border: 3px solid #ef4444;
+    /* Card Panels */
+    .panel {
+      background-color: var(--card-bg);
+      border: 1px solid var(--card-border);
       border-radius: 10px;
+      padding: 14px;
+      box-shadow: 0 4px 10px var(--shadow-color);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--card-border);
+      padding-bottom: 8px;
+    }
+
+    .panel-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    /* Sunlight Toggle Button */
+    .sunlight-btn {
+      background-color: var(--button-bg);
+      color: var(--text-main);
+      border: 2px solid var(--card-border);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    /* Master PDP Display */
+    .master-pdp-box {
+      border: 2px solid var(--accent-orange);
+      border-radius: 8px;
       padding: 10px;
       text-align: center;
-      margin-bottom: 12px;
-      width: 100%;
-      box-sizing: border-box;
+      background-color: rgba(255, 107, 0, 0.05);
     }
-    .master-title { font-size: 11px; color: #ef4444; font-weight: bold; letter-spacing: 1px; }
-    .master-value { font-size: 38px; font-weight: bold; color: #ef4444; }
 
-    /* Line Selector Tabs */
-    .line-selector { display: flex; justify-content: space-between; gap: 4px; margin-bottom: 10px; }
-    .line-tab {
-      flex: 1; padding: 8px 2px; background: #2a2a2a; color: #aaa;
-      border: 1px solid #444; border-radius: 6px; cursor: pointer;
-      font-weight: bold; font-size: 11px; text-align: center;
+    .master-pdp-label {
+      font-size: 0.75rem;
+      font-weight: bold;
+      color: var(--accent-orange);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
-    .line-tab.active { background: #ff5e00; color: #fff; border-color: #22c55e; }
 
-    /* Active Line Gauge */
-    .gauge-card {
-      background: #000; border: 2px solid #22c55e; border-radius: 8px;
-      padding: 8px; text-align: center; margin-bottom: 8px;
+    .master-pdp-value {
+      font-size: 2.2rem;
+      font-weight: 900;
+      color: var(--accent-orange);
+      line-height: 1.1;
     }
-    .gauge-title { font-size: 10px; color: #aaa; text-transform: uppercase; }
-    .gauge-value { font-size: 26px; font-weight: bold; color: #22c55e; margin: 2px 0; }
 
+    /* Target PDP Display */
+    .target-pdp-box {
+      border: 2px solid var(--accent-green);
+      border-radius: 8px;
+      padding: 10px;
+      text-align: center;
+      background-color: rgba(0, 230, 118, 0.05);
+    }
+
+    .target-pdp-value {
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: var(--accent-green);
+    }
+
+    /* Button Grids & Touch Targets */
     .btn-group {
-      margin: 5px 0; background: #262626;
-      padding: 8px; border-radius: 6px; border: 1px solid #333;
-    }
-    .btn-group h3 { margin: 0 0 5px 0; font-size: 11px; color: #ccc; text-align: left; }
-
-    button {
-      background-color: #ea580c; color: white; border: none;
-      padding: 6px 10px; margin: 2px; font-size: 11px;
-      border-radius: 4px; cursor: pointer; font-weight: bold;
-      transition: background 0.2s;
-    }
-    button:hover { background-color: #c2410c; }
-    button.preset-btn { background-color: #0284c7; }
-    button.flow-btn { background-color: #38bdf8; color: #000; }
-    button.supply-btn.active { background-color: #38bdf8; color: #000; }
-    button.refill-btn { background-color: #16a34a; color: white; }
-    button.remove-btn { background-color: #dc2626; }
-    button.reset { background-color: #4b5563; width: 100%; margin-top: 6px; }
-
-    /* Diagram Styles */
-    #diagram-container {
-      width: 100%; height: 100%; display: flex;
-      flex-direction: column; align-items: center;
-      overflow-y: auto; padding-top: 5px;
-    }
-    .structure-part { font-size: 38px; line-height: 1; }
-    .truck-part { font-size: 58px; line-height: 1; margin: 6px 0; }
-
-    .multi-lines-wrapper { display: flex; justify-content: space-around; width: 100%; }
-    .line-column { display: flex; flex-direction: column; align-items: center; width: 23%; }
-    
-    .line-label { font-size: 9px; font-weight: bold; margin-bottom: 2px; text-align: center; }
-    .flow-label { font-size: 8px; color: #38bdf8; font-weight: bold; text-align: center; margin-bottom: 2px; }
-    .nozzle-type-label { font-size: 8px; color: #fde047; font-weight: bold; text-align: center; margin-bottom: 2px; }
-
-    .gate-indicator { font-size: 8px; padding: 2px 4px; border-radius: 3px; font-weight: bold; margin-bottom: 2px; text-align: center; }
-    .gate-full { background: #16a34a; color: white; }
-    .gate-down { background: #eab308; color: black; }
-
-    .hose-section { display: flex; flex-direction: column; align-items: center; }
-    .coupling { width: 16px; height: 3px; background: #888; border-radius: 1px; border: 1px solid #111; }
-    
-    .hose-line { height: 28px; border-left: 1px solid rgba(0,0,0,0.5); border-right: 1px solid rgba(0,0,0,0.5); }
-    .hose-44mm { width: 6px; }
-    .hose-65mm { width: 12px; }
-
-    .color-attack1 { background-color: #facc15; }
-    .color-attack2 { background-color: #3b82f6; }
-    .color-bumper  { background-color: #ef4444; }
-    .color-monitor { background-color: #22c55e; }
-
-    /* Water Spray Graphic */
-    .water-spray-effect {
-      font-size: 15px; line-height: 1; margin-bottom: -4px; text-align: center;
-      animation: pulseSpray 0.8s infinite alternate;
-    }
-    @keyframes pulseSpray {
-      0% { opacity: 0.7; transform: translateY(0); }
-      100% { opacity: 1; transform: translateY(-3px); }
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+      gap: 8px;
     }
 
-    .nozzle-wrapper { display: flex; flex-direction: column; align-items: center; margin-bottom: 2px; }
-    .smooth-bore-nozzle {
-      width: 0; height: 0;
-      border-left: 4px solid transparent; border-right: 4px solid transparent;
-      border-bottom: 18px solid #eab308;
-    }
-    .fog-nozzle {
-      width: 0; height: 0;
-      border-left: 7px solid transparent; border-right: 7px solid transparent;
-      border-top: 16px solid #38bdf8;
-      margin-bottom: 2px;
-    }
-
-    /* Supply Diagram Area */
-    .supply-area { display: flex; flex-direction: column; align-items: center; margin-top: 4px; width: 100%; }
-    .supply-hose { width: 10px; height: 30px; background: #0284c7; border: 1px solid #0369a1; border-radius: 2px; }
-    .supply-icon { font-size: 34px; line-height: 1; text-align: center; }
-
-    /* Dynamic Integrated Tactical Advisor Warnings */
-    .warning-card {
-      background: rgba(220, 38, 38, 0.15); border: 1px solid #ef4444;
-      border-radius: 6px; padding: 8px; margin-bottom: 8px; font-size: 11px;
-    }
-    .warning-title { font-weight: bold; color: #fca5a5; font-size: 12px; margin-bottom: 3px; }
-
-    /* Window 3: Water Tank Level Gauge & Timer */
-    .timer-card {
-      background: #000;
-      border: 2px solid #0284c7;
-      border-radius: 8px;
-      padding: 10px;
+    .btn {
+      background-color: var(--button-bg);
+      color: var(--text-main);
+      border: 1px solid var(--card-border);
+      padding: 10px 8px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
       text-align: center;
-      margin-bottom: 12px;
-    }
-    .timer-title { font-size: 11px; color: #38bdf8; font-weight: bold; letter-spacing: 1px; }
-    .timer-clock { font-size: 38px; font-weight: bold; color: #38bdf8; margin: 4px 0; }
-    
-    /* Visual Water Gauge Bar */
-    .tank-gauge-container {
-      background: #262626;
-      border: 1px solid #444;
-      border-radius: 8px;
-      padding: 10px;
-      margin-bottom: 10px;
-    }
-    .gauge-header { display: flex; justify-content: space-between; font-size: 11px; font-weight: bold; margin-bottom: 6px; }
-    .bar-outer {
-      width: 100%; height: 22px; background: #111; border-radius: 4px; border: 1px solid #555; overflow: hidden;
-    }
-    .bar-inner {
-      height: 100%; width: 100%; background: #22c55e; transition: width 0.3s, background-color 0.3s;
+      transition: all 0.15s ease;
+      min-height: 44px; /* Apple's recommended touch target size */
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
-    .vol-row {
-      display: flex; justify-content: space-between; align-items: center;
-      background: #262626; padding: 6px 8px; border-radius: 6px; margin-bottom: 6px; border: 1px solid #333;
+    .btn:active {
+      transform: scale(0.97);
     }
-    .vol-info { font-size: 11px; }
-    .vol-val { font-size: 13px; font-weight: bold; color: #22c55e; }
+
+    /* High Visibility Selected States */
+    .btn.active {
+      background-color: var(--accent-orange);
+      color: #ffffff;
+      border: 2px solid var(--active-border);
+      box-shadow: 0 0 8px rgba(255, 107, 0, 0.5);
+      font-weight: 800;
+    }
+
+    .btn-blue.active {
+      background-color: var(--accent-blue);
+      box-shadow: 0 0 8px rgba(2, 136, 209, 0.5);
+    }
+
+    /* Section Subheadings */
+    .section-label {
+      font-size: 0.8rem;
+      font-weight: bold;
+      color: var(--text-sub);
+      margin-top: 4px;
+    }
+
+    /* Diagram Styling */
+    .diagram-container {
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 8px;
+      padding: 16px;
+      min-height: 250px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      border: 1px dashed var(--card-border);
+    }
+
+    .line-indicator {
+      width: 100%;
+      background: var(--button-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 6px;
+      padding: 8px;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.85rem;
+    }
+
+    .line-indicator.active-line {
+      border: 2px solid var(--accent-green);
+      background: rgba(0, 230, 118, 0.1);
+    }
+
+    /* Tank Manager */
+    .timer-display {
+      text-align: center;
+      font-size: 2.2rem;
+      font-weight: 900;
+      color: var(--accent-blue);
+    }
+
+    .tank-row {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      background: rgba(0,0,0,0.15);
+      padding: 8px;
+      border-radius: 6px;
+    }
+
+    .tank-controls {
+      display: flex;
+      gap: 6px;
+    }
+
+    .tank-controls .btn {
+      flex: 1;
+      padding: 6px;
+      font-size: 0.75rem;
+    }
+
+    /* Nozzle Grid Touch Adjustments */
+    .flow-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+    }
   </style>
 </head>
 <body>
 
-  <!-- Column 1: Calculator Controls & Integrated Tactical Advisor -->
-  <div class="box calc-box">
-    <!-- Integrated Tactical Advisor (Populates dynamically) -->
-    <div id="integrated-warning-container"></div>
-
-    <!-- Line Tabs -->
-    <div class="line-selector">
-      <div class="line-tab active" id="tab-attack1" onclick="selectLine('attack1')">Attack 1</div>
-      <div class="line-tab" id="tab-attack2" onclick="selectLine('attack2')">Attack 2</div>
-      <div class="line-tab" id="tab-bumper" onclick="selectLine('bumper')">Bumper Line</div>
-      <div class="line-tab" id="tab-monitor" onclick="selectLine('monitor')">Monitor</div>
-    </div>
-
-    <!-- Selected Line Gauge -->
-    <div class="gauge-card">
-      <div class="gauge-title" id="gauge-label">ATTACK LINE 1 - TARGET PDP</div>
-      <div class="gauge-value"><span id="pdp-gauge">0</span> <small style="font-size:12px;">kPa</small></div>
-      <div id="line-gate-status" style="font-size:10px; font-weight:bold; color:#ea580c;">FULLY OPEN</div>
-    </div>
-
-    <!-- Quick Presets -->
-    <div class="btn-group">
-      <h3>Quick Preconnect Short-Cuts</h3>
-      <button class="preset-btn" onclick="applyPreset('crosslay')">Crosslay (60m 44mm + Fog)</button>
-      <button class="preset-btn" onclick="applyPreset('highrise')">High-Rise Standpipe (30m 65mm + SB)</button>
-    </div>
-
-    <!-- Water Supply Mode -->
-    <div class="btn-group">
-      <h3>Supply Mode</h3>
-      <button class="supply-btn" id="btn-hydrant" onclick="setSupply('Hydrant')">Hydrant Supply</button>
-      <button class="supply-btn" id="btn-drafting" onclick="setSupply('Drafting')">Drafting (Static)</button>
-      <button class="supply-btn" id="btn-nursing" onclick="setSupply('Nursing')">Nursing (Relay)</button>
-    </div>
-
-    <!-- Nozzle Controls -->
-    <div class="btn-group">
-      <h3>1. Nozzle Selection</h3>
-      <button onclick="setNozzle('Fog Nozzle', 700)">Fog Nozzle (700 kPa)</button>
-      <button onclick="setNozzle('Smooth Bore', 350)">Smooth Bore (350 kPa)</button>
-      <button class="remove-btn" onclick="removeNozzle()">- Nozzle</button>
-    </div>
-
-    <!-- Hose Controls -->
-    <div class="btn-group">
-      <h3>2. Hose Lengths</h3>
-      <button onclick="addHose('44mm', 100)">+ 1x 44mm (100 kPa)</button>
-      <button onclick="addHose('65mm', 30)">+ 1x 65mm (30 kPa)</button>
-      <button class="remove-btn" onclick="removeHose()">- Hose</button>
-    </div>
-
-    <!-- Elevation Controls -->
-    <div class="btn-group">
-      <h3>3. Elevation Adjustment (10 kPa / floor)</h3>
-      <button onclick="addElevation(10)">+ 1 Floor Up (+10 kPa)</button>
-      <button onclick="addElevation(-10)">- 1 Floor Down (-10 kPa)</button>
-    </div>
-
-    <!-- Appliances / Standpipe -->
-    <div class="btn-group">
-      <h3>4. Appliances / Connections</h3>
-      <button onclick="toggleStandpipe()">Toggle Standpipe / Wye (+70 kPa FL)</button>
-    </div>
-
-    <button class="reset" onclick="resetActiveLine()">Reset Active Line</button>
+  <!-- Severe Warning Banners -->
+  <div class="alert-banner">
+    <div>⚠️ <strong>SEVERE FRICTION LOSS:</strong> Friction loss exceeds 300 kPa on this line. Consider extending with 65mm hose.</div>
+    <div>⚠️ <strong>DRAFTING LIFT HEIGHT:</strong> Ensure maximum vertical lift height does not exceed 3 meters (10 ft).</div>
   </div>
 
-  <!-- Column 2: Master Gauge & Multi-Line Lay Diagram -->
-  <div class="box diagram-box">
-    <!-- Highlighted Master Pump Discharge Pressure Box -->
-    <div class="master-gauge">
-      <div class="master-title">MASTER PUMP DISCHARGE PRESSURE (HIGHEST REQUIRED)</div>
-      <div class="master-value"><span id="master-pdp">0</span> <small style="font-size:18px;">kPa</small></div>
-    </div>
+  <div class="dashboard-grid">
 
-    <h2>Lay Diagram</h2>
-    <div id="diagram-container">
-      <div class="structure-part">🏠🔥</div>
-      <div class="multi-lines-wrapper" id="multi-lines-container"></div>
-      <div class="truck-part">🚒</div>
-      <div class="supply-area" id="supply-container"></div>
-    </div>
-  </div>
+    <!-- COLUMN 1: PDP & CONTROL PANEL -->
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">Control Panel</span>
+        <button class="sunlight-btn" onclick="toggleSunlightMode()">☀️ Sun Mode</button>
+      </div>
 
-  <!-- Column 3: Advanced Config & Water Management -->
-  <div class="box advanced-box">
-    <h2>Water Supply & Tank Manager</h2>
+      <div class="master-pdp-box">
+        <div class="master-pdp-label">Master Pump Discharge Pressure (Highest Required)</div>
+        <div class="master-pdp-value" id="master-pdp">1100 <span style="font-size: 1rem;">kPa</span></div>
+      </div>
 
-    <!-- Live Timer Clock -->
-    <div class="timer-card">
-      <div class="timer-title">TIME TO EMPTY WATER SUPPLY</div>
-      <div class="timer-clock" id="tte-clock">--:--</div>
-      <div style="font-size:11px; color:#aaa;">Total Discharge Flow: <span id="total-flow-label" style="color:#38bdf8; font-weight:bold;">0 L/m</span></div>
-    </div>
+      <div class="btn-group">
+        <button class="btn active" onclick="selectLine('attack1', this)">Attack 1</button>
+        <button class="btn" onclick="selectLine('attack2', this)">Attack 2</button>
+        <button class="btn" onclick="selectLine('bumper', this)">Bumper Line</button>
+        <button class="btn" onclick="selectLine('monitor', this)">Monitor</button>
+      </div>
 
-    <!-- Visual Water Gauge Bar -->
-    <div class="tank-gauge-container">
-      <div class="gauge-header">
-        <span id="active-source-title">ACTIVE SOURCE: ON-BOARD TANK</span>
-        <span id="active-source-pct" style="color:#22c55e;">100%</span>
+      <div class="target-pdp-box">
+        <div style="font-size: 0.75rem; font-weight: bold; color: var(--accent-green);" id="active-line-title">ATTACK 1 - TARGET PDP</div>
+        <div class="target-pdp-value" id="target-pdp">1100 <span style="font-size: 0.9rem;">kPa</span></div>
+        <div style="font-size: 0.7rem; color: var(--accent-green); font-weight: bold;">100% FULLY OPEN DISCHARGE</div>
       </div>
-      <div class="bar-outer">
-        <div class="bar-inner" id="visual-water-bar"></div>
-      </div>
-    </div>
 
-    <!-- On-Board Tank Volume Adjuster -->
-    <div class="vol-row">
-      <div class="vol-info">
-        <strong>On-Board Engine Tank:</strong><br>
-        <span class="vol-val" id="val-board">2500 L / 2500 L</span>
+      <div class="section-label">Quick Preconnect Short-Cuts</div>
+      <div class="btn-group">
+        <button class="btn btn-blue" onclick="applyPreset('crosslay')">Crosslay (60m 44mm + Fog)</button>
+        <button class="btn btn-blue" onclick="applyPreset('highrise')">High-Rise Standpipe (30m 65mm + SB)</button>
       </div>
-      <div>
-        <button onclick="adjVol('board', -500)">- 500L</button>
-        <button onclick="adjVol('board', 500)">+ 500L</button>
-        <button class="refill-btn" onclick="fullRefill('board')">FULL REFILL</button>
-      </div>
-    </div>
 
-    <!-- Dump Tank Volume Adjuster (Drafting) -->
-    <div class="vol-row">
-      <div class="vol-info">
-        <strong>Draft Dump Tank:</strong><br>
-        <span class="vol-val" id="val-dump">10000 L / 10000 L</span>
+      <div class="section-label">Supply Mode</div>
+      <div class="btn-group">
+        <button class="btn" onclick="setSupply('hydrant', this)">Hydrant Supply</button>
+        <button class="btn active" onclick="setSupply('drafting', this)">Drafting (Static)</button>
+        <button class="btn" onclick="setSupply('nursing', this)">Nursing (Relay)</button>
       </div>
-      <div>
-        <button onclick="adjVol('dump', -500)">- 500L</button>
-        <button onclick="adjVol('dump', 500)">+ 500L</button>
-        <button class="refill-btn" onclick="fullRefill('dump')">FULL REFILL</button>
-      </div>
-    </div>
 
-    <!-- Nursing Tender Volume Adjuster -->
-    <div class="vol-row">
-      <div class="vol-info">
-        <strong>Nursing Tender:</strong><br>
-        <span class="vol-val" id="val-tender">12000 L / 12000 L</span>
+      <div class="section-label">1. Nozzle Selection</div>
+      <div class="btn-group">
+        <button class="btn active" onclick="setNozzle('fog', 700, this)">Fog Nozzle (700 kPa)</button>
+        <button class="btn" onclick="setNozzle('smooth', 350, this)">Smooth Bore (350 kPa)</button>
+        <button class="btn" onclick="clearNozzle()">- Nozzle</button>
       </div>
-      <div>
-        <button onclick="adjVol('tender', -500)">- 500L</button>
-        <button onclick="adjVol('tender', 500)">+ 500L</button>
-        <button class="refill-btn" onclick="fullRefill('tender')">FULL REFILL</button>
+
+      <div class="section-label">2. Hose Lengths</div>
+      <div class="btn-group">
+        <button class="btn" onclick="addHose(44, 100)">+ 1x 44mm (100 kPa)</button>
+        <button class="btn" onclick="addHose(65, 30)">+ 1x 65mm (30 kPa)</button>
+        <button class="btn" onclick="removeHose()">- Hose</button>
+      </div>
+
+      <div class="section-label">3. Elevation Adjustment (10 kPa / floor)</div>
+      <div class="btn-group">
+        <button class="btn" onclick="adjustElevation(10)">+1 Floor Up (+10 kPa)</button>
+        <button class="btn" onclick="adjustElevation(-10)">-1 Floor Down (-10 kPa)</button>
+      </div>
+
+      <div class="section-label">4. Appliances / Connections</div>
+      <div class="btn-group">
+        <button class="btn" id="standpipe-btn" onclick="toggleStandpipe()">Toggle Standpipe / Wye (+70 kPa FL)</button>
+        <button class="btn" onclick="resetActiveLine()" style="background-color: #5c1d1d;">Reset Active Line</button>
       </div>
     </div>
 
-    <!-- Nozzle Flow Rate Presets for Active Line -->
-    <div class="btn-group" style="margin-top:10px;">
-      <h3>Nozzle Flow Rate (Selected Line)</h3>
-      <button class="flow-btn" onclick="setCustomFlow(115)">115 L/m (30 GPM)</button>
-      <button class="flow-btn" onclick="setCustomFlow(230)">230 L/m (60 GPM)</button>
-      <button class="flow-btn" onclick="setCustomFlow(360)">360 L/m (95 GPM)</button>
-      <button class="flow-btn" onclick="setCustomFlow(470)">470 L/m (125 GPM)</button>
-      <button class="flow-btn" onclick="setCustomFlow(570)">570 L/m (150 GPM)</button>
-      <button class="flow-btn" onclick="setCustomFlow(750)">750 L/m (200 GPM)</button>
-      <button class="flow-btn" onclick="setCustomFlow(950)">950 L/m (250 GPM)</button>
-      <button class="flow-btn" onclick="setCustomFlow(1900)">1900 L/m (500 GPM Monitor)</button>
+    <!-- COLUMN 2: LAY DIAGRAM -->
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">Lay Diagram</span>
+      </div>
+      <div class="diagram-container">
+        <div style="font-size: 1.5rem;">🏠🔥</div>
+
+        <div class="line-indicator active-line" id="diag-line-1">
+          <span>💦💧 [FOG] Attack 1</span>
+          <span>470 L/m (124 GPM) | <strong>1100 kPa</strong> (100% OPEN)</span>
+        </div>
+
+        <div class="line-indicator" id="diag-line-2">
+          <span>💦💧 [FOG] Attack 2</span>
+          <span>470 L/m (124 GPM) | <strong>1100 kPa</strong> (100% OPEN)</span>
+        </div>
+
+        <div class="line-indicator" id="diag-line-3">
+          <span>💦💧 [FOG] Monitor</span>
+          <span>950 L/m (251 GPM) | <strong>700 kPa</strong> (GATE 64%)</span>
+        </div>
+
+        <div style="font-size: 2rem; margin-top: auto;">🚒 🌊</div>
+        <div style="font-size: 0.8rem; font-weight: bold; color: var(--accent-blue);">STATIC DUMP TANK</div>
+      </div>
+    </div>
+
+    <!-- COLUMN 3: WATER SUPPLY & TANK MANAGER -->
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">Water Supply & Tank Manager</span>
+      </div>
+
+      <div style="text-align: center;">
+        <div class="section-label">TIME TO EMPTY WATER SUPPLY</div>
+        <div class="timer-display" id="empty-timer">05:17</div>
+        <div style="font-size: 0.8rem; color: var(--text-sub);">Total Discharge Flow: <strong id="total-flow">1890 L/m</strong></div>
+      </div>
+
+      <div class="section-label">ACTIVE SOURCE: STATIC DUMP TANK (100%)</div>
+      <div style="width: 100%; background-color: var(--button-bg); height: 12px; border-radius: 6px; overflow: hidden;">
+        <div id="tank-bar" style="width: 100%; height: 100%; background-color: var(--accent-green);"></div>
+      </div>
+
+      <!-- Tanks -->
+      <div class="tank-row">
+        <div style="font-size: 0.85rem; font-weight: bold;">On-Board Engine Tank: <span id="engine-tank-val">2500 L / 2500 L</span></div>
+        <div class="tank-controls">
+          <button class="btn" onclick="adjustTank('engine', -500)">- 500L</button>
+          <button class="btn" onclick="adjustTank('engine', 500)">+ 500L</button>
+          <button class="btn btn-blue" onclick="refillTank('engine')">FULL REFILL</button>
+        </div>
+      </div>
+
+      <div class="tank-row">
+        <div style="font-size: 0.85rem; font-weight: bold;">Draft Dump Tank: <span id="draft-tank-val">10000 L / 10000 L</span></div>
+        <div class="tank-controls">
+          <button class="btn" onclick="adjustTank('draft', -500)">- 500L</button>
+          <button class="btn" onclick="adjustTank('draft', 500)">+ 500L</button>
+          <button class="btn btn-blue" onclick="refillTank('draft')">FULL REFILL</button>
+        </div>
+      </div>
+
+      <div class="tank-row">
+        <div style="font-size: 0.85rem; font-weight: bold;">Nursing Tender: <span id="nursing-tank-val">12000 L / 12000 L</span></div>
+        <div class="tank-controls">
+          <button class="btn" onclick="adjustTank('nursing', -500)">- 500L</button>
+          <button class="btn" onclick="adjustTank('nursing', 500)">+ 500L</button>
+          <button class="btn btn-blue" onclick="refillTank('nursing')">FULL REFILL</button>
+        </div>
+      </div>
+
+      <div class="section-label">Nozzle Flow Rate (Selected Line)</div>
+      <div class="flow-grid">
+        <button class="btn" onclick="setFlow(115, '30 GPM', this)">115 L/m (30 GPM)</button>
+        <button class="btn" onclick="setFlow(230, '60 GPM', this)">230 L/m (60 GPM)</button>
+        <button class="btn" onclick="setFlow(360, '95 GPM', this)">360 L/m (95 GPM)</button>
+        <button class="btn active" onclick="setFlow(470, '125 GPM', this)">470 L/m (125 GPM)</button>
+        <button class="btn" onclick="setFlow(570, '150 GPM', this)">570 L/m (150 GPM)</button>
+        <button class="btn" onclick="setFlow(750, '200 GPM', this)">750 L/m (200 GPM)</button>
+        <button class="btn" onclick="setFlow(950, '250 GPM', this)">950 L/m (250 GPM)</button>
+        <button class="btn" onclick="setFlow(1900, '500 GPM', this)">1900 L/m (500 GPM Monitor)</button>
+      </div>
+
     </div>
   </div>
 
   <script>
-    const MAX_VOLUMES = { board: 2500, dump: 10000, tender: 12000 };
-    let volumes = { board: 2500, dump: 10000, tender: 12000 };
-
-    const lines = {
-      attack1: { name: "Attack 1", code: "attack1", np: 0, nozzleName: "None", fl: 0, elev: 0, appliance: 0, customFlow: 0, hoses: [] },
-      attack2: { name: "Attack 2", code: "attack2", np: 0, nozzleName: "None", fl: 0, elev: 0, appliance: 0, customFlow: 0, hoses: [] },
-      bumper:  { name: "Bumper",   code: "bumper",  np: 0, nozzleName: "None", fl: 0, elev: 0, appliance: 0, customFlow: 0, hoses: [] },
-      monitor: { name: "Monitor",  code: "monitor", np: 0, nozzleName: "None", fl: 0, elev: 0, appliance: 0, customFlow: 0, hoses: [] }
-    };
-
-    let currentLineKey = 'attack1';
-    let supplyMode = 'None';
-
-    function selectLine(lineKey) {
-      currentLineKey = lineKey;
-      document.querySelectorAll('.line-tab').forEach(tab => tab.classList.remove('active'));
-      document.getElementById(`tab-${lineKey}`).classList.add('active');
-      document.getElementById('gauge-label').innerText = `${lines[lineKey].name.toUpperCase()} - TARGET PDP`;
-      updateDashboard();
+    /* Sunlight Mode Toggle */
+    function toggleSunlightMode() {
+      document.body.classList.toggle('sunlight-mode');
     }
 
-    function setSupply(mode) {
-      supplyMode = supplyMode === mode ? 'None' : mode;
-      document.querySelectorAll('.supply-btn').forEach(btn => btn.classList.remove('active'));
-      if (supplyMode !== 'None') {
-        document.getElementById(`btn-${supplyMode.toLowerCase()}`).classList.add('active');
-      }
-      updateDashboard();
+    /* Line Selection Logic */
+    let currentLine = 'attack1';
+
+    function selectLine(lineId, element) {
+      currentLine = lineId;
+      const buttons = element.parentElement.querySelectorAll('.btn');
+      buttons.forEach(btn => btn.classList.remove('active'));
+      element.classList.add('active');
+      
+      const title = document.getElementById('active-line-title');
+      title.innerText = `${lineId.toUpperCase()} - TARGET PDP`;
     }
 
+    /* Supply Mode Toggle */
+    function setSupply(mode, element) {
+      const buttons = element.parentElement.querySelectorAll('.btn');
+      buttons.forEach(btn => btn.classList.remove('active'));
+      element.classList.add('active');
+    }
+
+    /* Nozzle Selection */
+    function setNozzle(type, pressure, element) {
+      const buttons = element.parentElement.querySelectorAll('.btn');
+      buttons.forEach(btn => btn.classList.remove('active'));
+      element.classList.add('active');
+    }
+
+    function clearNozzle() {
+      // Logic to remove nozzle selection
+    }
+
+    /* Hose Adjustments */
+    function addHose(size, pressure) {}
+    function removeHose() {}
+
+    /* Elevation */
+    function adjustElevation(amount) {}
+
+    /* Appliances */
     function toggleStandpipe() {
-      lines[currentLineKey].appliance = lines[currentLineKey].appliance === 0 ? 70 : 0;
-      updateDashboard();
+      document.getElementById('standpipe-btn').classList.toggle('active');
     }
 
-    function applyPreset(preset) {
-      resetActiveLine();
-      if (preset === 'crosslay') {
-        lines[currentLineKey].nozzleName = "Fog Nozzle";
-        lines[currentLineKey].np = 700;
-        addHose('44mm', 100); addHose('44mm', 100);
-        addHose('44mm', 100); addHose('44mm', 100);
-      } else if (preset === 'highrise') {
-        lines[currentLineKey].nozzleName = "Smooth Bore";
-        lines[currentLineKey].np = 350;
-        addHose('65mm', 30); addHose('65mm', 30);
-        lines[currentLineKey].elev = 30;
-        lines[currentLineKey].appliance = 70;
-      }
-      updateDashboard();
+    function resetActiveLine() {}
+
+    /* Presets */
+    function applyPreset(type) {}
+
+    /* Flow Selection */
+    function setFlow(flowLpm, gpmText, element) {
+      const buttons = element.parentElement.querySelectorAll('.btn');
+      buttons.forEach(btn => btn.classList.remove('active'));
+      element.classList.add('active');
     }
 
-    function setNozzle(name, pressure) {
-      lines[currentLineKey].nozzleName = name;
-      lines[currentLineKey].np = pressure;
-      lines[currentLineKey].customFlow = 0;
-      updateDashboard();
-    }
+    /* Tank Adjustments */
+    function adjustTank(tankType, amount) {}
+    function refillTank(tankType) {}
 
-    function setCustomFlow(lpm) {
-      if (lines[currentLineKey].nozzleName === "None") {
-        lines[currentLineKey].nozzleName = "Fog Nozzle";
-        lines[currentLineKey].np = 700;
-      }
-      lines[currentLineKey].customFlow = lpm;
-      updateDashboard();
-    }
-
-    function removeNozzle() {
-      lines[currentLineKey].nozzleName = "None";
-      lines[currentLineKey].np = 0;
-      lines[currentLineKey].customFlow = 0;
-      updateDashboard();
-    }
-
-    function addHose(type, flValue) {
-      lines[currentLineKey].hoses.push({ type: type, fl: flValue });
-      lines[currentLineKey].fl += flValue;
-      updateDashboard();
-    }
-
-    function removeHose() {
-      if (lines[currentLineKey].hoses.length > 0) {
-        let popped = lines[currentLineKey].hoses.pop();
-        lines[currentLineKey].fl -= popped.fl;
-        if (lines[currentLineKey].fl < 0) lines[currentLineKey].fl = 0;
-      }
-      if (lines[currentLineKey].hoses.length === 0) {
-        lines[currentLineKey].elev = 0;
-      }
-      updateDashboard();
-    }
-
-    function addElevation(val) {
-      if (lines[currentLineKey].hoses.length > 0) {
-        lines[currentLineKey].elev += val;
-      }
-      updateDashboard();
-    }
-
-    function adjVol(key, val) {
-      volumes[key] += val;
-      if (volumes[key] < 0) volumes[key] = 0;
-      if (volumes[key] > MAX_VOLUMES[key]) volumes[key] = MAX_VOLUMES[key];
-      document.getElementById(`val-${key}`).innerText = `${volumes[key]} L / ${MAX_VOLUMES[key]} L`;
-      updateDashboard();
-    }
-
-    function fullRefill(key) {
-      volumes[key] = MAX_VOLUMES[key];
-      document.getElementById(`val-${key}`).innerText = `${volumes[key]} L / ${MAX_VOLUMES[key]} L`;
-      updateDashboard();
-    }
-
-    function resetActiveLine() {
-      lines[currentLineKey].np = 0;
-      lines[currentLineKey].nozzleName = "None";
-      lines[currentLineKey].fl = 0;
-      lines[currentLineKey].elev = 0;
-      lines[currentLineKey].appliance = 0;
-      lines[currentLineKey].customFlow = 0;
-      lines[currentLineKey].hoses = [];
-      updateDashboard();
-    }
-
-    function calculateFlow(line) {
-      if (line.nozzleName === "None") return { lpm: 0, gpm: 0 };
-      if (line.customFlow > 0) {
-        return { lpm: line.customFlow, gpm: Math.round(line.customFlow / 3.785) };
-      }
-      let has65 = line.hoses.some(h => h.type === '65mm');
-      if (line.nozzleName === "Fog Nozzle") {
-        return has65 ? { lpm: 950, gpm: 250 } : { lpm: 570, gpm: 150 };
-      } else if (line.nozzleName === "Smooth Bore") {
-        return has65 ? { lpm: 1000, gpm: 265 } : { lpm: 700, gpm: 185 };
-      }
-      return { lpm: 0, gpm: 0 };
-    }
-
-    function updateDashboard() {
-      const activeLine = lines[currentLineKey];
-      if (activeLine.hoses.length === 0) activeLine.elev = 0;
-
-      let activePDP = 0;
-      if (activeLine.hoses.length > 0 || activeLine.nozzleName !== "None") {
-        activePDP = activeLine.np + activeLine.fl + activeLine.elev + activeLine.appliance;
-      }
-
-      document.getElementById('pdp-gauge').innerText = activePDP;
-
-      let maxPDP = 0;
-      let totalLPM = 0;
-
-      Object.keys(lines).forEach(key => {
-        let l = lines[key];
-        if (l.hoses.length === 0) l.elev = 0;
-
-        let lPdp = (l.hoses.length > 0 || l.nozzleName !== "None") ? (l.np + l.fl + l.elev + l.appliance) : 0;
-        if (lPdp > maxPDP) maxPDP = lPdp;
-
-        let flow = calculateFlow(l);
-        totalLPM += flow.lpm;
-      });
-
-      document.getElementById('master-pdp').innerText = maxPDP;
-      document.getElementById('total-flow-label').innerText = `${totalLPM} L/m`;
-
-      const gateElem = document.getElementById('line-gate-status');
-      if (activePDP === maxPDP && maxPDP > 0) {
-        gateElem.innerText = "100% FULLY OPEN DISCHARGE";
-        gateElem.style.color = "#22c55e";
-      } else if (activePDP < maxPDP && activePDP > 0) {
-        let pct = Math.round((activePDP / maxPDP) * 100);
-        gateElem.innerText = `GATE DOWN TO ${pct}% OPEN`;
-        gateElem.style.color = "#eab308";
-      } else {
-        gateElem.innerText = "LINE INACTIVE";
-        gateElem.style.color = "#aaa";
-      }
-
-      updateWaterTankGauge(totalLPM);
-      updateWarnings(maxPDP, activePDP);
-      drawDiagram(maxPDP);
-    }
-
-    function updateWaterTankGauge(totalLPM) {
-      const clockElem = document.getElementById('tte-clock');
-      const barElem = document.getElementById('visual-water-bar');
-      const titleElem = document.getElementById('active-source-title');
-      const pctElem = document.getElementById('active-source-pct');
-
-      if (supplyMode === 'Hydrant') {
-        clockElem.innerText = "∞ (HYDRANT)";
-        clockElem.style.color = "#22c55e";
-        titleElem.innerText = "ACTIVE SOURCE: HYDRANT (CONTINUOUS)";
-        pctElem.innerText = "100%";
-        pctElem.style.color = "#22c55e";
-        barElem.style.width = "100%";
-        barElem.style.backgroundColor = "#0284c7";
-        return;
-      }
-
-      let key = 'board';
-      let titleName = "ON-BOARD TANK";
-      if (supplyMode === 'Drafting') { key = 'dump'; titleName = "STATIC DUMP TANK"; }
-      if (supplyMode === 'Nursing') { key = 'tender'; titleName = "NURSING TENDER"; }
-
-      let currentVol = volumes[key];
-      let maxVol = MAX_VOLUMES[key];
-      let pct = Math.round((currentVol / maxVol) * 100);
-
-      titleElem.innerText = `ACTIVE SOURCE: ${titleName}`;
-      pctElem.innerText = `${pct}%`;
-      barElem.style.width = `${pct}%`;
-
-      if (pct > 50) {
-        barElem.style.backgroundColor = "#22c55e";
-        pctElem.style.color = "#22c55e";
-      } else if (pct > 20) {
-        barElem.style.backgroundColor = "#eab308";
-        pctElem.style.color = "#eab308";
-      } else {
-        barElem.style.backgroundColor = "#ef4444";
-        pctElem.style.color = "#ef4444";
-      }
-
-      if (totalLPM <= 0) {
-        clockElem.innerText = "--:--";
-        clockElem.style.color = "#38bdf8";
-        return;
-      }
-
-      let totalMinutes = currentVol / totalLPM;
-      let mins = Math.floor(totalMinutes);
-      let secs = Math.floor((totalMinutes - mins) * 60);
-
-      let minStr = mins < 10 ? `0${mins}` : `${mins}`;
-      let secStr = secs < 10 ? `0${secs}` : `${secs}`;
-
-      clockElem.innerText = `${minStr}:${secStr}`;
-      clockElem.style.color = mins < 2 ? "#ef4444" : "#38bdf8";
-    }
-
-    function updateWarnings(maxPDP, activePDP) {
-      const container = document.getElementById('integrated-warning-container');
-      container.innerHTML = "";
-
-      let activeLine = lines[currentLineKey];
-      let flow = calculateFlow(activeLine);
-
-      if (activeLine.appliance > 0) {
-        container.innerHTML += `
-          <div class="warning-card" style="background:rgba(2,132,199,0.2); border-color:#0284c7;">
-            <div class="warning-title" style="color:#38bdf8;">🏢 STANDPIPE LOSS ACTIVE</div>
-            Includes <strong>70 kPa</strong> appliance loss penalty for high-rise riser/wye.
-          </div>`;
-      }
-
-      if (activeLine.nozzleName === "Smooth Bore" && flow.lpm >= 950) {
-        container.innerHTML += `
-          <div class="warning-card" style="background:rgba(234,179,8,0.2); border-color:#eab308;">
-            <div class="warning-title" style="color:#fde047;">💪 HIGH NOZZLE REACTION</div>
-            Heavy smooth bore flow (${flow.lpm} L/m). Ensure minimum 2 firefighters on nozzle.
-          </div>`;
-      }
-
-      if (activeLine.fl >= 300) {
-        container.innerHTML += `
-          <div class="warning-card" style="background:rgba(234,179,8,0.2); border-color:#eab308;">
-            <div class="warning-title" style="color:#fde047;">⚠️ SEVERE FRICTION LOSS</div>
-            Friction loss exceeds 300 kPa on this line. Consider extending with 65mm hose.
-          </div>`;
-      }
-
-      if (supplyMode === 'Hydrant') {
-        container.innerHTML += `
-          <div class="warning-card">
-            <div class="warning-title">⚠️ HYDRANT RESIDUAL LIMIT</div>
-            Maintain intake residual above <strong>140 kPa (20 psi)</strong> to avoid cavitation.
-          </div>`;
-      } else if (supplyMode === 'Drafting') {
-        container.innerHTML += `
-          <div class="warning-card">
-            <div class="warning-title">⚠️ DRAFTING LIFT HEIGHT</div>
-            Ensure maximum vertical lift height does not exceed 3 meters (10 ft).
-          </div>`;
-      } else if (supplyMode === 'Nursing') {
-        container.innerHTML += `
-          <div class="warning-card" style="background:rgba(234,179,8,0.2); border-color:#eab308;">
-            <div class="warning-title" style="color:#fde047;">🚒 RELAY PUMPING BUFFER</div>
-            Supply pumper must maintain at least 140 kPa intake supply buffer.
-          </div>`;
-      }
-
-      if (maxPDP > 1750) {
-        container.innerHTML += `
-          <div class="warning-card">
-            <div class="warning-title">🚨 OVERPRESSURE DANGER</div>
-            Target PDP exceeds 1750 kPa (250 psi). Verify hose structural rating!
-          </div>`;
-      }
-    }
-
-    function drawDiagram(maxPDP) {
-      const wrapper = document.getElementById('multi-lines-container');
-      wrapper.innerHTML = "";
-
-      Object.keys(lines).forEach(key => {
-        const line = lines[key];
-        let linePDP = (line.hoses.length > 0 || line.nozzleName !== "None") ? (line.np + line.fl + line.elev + line.appliance) : 0;
-        let flow = calculateFlow(line);
-
-        const col = document.createElement('div');
-        col.className = 'line-column';
-
-        // 1. Water Spray
-        if (line.nozzleName !== "None") {
-          const spray = document.createElement('div');
-          spray.className = 'water-spray-effect';
-          spray.innerText = '💦💧';
-          col.appendChild(spray);
-
-          const nozzleWrap = document.createElement('div');
-          nozzleWrap.className = 'nozzle-wrapper';
-
-          if (line.nozzleName === "Fog Nozzle") {
-            const fog = document.createElement('div');
-            fog.className = 'fog-nozzle';
-            nozzleWrap.appendChild(fog);
-          } else if (line.nozzleName === "Smooth Bore") {
-            const smoothBore = document.createElement('div');
-            smoothBore.className = 'smooth-bore-nozzle';
-            nozzleWrap.appendChild(smoothBore);
-          }
-          col.appendChild(nozzleWrap);
-
-          // Nozzle Type Label
-          const nozzleTypeDiv = document.createElement('div');
-          nozzleTypeDiv.className = 'nozzle-type-label';
-          nozzleTypeDiv.innerText = line.nozzleName === "Fog Nozzle" ? '[FOG]' : '[SMOOTH BORE]';
-          col.appendChild(nozzleTypeDiv);
-        }
-
-        // 2. Flow Label
-        if (flow.lpm > 0) {
-          const flowDiv = document.createElement('div');
-          flowDiv.className = 'flow-label';
-          flowDiv.innerText = `${flow.lpm} L/m (${flow.gpm} GPM)`;
-          col.appendChild(flowDiv);
-        }
-
-        // 3. Hoses
-        line.hoses.forEach(hoseObj => {
-          const hoseSection = document.createElement('div');
-          hoseSection.className = 'hose-section';
-
-          const topCoupling = document.createElement('div');
-          topCoupling.className = 'coupling';
-
-          const hoseLine = document.createElement('div');
-          const widthClass = hoseObj.type === '65mm' ? 'hose-65mm' : 'hose-44mm';
-          hoseLine.className = `hose-line ${widthClass} color-${line.code}`;
-
-          const bottomCoupling = document.createElement('div');
-          bottomCoupling.className = 'coupling';
-
-          hoseSection.appendChild(topCoupling);
-          hoseSection.appendChild(hoseLine);
-          hoseSection.appendChild(bottomCoupling);
-          col.appendChild(hoseSection);
+    /* Register Service Worker for Offline Functionality */
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        const swCode = `
+          const CACHE_NAME = 'pdp-dash-v1';
+          self.addEventListener('install', (e) => {
+            e.waitUntil(
+              caches.open(CACHE_NAME).then((cache) => {
+                return cache.addAll(['./']);
+              })
+            );
+          });
+          self.addEventListener('fetch', (e) => {
+            e.respondWith(
+              caches.match(e.request).then((res) => res || fetch(e.request))
+            );
+          });
+        `;
+        const blob = new Blob([swCode], { type: 'application/javascript' });
+        const blobURL = URL.createObjectURL(blob);
+        navigator.serviceWorker.register(blobURL).catch(() => {
+          // Fallback if Blob workers are restricted
         });
-
-        // 4. Line Label & Gate Directive
-        const label = document.createElement('div');
-        label.className = 'line-label';
-        label.innerHTML = `${line.name}<br><span style="color:#22c55e">${linePDP} kPa</span>`;
-        col.appendChild(label);
-
-        const gateDiv = document.createElement('div');
-        if (linePDP === maxPDP && maxPDP > 0) {
-          gateDiv.className = 'gate-indicator gate-full';
-          gateDiv.innerText = '100% OPEN';
-        } else if (linePDP < maxPDP && linePDP > 0) {
-          let pct = Math.round((linePDP / maxPDP) * 100);
-          gateDiv.className = 'gate-indicator gate-down';
-          gateDiv.innerText = `GATE ${pct}%`;
-        }
-        col.appendChild(gateDiv);
-
-        wrapper.appendChild(col);
       });
-
-      // Render Intake Supply Graphic
-      const supplyContainer = document.getElementById('supply-container');
-      supplyContainer.innerHTML = "";
-
-      if (supplyMode === 'Hydrant') {
-        supplyContainer.innerHTML = `
-          <div class="supply-hose"></div>
-          <div class="supply-icon">🚰</div>
-          <div style="font-size:9px; font-weight:bold; color:#38bdf8;">HYDRANT SUPPLY</div>
-        `;
-      } else if (supplyMode === 'Drafting') {
-        supplyContainer.innerHTML = `
-          <div class="supply-hose" style="background:#555; border-color:#888;"></div>
-          <div class="supply-icon">🌊</div>
-          <div style="font-size:9px; font-weight:bold; color:#38bdf8;">STATIC DUMP TANK</div>
-        `;
-      } else if (supplyMode === 'Nursing') {
-        supplyContainer.innerHTML = `
-          <div class="supply-hose"></div>
-          <div class="supply-icon">🚒</div>
-          <div style="font-size:9px; font-weight:bold; color:#38bdf8;">NURSING TENDER</div>
-        `;
-      }
     }
-
-    updateDashboard();
   </script>
 </body>
 </html>
