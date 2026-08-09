@@ -22,18 +22,18 @@
       padding: 18px;
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
       box-sizing: border-box;
-      height: 720px;
+      height: 750px;
       display: flex;
       flex-direction: column;
     }
 
-    /* 1. Left Box: PDP Controls & Presets */
+    /* 1. Left Box: PDP Controls */
     .calc-box { width: 500px; overflow-y: auto; }
     
     /* 2. Middle Box: Lay Diagram */
     .diagram-box { width: 380px; align-items: center; }
 
-    /* 3. Right Box: Tactical Guidance & Warnings */
+    /* 3. Right Box: Tactical Advisor */
     .guidance-box { width: 320px; overflow-y: auto; }
 
     h1, h2, h3 { margin-top: 0; text-align: center; }
@@ -93,10 +93,12 @@
     .truck-part { font-size: 45px; line-height: 1; margin-top: 10px; }
 
     .multi-lines-wrapper { display: flex; justify-content: space-around; width: 100%; }
-    .line-column { display: flex; flex-direction: column-reverse; align-items: center; width: 23%; }
+    .line-column { display: flex; flex-direction: column; align-items: center; width: 23%; }
     
-    .line-label { font-size: 10px; font-weight: bold; margin-top: 4px; text-align: center; }
-    .gate-indicator { font-size: 9px; padding: 2px 4px; border-radius: 3px; font-weight: bold; margin-top: 2px; text-align: center; }
+    .line-label { font-size: 10px; font-weight: bold; margin-bottom: 4px; text-align: center; }
+    .flow-label { font-size: 9px; color: #38bdf8; font-weight: bold; text-align: center; margin-bottom: 2px; }
+
+    .gate-indicator { font-size: 9px; padding: 2px 4px; border-radius: 3px; font-weight: bold; margin-bottom: 4px; text-align: center; }
     .gate-full { background: #16a34a; color: white; }
     .gate-down { background: #eab308; color: black; }
 
@@ -105,20 +107,20 @@
     
     .hose-line { height: 32px; border-left: 1px solid rgba(0,0,0,0.4); border-right: 1px solid rgba(0,0,0,0.4); }
     .hose-44mm { width: 6px; }
-    .hose-65mm { width: 14px; } /* Wider 65mm hose */
+    .hose-65mm { width: 14px; }
 
     .color-attack1 { background-color: #fdfd04; }
     .color-attack2 { background-color: #3182ce; }
     .color-bumper  { background-color: #e53e3e; }
     .color-monitor { background-color: #38a169; }
 
-    /* Nozzles with Water Spray Effects pointing UP */
+    /* Nozzles Fixed: Attached to top end of hose pointing UP */
     .nozzle-wrapper { display: flex; flex-direction: column; align-items: center; margin-bottom: 2px; }
     .water-spray {
       width: 0; height: 0;
       border-left: 12px solid transparent; border-right: 12px solid transparent;
-      border-top: 20px solid rgba(56, 189, 248, 0.8);
-      transform: rotate(180deg);
+      border-bottom: 20px solid rgba(56, 189, 248, 0.8);
+      margin-bottom: 2px;
     }
     .smooth-bore-nozzle {
       width: 0; height: 0;
@@ -131,7 +133,6 @@
       border-bottom: 16px solid #38bdf8;
     }
 
-    /* Warning Card Styling */
     .warning-card {
       background: rgba(220, 38, 38, 0.2); border: 1px solid #ef4444;
       border-radius: 6px; padding: 10px; margin-bottom: 10px; font-size: 11px;
@@ -173,7 +174,7 @@
     <div class="btn-group">
       <h3>Quick Preconnect Short-Cuts</h3>
       <button class="preset-btn" onclick="applyPreset('crosslay')">Crosslay (60m 44mm + Fog)</button>
-      <button class="preset-btn" onclick="applyPreset('highrise')">High-Rise (30m 65mm + Smooth)</button>
+      <button class="preset-btn" onclick="applyPreset('highrise')">High-Rise Standpipe (30m 65mm + SB)</button>
     </div>
 
     <!-- Water Supply Mode -->
@@ -182,6 +183,12 @@
       <button onclick="setSupply('Hydrant')">Hydrant Supply</button>
       <button onclick="setSupply('Drafting')">Drafting (Static)</button>
       <button onclick="setSupply('Nursing')">Nursing (Relay)</button>
+    </div>
+
+    <!-- Appliances / Standpipe -->
+    <div class="btn-group">
+      <h3>Appliances / Connections</h3>
+      <button onclick="toggleStandpipe()">Toggle Standpipe / Wye (+70 kPa FL)</button>
     </div>
 
     <!-- Nozzle Controls -->
@@ -220,7 +227,7 @@
     </div>
   </div>
 
-  <!-- Box 3: Tactical Guidance, Warnings & Rules of Thumb -->
+  <!-- Box 3: Tactical Advisor -->
   <div class="box guidance-box">
     <h2>Tactical Advisor</h2>
     
@@ -234,27 +241,27 @@
     <h3>Standard Rules of Thumb</h3>
 
     <div class="rule-card">
-      <div class="rule-title">Rule 1: Hydrant Residual Pressure</div>
-      Always keep residual intake pressure above <strong>140 kPa (20 psi)</strong> to prevent pump cavitation or supply hose collapse.
+      <div class="rule-title">Rule 1: Standpipe Operations</div>
+      High-rise standpipe connections add <strong>70 kPa (10 psi)</strong> appliance friction loss plus <strong>10 kPa per floor</strong> elevation loss.
     </div>
 
     <div class="rule-card">
-      <div class="rule-title">Rule 2: Elevation Loss/Gain</div>
-      Add or subtract <strong>10 kPa per floor</strong> (approx. 1 kPa/ft or 10 kPa/3m height).
+      <div class="rule-title">Rule 2: Gating Valve Percentage</div>
+      If a discharge requires less than Master PDP, throttle valve to <strong>(Line PDP / Master PDP) %</strong>.
     </div>
 
     <div class="rule-card">
-      <div class="rule-title">Rule 3: Master PDP Setting</div>
-      Throttle the main engine pump pressure to match the <strong>highest line demand</strong>. Gate down any lines requiring lower pressure.
+      <div class="rule-title">Rule 3: Hydrant Residual Pressure</div>
+      Keep intake residual above <strong>140 kPa (20 psi)</strong> to prevent pump cavitation.
     </div>
   </div>
 
   <script>
     const lines = {
-      attack1: { name: "Attack 1", code: "attack1", np: 0, nozzleName: "None", fl: 0, elev: 0, hoses: [] },
-      attack2: { name: "Attack 2", code: "attack2", np: 0, nozzleName: "None", fl: 0, elev: 0, hoses: [] },
-      bumper:  { name: "Bumper",   code: "bumper",  np: 0, nozzleName: "None", fl: 0, elev: 0, hoses: [] },
-      monitor: { name: "Monitor",  code: "monitor", np: 0, nozzleName: "None", fl: 0, elev: 0, hoses: [] }
+      attack1: { name: "Attack 1", code: "attack1", np: 0, nozzleName: "None", fl: 0, elev: 0, appliance: 0, hoses: [] },
+      attack2: { name: "Attack 2", code: "attack2", np: 0, nozzleName: "None", fl: 0, elev: 0, appliance: 0, hoses: [] },
+      bumper:  { name: "Bumper",   code: "bumper",  np: 0, nozzleName: "None", fl: 0, elev: 0, appliance: 0, hoses: [] },
+      monitor: { name: "Monitor",  code: "monitor", np: 0, nozzleName: "None", fl: 0, elev: 0, appliance: 0, hoses: [] }
     };
 
     let currentLineKey = 'attack1';
@@ -273,6 +280,11 @@
       updateDashboard();
     }
 
+    function toggleStandpipe() {
+      lines[currentLineKey].appliance = lines[currentLineKey].appliance === 0 ? 70 : 0;
+      updateDashboard();
+    }
+
     function applyPreset(preset) {
       resetActiveLine();
       if (preset === 'crosslay') {
@@ -284,7 +296,8 @@
         lines[currentLineKey].nozzleName = "Smooth Bore";
         lines[currentLineKey].np = 350;
         addHose('65mm', 30); addHose('65mm', 30);
-        lines[currentLineKey].elev = 30; // 3 floors default
+        lines[currentLineKey].elev = 30; // 3 floors
+        lines[currentLineKey].appliance = 70; // Standpipe
       }
       updateDashboard();
     }
@@ -326,32 +339,44 @@
       lines[currentLineKey].nozzleName = "None";
       lines[currentLineKey].fl = 0;
       lines[currentLineKey].elev = 0;
+      lines[currentLineKey].appliance = 0;
       lines[currentLineKey].hoses = [];
       updateDashboard();
     }
 
+    function calculateFlow(line) {
+      if (line.nozzleName === "None") return { lpm: 0, gpm: 0 };
+      let has65 = line.hoses.some(h => h.type === '65mm');
+      if (line.nozzleName === "Fog Nozzle") {
+        return has65 ? { lpm: 950, gpm: 250 } : { lpm: 570, gpm: 150 };
+      } else if (line.nozzleName === "Smooth Bore") {
+        return has65 ? { lpm: 1000, gpm: 265 } : { lpm: 700, gpm: 185 };
+      }
+      return { lpm: 0, gpm: 0 };
+    }
+
     function updateDashboard() {
       const activeLine = lines[currentLineKey];
-      const activePDP = activeLine.np + activeLine.fl + activeLine.elev;
+      const activePDP = activeLine.np + activeLine.fl + activeLine.elev + activeLine.appliance;
 
       document.getElementById('pdp-gauge').innerText = activePDP;
 
       // Find Master PDP
       let maxPDP = 0;
       Object.keys(lines).forEach(key => {
-        let lPdp = lines[key].np + lines[key].fl + lines[key].elev;
+        let lPdp = lines[key].np + lines[key].fl + lines[key].elev + lines[key].appliance;
         if (lPdp > maxPDP) maxPDP = lPdp;
       });
       document.getElementById('master-pdp').innerText = maxPDP;
 
-      // Gate Down Status on active line
+      // Gate Down Percentage Status
       const gateElem = document.getElementById('line-gate-status');
       if (activePDP === maxPDP && maxPDP > 0) {
-        gateElem.innerText = "FULLY OPEN DISCHARGE";
+        gateElem.innerText = "100% FULLY OPEN DISCHARGE";
         gateElem.style.color = "#39ff14";
       } else if (activePDP < maxPDP && activePDP > 0) {
-        let diff = maxPDP - activePDP;
-        gateElem.innerText = `GATE DOWN BY ${diff} kPa`;
+        let pct = Math.round((activePDP / maxPDP) * 100);
+        gateElem.innerText = `GATE DOWN TO ${pct}% OPEN`;
         gateElem.style.color = "#eab308";
       } else {
         gateElem.innerText = "LINE INACTIVE";
@@ -366,36 +391,33 @@
       const container = document.getElementById('warning-container');
       container.innerHTML = "";
 
-      // Hydrant warning
+      if (lines[currentLineKey].appliance > 0) {
+        container.innerHTML += `
+          <div class="warning-card" style="background:rgba(2,132,199,0.2); border-color:#0284c7;">
+            <div class="warning-title" style="color:#38bdf8;">🏢 STANDPIPE ACTIVE</div>
+            Includes <strong>70 kPa</strong> appliance friction loss for high-rise riser/wye.
+          </div>`;
+      }
+
       if (supplyMode === 'Hydrant') {
         container.innerHTML += `
           <div class="warning-card">
             <div class="warning-title">⚠️ HYDRANT RESIDUAL WARNING</div>
-            Monitor intake gauge closely. Ensure intake residual pressure remains above <strong>140 kPa (20 psi)</strong> to protect supply line and pump.
+            Keep intake residual above <strong>140 kPa (20 psi)</strong> to prevent pump cavitation.
           </div>`;
       } else if (supplyMode === 'Drafting') {
         container.innerHTML += `
           <div class="warning-card">
             <div class="warning-title">⚠️ DRAFTING STATIC SOURCE</div>
-            Ensure hard suction lift height does not exceed 3 meters (10 ft) to prevent prime loss.
+            Ensure hard suction lift height does not exceed 3 meters (10 ft).
           </div>`;
       }
 
-      // Dangerous Overpressure Warning
       if (maxPDP > 1750) {
         container.innerHTML += `
           <div class="warning-card">
             <div class="warning-title">🚨 DANGER: OVERPRESSURE RISK</div>
-            Target PDP exceeds 1750 kPa (250 psi). Verify hose rating and pressure relief valve settings immediately!
-          </div>`;
-      }
-
-      // No Nozzle Warning
-      if (lines[currentLineKey].hoses.length > 0 && lines[currentLineKey].nozzleName === "None") {
-        container.innerHTML += `
-          <div class="warning-card">
-            <div class="warning-title">⚠️ MISSING NOZZLE</div>
-            Hoses added without a nozzle selected. Select Fog or Smooth Bore to establish accurate Nozzle Pressure (NP).
+            Target PDP exceeds 1750 kPa (250 psi). Verify hose rating immediately!
           </div>`;
       }
     }
@@ -406,36 +428,20 @@
 
       Object.keys(lines).forEach(key => {
         const line = lines[key];
-        let linePDP = line.np + line.fl + line.elev;
+        let linePDP = line.np + line.fl + line.elev + line.appliance;
+        let flow = calculateFlow(line);
 
         const col = document.createElement('div');
         col.className = 'line-column';
 
-        // Gate Directive Label
-        const gateDiv = document.createElement('div');
-        if (linePDP === maxPDP && maxPDP > 0) {
-          gateDiv.className = 'gate-indicator gate-full';
-          gateDiv.innerText = 'FULL OPEN';
-        } else if (linePDP < maxPDP && linePDP > 0) {
-          gateDiv.className = 'gate-indicator gate-down';
-          gateDiv.innerText = `GATE -${maxPDP - linePDP}`;
-        }
-        col.appendChild(gateDiv);
-
-        const label = document.createElement('div');
-        label.className = 'line-label';
-        label.innerHTML = `${line.name}<br><span style="color:#39ff14">${linePDP} kPa</span>`;
-        col.appendChild(label);
-
-        // Render Nozzle & Water Spray at TOP towards fire
+        // 1. Water Spray
         if (line.nozzleName !== "None") {
-          const nozzleWrap = document.createElement('div');
-          nozzleWrap.className = 'nozzle-wrapper';
-
           const spray = document.createElement('div');
           spray.className = 'water-spray';
-          nozzleWrap.appendChild(spray);
+          col.appendChild(spray);
 
+          const nozzleWrap = document.createElement('div');
+          nozzleWrap.className = 'nozzle-wrapper';
           if (line.nozzleName === "Fog Nozzle") {
             const fog = document.createElement('div');
             fog.className = 'fog-nozzle';
@@ -448,7 +454,15 @@
           col.appendChild(nozzleWrap);
         }
 
-        // Render Hoses UPWARDS from truck
+        // 2. Flow Rate Label
+        if (flow.lpm > 0) {
+          const flowDiv = document.createElement('div');
+          flowDiv.className = 'flow-label';
+          flowDiv.innerText = `${flow.lpm} L/m (${flow.gpm} GPM)`;
+          col.appendChild(flowDiv);
+        }
+
+        // 3. Hoses (Built top-to-bottom towards engine)
         line.hoses.forEach(hoseObj => {
           const hoseSection = document.createElement('div');
           hoseSection.className = 'hose-section';
@@ -468,6 +482,23 @@
           hoseSection.appendChild(bottomCoupling);
           col.appendChild(hoseSection);
         });
+
+        // 4. Line Label & Gate Directive Percentage
+        const label = document.createElement('div');
+        label.className = 'line-label';
+        label.innerHTML = `${line.name}<br><span style="color:#39ff14">${linePDP} kPa</span>`;
+        col.appendChild(label);
+
+        const gateDiv = document.createElement('div');
+        if (linePDP === maxPDP && maxPDP > 0) {
+          gateDiv.className = 'gate-indicator gate-full';
+          gateDiv.innerText = '100% OPEN';
+        } else if (linePDP < maxPDP && linePDP > 0) {
+          let pct = Math.round((linePDP / maxPDP) * 100);
+          gateDiv.className = 'gate-indicator gate-down';
+          gateDiv.innerText = `GATE ${pct}%`;
+        }
+        col.appendChild(gateDiv);
 
         wrapper.appendChild(col);
       });
