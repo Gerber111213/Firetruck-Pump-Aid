@@ -224,7 +224,7 @@
 
     #hoseCanvas {
       width: 100%;
-      height: 340px;
+      height: 380px;
       background: rgba(0, 0, 0, 0.15);
       border-radius: 6px;
     }
@@ -284,7 +284,7 @@
       <div class="target-pdp-box">
         <div style="font-size: 0.75rem; font-weight: bold; color: var(--accent-green);" id="active-line-title">ATTACK 1 - TARGET PDP</div>
         <div class="target-pdp-value" id="target-pdp">0 <span style="font-size: 0.9rem;">kPa</span></div>
-        <div style="font-size: 0.75rem; color: var(--text-sub);" id="line-summary-text">NONE (0 kPa) | 0 hoses (0 kPa FL) | 0 floors (0 kPa)</div>
+        <div style="font-size: 0.75rem; color: var(--text-sub);" id="line-summary-text">NONE (0 kPa) | 0 hoses | 0 floors</div>
       </div>
 
       <div class="section-label">Quick Preconnect Short-Cuts</div>
@@ -448,7 +448,6 @@
       updateUI();
     }
 
-    /* Toggle Off / Deselect Logic for Supply Modes */
     function setSupply(mode) {
       if (supplyMode === mode) {
         supplyMode = 'none';
@@ -458,7 +457,6 @@
       updateUI();
     }
 
-    /* Toggle Off / Deselect Logic for Nozzles */
     function setNozzle(type, pressure) {
       const line = lines[activeLineKey];
       if (line.nozzleType === type) {
@@ -505,7 +503,6 @@
       updateUI();
     }
 
-    /* Fully Active Reset Line Function */
     function resetActiveLine() {
       lines[activeLineKey] = defaultLineState();
       document.getElementById('standpipe-btn').classList.remove('active');
@@ -542,7 +539,6 @@
       updateUI();
     }
 
-    /* Toggle Off / Deselect Logic for Flow Rate */
     function setFlow(lpm) {
       const line = lines[activeLineKey];
       if (line.flowLpm === lpm) {
@@ -569,7 +565,7 @@
       return line.nozzlePressure + line.hoseLoss + line.elevationLoss + line.standpipeLoss;
     }
 
-    /* Canvas Graphic Renderer */
+    /* Updated Canvas Graphic Renderer */
     function drawHoseDiagram() {
       const canvas = document.getElementById('hoseCanvas');
       if (!canvas) return;
@@ -583,41 +579,41 @@
       const lineKeys = ['attack1', 'attack2', 'bumper', 'monitor'];
       const spacing = canvas.width / (lineKeys.length + 1);
 
-      const engineY = canvas.height - 60;
-      const topY = 40;
+      const engineY = canvas.height - 75;
+      const topY = 55;
 
-      // Draw Main Engine
+      // Draw Main Engine at bottom center
       ctx.font = '2.2rem sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText('🚒', canvas.width / 2, engineY + 30);
+      ctx.fillText('🚒', canvas.width / 2, engineY + 25);
 
-      // Draw Water Source connected to Firetruck (Nursing Relay now uses 🚒)
+      // Draw Connected Water Source Directly Below the Firetruck
       if (supplyMode === 'hydrant') {
-        ctx.font = '1.8rem sans-serif';
-        ctx.fillText('🚰', 35, engineY + 25);
+        ctx.font = '1.6rem sans-serif';
+        ctx.fillText('🚰', canvas.width / 2, engineY + 55);
         ctx.strokeStyle = '#ffd600';
-        ctx.lineWidth = 6;
+        ctx.lineWidth = 5;
         ctx.beginPath();
-        ctx.moveTo(50, engineY + 20);
-        ctx.lineTo(canvas.width / 2 - 30, engineY + 20);
+        ctx.moveTo(canvas.width / 2, engineY + 25);
+        ctx.lineTo(canvas.width / 2, engineY + 42);
         ctx.stroke();
       } else if (supplyMode === 'nursing') {
-        ctx.font = '1.8rem sans-serif';
-        ctx.fillText('🚒', 35, engineY + 25);
+        ctx.font = '1.6rem sans-serif';
+        ctx.fillText('🚒', canvas.width / 2, engineY + 55);
         ctx.strokeStyle = '#ffd600';
-        ctx.lineWidth = 6;
+        ctx.lineWidth = 5;
         ctx.beginPath();
-        ctx.moveTo(50, engineY + 20);
-        ctx.lineTo(canvas.width / 2 - 30, engineY + 20);
+        ctx.moveTo(canvas.width / 2, engineY + 25);
+        ctx.lineTo(canvas.width / 2, engineY + 42);
         ctx.stroke();
       } else if (supplyMode === 'drafting') {
-        ctx.font = '1.8rem sans-serif';
-        ctx.fillText('🌊', 35, engineY + 25);
+        ctx.font = '1.6rem sans-serif';
+        ctx.fillText('🌊', canvas.width / 2, engineY + 55);
         ctx.strokeStyle = '#0288d1';
-        ctx.lineWidth = 8;
+        ctx.lineWidth = 6;
         ctx.beginPath();
-        ctx.moveTo(50, engineY + 20);
-        ctx.lineTo(canvas.width / 2 - 30, engineY + 20);
+        ctx.moveTo(canvas.width / 2, engineY + 25);
+        ctx.lineTo(canvas.width / 2, engineY + 42);
         ctx.stroke();
       }
 
@@ -628,7 +624,7 @@
 
         if (key === activeLineKey) {
           ctx.strokeStyle = 'rgba(0, 255, 102, 0.4)';
-          ctx.lineWidth = 16;
+          ctx.lineWidth = 14;
           ctx.beginPath();
           ctx.moveTo(x, engineY);
           ctx.lineTo(x, topY);
@@ -656,7 +652,9 @@
           }
         }
 
+        // Draw Nozzles & Water Spray Graphics
         if (line.nozzleType === 'fog') {
+          // Fog Nozzle Tip
           ctx.fillStyle = '#ff6b00';
           ctx.beginPath();
           ctx.moveTo(x, topY + 15);
@@ -664,10 +662,24 @@
           ctx.lineTo(x + 12, topY - 5);
           ctx.closePath();
           ctx.fill();
-          ctx.strokeStyle = '#ffffff';
+
+          // Spray water effect
+          ctx.strokeStyle = 'rgba(2, 136, 209, 0.6)';
           ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(x, topY - 5); ctx.lineTo(x - 16, topY - 22);
+          ctx.moveTo(x, topY - 5); ctx.lineTo(x - 8, topY - 24);
+          ctx.moveTo(x, topY - 5); ctx.lineTo(x + 8, topY - 24);
+          ctx.moveTo(x, topY - 5); ctx.lineTo(x + 16, topY - 22);
           ctx.stroke();
+
+          // Nozzle & Flow Text Label
+          ctx.fillStyle = '#ff6b00';
+          ctx.font = 'bold 10px sans-serif';
+          ctx.fillText(`FOG | ${line.flowLpm} LPM`, x, topY - 28);
+
         } else if (line.nozzleType === 'smooth') {
+          // Smooth Bore Tip
           ctx.fillStyle = '#0288d1';
           ctx.beginPath();
           ctx.moveTo(x - 10, topY + 15);
@@ -676,35 +688,43 @@
           ctx.lineTo(x - 3, topY - 5);
           ctx.closePath();
           ctx.fill();
-          ctx.strokeStyle = '#ffffff';
-          ctx.lineWidth = 2;
+
+          // Solid stream water effect
+          ctx.strokeStyle = 'rgba(2, 136, 209, 0.8)';
+          ctx.lineWidth = 4;
+          ctx.beginPath();
+          ctx.moveTo(x, topY - 5);
+          ctx.lineTo(x, topY - 26);
           ctx.stroke();
+
+          // Nozzle & Flow Text Label
+          ctx.fillStyle = '#0288d1';
+          ctx.font = 'bold 10px sans-serif';
+          ctx.fillText(`SMOOTH | ${line.flowLpm} LPM`, x, topY - 30);
         }
 
+        // Repositioned Line PDP Label at the Bottom near Engine
         ctx.fillStyle = key === activeLineKey ? '#00e676' : '#2a2a2a';
-        ctx.fillRect(x - 32, (engineY + topY) / 2 - 12, 64, 24);
+        ctx.fillRect(x - 32, engineY - 26, 64, 20);
         ctx.fillStyle = key === activeLineKey ? '#000000' : '#ffffff';
         ctx.font = 'bold 11px sans-serif';
         ctx.textAlign = 'center';
-        ctx.fillText(`${pdp} kPa`, x, (engineY + topY) / 2 + 4);
+        ctx.fillText(`${pdp} kPa`, x, engineY - 12);
       });
     }
 
     function updateUI() {
       const activeLine = lines[activeLineKey];
 
-      // Update Supply buttons
       ['hydrant', 'drafting', 'nursing'].forEach(m => {
         const btn = document.getElementById(`sup-btn-${m}`);
         if (btn) btn.classList.toggle('active', supplyMode === m);
       });
 
-      // Update Nozzle buttons
       document.getElementById('nozzle-btn-fog').classList.toggle('active', activeLine.nozzleType === 'fog');
       document.getElementById('nozzle-btn-smooth').classList.toggle('active', activeLine.nozzleType === 'smooth');
       document.getElementById('standpipe-btn').classList.toggle('active', activeLine.standpipeLoss > 0);
 
-      // Update Flow Rate buttons
       [115, 230, 360, 470, 570, 750, 950, 1900].forEach(f => {
         const btn = document.getElementById(`flow-btn-${f}`);
         if (btn) btn.classList.toggle('active', activeLine.flowLpm === f);
@@ -764,7 +784,7 @@
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         const swCode = `
-          const CACHE_NAME = 'pdp-dash-v6';
+          const CACHE_NAME = 'pdp-dash-v7';
           self.addEventListener('install', (e) => {
             e.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(['./'])));
           });
