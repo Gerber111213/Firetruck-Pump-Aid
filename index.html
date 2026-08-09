@@ -12,7 +12,6 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 
   <style>
-    /* CSS Variables for Dynamic Theme & Contrast Switching */
     :root {
       --bg-color: #121212;
       --card-bg: #1e1e1e;
@@ -113,22 +112,21 @@
     .master-pdp-box {
       border: 2px solid var(--accent-orange);
       border-radius: 8px;
-      padding: 10px;
+      padding: 8px;
       text-align: center;
       background-color: rgba(255, 107, 0, 0.08);
-      margin-bottom: 8px;
+      margin-bottom: 4px;
     }
 
     .master-pdp-label {
-      font-size: 0.75rem;
+      font-size: 0.7rem;
       font-weight: bold;
       color: var(--accent-orange);
       text-transform: uppercase;
-      letter-spacing: 0.5px;
     }
 
     .master-pdp-value {
-      font-size: 2.2rem;
+      font-size: 2rem;
       font-weight: 900;
       color: var(--accent-orange);
       line-height: 1.1;
@@ -205,54 +203,31 @@
       margin-top: 4px;
     }
 
-    /* Graphical Lay Canvas */
-    .visual-diagram {
+    /* Lay Diagram Box Container */
+    .lay-diagram-container {
       background: rgba(0, 0, 0, 0.25);
       border-radius: 8px;
-      padding: 12px;
+      padding: 8px;
       display: flex;
       flex-direction: column;
-      align-items: center;
       border: 1px dashed var(--card-border);
       position: relative;
     }
 
-    .scene-top {
+    .scene-top-icons {
       display: flex;
+      justify-content: center;
       align-items: center;
-      justify-content: space-around;
-      width: 100%;
-      padding-bottom: 8px;
+      gap: 20px;
+      font-size: 2rem;
+      padding: 4px 0;
     }
 
-    .graphic-box {
-      background: var(--button-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 8px;
-      padding: 6px 12px;
-      font-size: 0.8rem;
-      font-weight: bold;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    /* Canvas Drawing Area for Hose Lay Graphic */
     #hoseCanvas {
       width: 100%;
-      height: 220px;
-      background: rgba(0,0,0,0.15);
+      height: 340px;
+      background: rgba(0, 0, 0, 0.15);
       border-radius: 6px;
-      margin: 8px 0;
-    }
-
-    .scene-bottom {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      width: 100%;
-      padding-top: 8px;
-      border-top: 1px dashed var(--card-border);
     }
 
     .timer-display {
@@ -353,7 +328,7 @@
       </div>
     </div>
 
-    <!-- COLUMN 2: LAY DIAGRAM WITH GRAPHICAL HOSES -->
+    <!-- COLUMN 2: REBUILT GRAPHICAL LAY DIAGRAM -->
     <div class="panel">
       <div class="panel-header">
         <span class="panel-title">Lay Diagram</span>
@@ -364,19 +339,15 @@
         <div class="master-pdp-value" id="master-pdp">700 <span style="font-size: 1rem;">kPa</span></div>
       </div>
 
-      <div class="visual-diagram">
-        <div class="scene-top">
-          <div class="graphic-box">🏠 Structure / Incident</div>
-          <div class="graphic-box">🔥 Fire Target</div>
+      <div class="lay-diagram-container">
+        <!-- Cartoon House and Fire Side-by-Side -->
+        <div class="scene-top-icons">
+          <span>🏠</span>
+          <span>🔥</span>
         </div>
 
-        <!-- Canvas drawing engine to show true hose lines -->
+        <!-- Dynamic Visual Hose Canvas -->
         <canvas id="hoseCanvas"></canvas>
-
-        <div class="scene-bottom">
-          <div class="graphic-box">🚒 Engine Discharge</div>
-          <div class="graphic-box" id="supply-label-display">🌊 Static Dump Tank</div>
-        </div>
       </div>
     </div>
 
@@ -485,8 +456,6 @@
       ['hydrant', 'drafting', 'nursing'].forEach(m => {
         document.getElementById(`sup-btn-${m}`).classList.toggle('active', m === mode);
       });
-      const labelMap = { hydrant: '🚰 Hydrant Supply', drafting: '🌊 Static Dump Tank', nursing: '🚛 Nursing Tender' };
-      document.getElementById('supply-label-display').innerText = labelMap[mode];
       updateUI();
     }
 
@@ -579,53 +548,133 @@
       return line.nozzlePressure + line.hoseLoss + line.elevationLoss + line.standpipeLoss;
     }
 
-    /* Canvas Hose Drawing Function */
+    /* FULL GRAPHICAL CANVAS RENDERER FOR LAY DIAGRAM */
     function drawHoseDiagram() {
       const canvas = document.getElementById('hoseCanvas');
       if (!canvas) return;
       const ctx = canvas.getContext('2d');
 
-      // Sync internal canvas width/height with container size
       canvas.width = canvas.offsetWidth;
       canvas.height = canvas.offsetHeight;
 
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       const lineKeys = ['attack1', 'attack2', 'bumper', 'monitor'];
-      const lineColors = {
-        attack1: '#ff6b00', // Orange
-        attack2: '#00e676', // Green
-        bumper: '#0288d1',  // Blue
-        monitor: '#e91e63'  // Pink
-      };
-
-      const startY = canvas.height - 20;
-      const endY = 20;
       const spacing = canvas.width / (lineKeys.length + 1);
 
+      // Bottom baseline position for Firetruck
+      const engineY = canvas.height - 60;
+      const topY = 40;
+
+      // Draw Main Engine
+      ctx.font = '2.2rem sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('🚒', canvas.width / 2, engineY + 30);
+
+      // Draw Water Source connected to Firetruck
+      if (supplyMode === 'hydrant') {
+        ctx.font = '1.8rem sans-serif';
+        ctx.fillText('🚰', 35, engineY + 25);
+        // Yellow supply hose
+        ctx.strokeStyle = '#ffd600';
+        ctx.lineWidth = 6;
+        ctx.beginPath();
+        ctx.moveTo(50, engineY + 20);
+        ctx.lineTo(canvas.width / 2 - 30, engineY + 20);
+        ctx.stroke();
+      } else if (supplyMode === 'nursing') {
+        ctx.font = '1.8rem sans-serif';
+        ctx.fillText('🚛', 35, engineY + 25);
+        ctx.strokeStyle = '#ffd600';
+        ctx.lineWidth = 6;
+        ctx.beginPath();
+        ctx.moveTo(50, engineY + 20);
+        ctx.lineTo(canvas.width / 2 - 30, engineY + 20);
+        ctx.stroke();
+      } else if (supplyMode === 'drafting') {
+        ctx.font = '1.8rem sans-serif';
+        ctx.fillText('🌊', 35, engineY + 25);
+        ctx.strokeStyle = '#0288d1';
+        ctx.lineWidth = 8;
+        ctx.beginPath();
+        ctx.moveTo(50, engineY + 20);
+        ctx.lineTo(canvas.width / 2 - 30, engineY + 20);
+        ctx.stroke();
+      }
+
+      // Render Each Active Hose Line & Nozzle
       lineKeys.forEach((key, index) => {
         const line = lines[key];
         const pdp = calculateLinePDP(line);
-        const startX = spacing * (index + 1);
-        const endX = spacing * (index + 1);
+        const x = spacing * (index + 1);
 
-        ctx.lineWidth = key === activeLineKey ? 6 : 3;
-        ctx.strokeStyle = lineColors[key];
+        // Highlight Active Selected Line
+        if (key === activeLineKey) {
+          ctx.strokeStyle = 'rgba(0, 255, 102, 0.4)';
+          ctx.lineWidth = 16;
+          ctx.beginPath();
+          ctx.moveTo(x, engineY);
+          ctx.lineTo(x, topY);
+          ctx.stroke();
+        }
 
-        // Draw curved hose line graphic
-        ctx.beginPath();
-        ctx.moveTo(startX, startY);
-        ctx.bezierCurveTo(startX - 20, startY - 50, endX + 20, endY + 50, endX, endY);
-        ctx.stroke();
+        // Render Hose Length Segments (Yellow with Grey Couplings)
+        const totalHoseCount = line.hoses.length;
+        const hoseSegmentHeight = (engineY - topY - 30) / Math.max(1, totalHoseCount);
 
-        // Hose Label Box over Canvas
+        for (let i = 0; i < totalHoseCount; i++) {
+          const segStartY = engineY - (i * hoseSegmentHeight);
+          const segEndY = segStartY - hoseSegmentHeight + 6;
+
+          // Yellow Hose
+          ctx.strokeStyle = '#ffeb3b';
+          ctx.lineWidth = 6;
+          ctx.beginPath();
+          ctx.moveTo(x, segStartY);
+          ctx.lineTo(x, segEndY);
+          ctx.stroke();
+
+          // Grey Couplings (End Caps)
+          ctx.fillStyle = '#9e9e9e';
+          ctx.fillRect(x - 6, segStartY - 3, 12, 4);
+          ctx.fillRect(x - 6, segEndY - 3, 12, 4);
+        }
+
+        // Draw Nozzles at top of hose line
+        if (line.nozzleType === 'fog') {
+          // Fog Nozzle Cone opening TOWARD the fire (Upwards)
+          ctx.fillStyle = '#ff6b00';
+          ctx.beginPath();
+          ctx.moveTo(x, topY + 15);
+          ctx.lineTo(x - 12, topY - 5);
+          ctx.lineTo(x + 12, topY - 5);
+          ctx.closePath();
+          ctx.fill();
+          ctx.strokeStyle = '#ffffff';
+          ctx.lineWidth = 2;
+          ctx.stroke();
+        } else if (line.nozzleType === 'smooth') {
+          // Smooth Bore Tapered Tip closing TOWARD the fire (Upwards)
+          ctx.fillStyle = '#0288d1';
+          ctx.beginPath();
+          ctx.moveTo(x - 10, topY + 15);
+          ctx.lineTo(x + 10, topY + 15);
+          ctx.lineTo(x + 3, topY - 5);
+          ctx.lineTo(x - 3, topY - 5);
+          ctx.closePath();
+          ctx.fill();
+          ctx.strokeStyle = '#ffffff';
+          ctx.lineWidth = 2;
+          ctx.stroke();
+        }
+
+        // PDP Pressure Tag Over Line
         ctx.fillStyle = key === activeLineKey ? '#00e676' : '#2a2a2a';
-        ctx.fillRect(startX - 35, (startY + endY) / 2 - 12, 70, 24);
-
+        ctx.fillRect(x - 32, (engineY + topY) / 2 - 12, 64, 24);
         ctx.fillStyle = key === activeLineKey ? '#000000' : '#ffffff';
         ctx.font = 'bold 11px sans-serif';
         ctx.textAlign = 'center';
-        ctx.fillText(`${pdp} kPa`, startX, (startY + endY) / 2 + 4);
+        ctx.fillText(`${pdp} kPa`, x, (engineY + topY) / 2 + 4);
       });
     }
 
@@ -682,17 +731,15 @@
         document.getElementById('empty-timer').innerText = `00:00`;
       }
 
-      // Redraw Hose Diagram on UI changes
       drawHoseDiagram();
     }
 
-    // Window resize handler to maintain graphic scale
     window.addEventListener('resize', drawHoseDiagram);
 
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         const swCode = `
-          const CACHE_NAME = 'pdp-dash-v4';
+          const CACHE_NAME = 'pdp-dash-v5';
           self.addEventListener('install', (e) => {
             e.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(['./'])));
           });
@@ -705,7 +752,6 @@
       });
     }
 
-    // Initial load sync
     updateUI();
   </script>
 </body>
