@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Engine PDP & Multi-Line Dashboard</title>
+  <title>Engine PDP Dashboard</title>
   <style>
     body {
       background-image: linear-gradient(to right, #ff5e00, #39ff14);
@@ -12,231 +12,149 @@
       display: flex;
       justify-content: flex-start;
       align-items: flex-start;
-      padding: 30px;
-      gap: 20px;
-    }
-
-    .calc-box, .diagram-box {
-      background-color: rgba(0, 0, 0, 0.88);
-      border-radius: 12px;
       padding: 20px;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+      gap: 15px;
+    }
+
+    .box {
+      background-color: rgba(0, 0, 0, 0.9);
+      border-radius: 12px;
+      padding: 18px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
       box-sizing: border-box;
-    }
-
-    .calc-box {
-      width: 560px;
+      height: 720px;
       display: flex;
       flex-direction: column;
     }
 
-    .diagram-box {
-      width: 400px;
-      height: 670px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
+    /* 1. Left Box: PDP Controls & Presets */
+    .calc-box { width: 500px; overflow-y: auto; }
+    
+    /* 2. Middle Box: Lay Diagram */
+    .diagram-box { width: 380px; align-items: center; }
 
-    h1, h2 { margin-top: 0; text-align: center; }
+    /* 3. Right Box: Tactical Guidance & Warnings */
+    .guidance-box { width: 320px; overflow-y: auto; }
 
-    /* Master Engine PDP Display */
+    h1, h2, h3 { margin-top: 0; text-align: center; }
+
+    /* Master Engine Gauge */
     .master-gauge {
       background: #111;
       border: 3px solid #ff3333;
       border-radius: 10px;
-      padding: 10px;
+      padding: 8px;
       text-align: center;
-      margin-bottom: 15px;
+      margin-bottom: 10px;
     }
-    .master-title {
-      font-size: 13px;
-      color: #ff3333;
-      font-weight: bold;
-      letter-spacing: 1px;
-    }
-    .master-value {
-      font-size: 42px;
-      font-weight: bold;
-      color: #ff3333;
-    }
+    .master-title { font-size: 11px; color: #ff3333; font-weight: bold; letter-spacing: 1px; }
+    .master-value { font-size: 36px; font-weight: bold; color: #ff3333; }
 
     /* Line Selector Tabs */
-    .line-selector {
-      display: flex;
-      justify-content: space-between;
-      gap: 6px;
-      margin-bottom: 15px;
-    }
-
+    .line-selector { display: flex; justify-content: space-between; gap: 4px; margin-bottom: 10px; }
     .line-tab {
-      flex: 1;
-      padding: 10px 4px;
-      background: #333;
-      color: #ccc;
-      border: 2px solid #555;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: bold;
-      font-size: 13px;
-      text-align: center;
+      flex: 1; padding: 8px 2px; background: #333; color: #ccc;
+      border: 2px solid #555; border-radius: 6px; cursor: pointer;
+      font-weight: bold; font-size: 11px; text-align: center;
     }
+    .line-tab.active { background: #ff5e00; color: white; border-color: #39ff14; }
 
-    .line-tab.active {
-      background: #ff5e00;
-      color: white;
-      border-color: #39ff14;
-    }
-
-    /* PDP Gauge Display for Selected Line */
+    /* Active Line Gauge */
     .gauge-card {
-      background: #111;
-      border: 2px solid #39ff14;
-      border-radius: 10px;
-      padding: 10px;
-      text-align: center;
-      margin-bottom: 12px;
+      background: #111; border: 2px solid #39ff14; border-radius: 8px;
+      padding: 8px; text-align: center; margin-bottom: 8px;
     }
+    .gauge-title { font-size: 11px; color: #aaa; text-transform: uppercase; }
+    .gauge-value { font-size: 28px; font-weight: bold; color: #39ff14; margin: 2px 0; }
 
-    .gauge-title {
-      font-size: 12px;
-      color: #aaa;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-
-    .gauge-value {
-      font-size: 32px;
-      font-weight: bold;
-      color: #39ff14;
-      margin: 4px 0;
-    }
-
-    /* Control Buttons */
     .btn-group {
-      margin: 6px 0;
-      background: rgba(255, 255, 255, 0.05);
-      padding: 10px;
-      border-radius: 8px;
+      margin: 5px 0; background: rgba(255, 255, 255, 0.05);
+      padding: 8px; border-radius: 6px;
     }
-
-    .btn-group h3 {
-      margin: 0 0 6px 0;
-      font-size: 13px;
-      color: #ddd;
-    }
+    .btn-group h3 { margin: 0 0 5px 0; font-size: 12px; color: #ddd; text-align: left; }
 
     button {
-      background-color: #ff5e00;
-      color: white;
-      border: none;
-      padding: 8px 12px;
-      margin: 3px;
-      font-size: 12px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: bold;
+      background-color: #ff5e00; color: white; border: none;
+      padding: 6px 10px; margin: 2px; font-size: 11px;
+      border-radius: 4px; cursor: pointer; font-weight: bold;
     }
-
     button:hover { background-color: #e05200; }
+    button.preset-btn { background-color: #0284c7; }
     button.remove-btn { background-color: #d9534f; }
-    button.remove-btn:hover { background-color: #c9302c; }
-    button.reset { background-color: #888; width: 100%; margin-top: 8px; }
+    button.reset { background-color: #666; width: 100%; margin-top: 5px; }
 
-    .summary-box {
-      background: rgba(255, 255, 255, 0.08);
-      padding: 10px;
-      border-radius: 6px;
-      font-size: 12px;
-      margin-top: 10px;
-    }
-
-    /* Custom Multi-Line Hose & Diagram Styling */
+    /* Diagram Styles */
     #diagram-container {
-      width: 100%;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      overflow-y: auto;
-      padding-top: 10px;
+      width: 100%; height: 100%; display: flex;
+      flex-direction: column; align-items: center;
+      overflow-y: auto; padding-top: 5px;
     }
+    .structure-part { font-size: 40px; line-height: 1; }
+    .truck-part { font-size: 45px; line-height: 1; margin-top: 10px; }
 
-    .structure-part { font-size: 45px; line-height: 1; margin-bottom: 5px; }
-    .truck-part { font-size: 50px; line-height: 1; margin-top: 10px; }
-
-    .multi-lines-wrapper {
-      display: flex;
-      justify-content: space-around;
-      width: 100%;
-    }
-
-    .line-column {
-      display: flex;
-      flex-direction: column-reverse; /* Reverses order so bottom is truck and top is nozzle/fire */
-      align-items: center;
-      width: 23%;
-    }
-
-    .line-label {
-      font-size: 11px;
-      font-weight: bold;
-      margin-top: 5px;
-      text-align: center;
-    }
+    .multi-lines-wrapper { display: flex; justify-content: space-around; width: 100%; }
+    .line-column { display: flex; flex-direction: column-reverse; align-items: center; width: 23%; }
+    
+    .line-label { font-size: 10px; font-weight: bold; margin-top: 4px; text-align: center; }
+    .gate-indicator { font-size: 9px; padding: 2px 4px; border-radius: 3px; font-weight: bold; margin-top: 2px; text-align: center; }
+    .gate-full { background: #16a34a; color: white; }
+    .gate-down { background: #eab308; color: black; }
 
     .hose-section { display: flex; flex-direction: column; align-items: center; }
+    .coupling { width: 18px; height: 4px; background: #bbb; border-radius: 1px; border: 1px solid #333; }
     
-    .coupling {
-      width: 16px; height: 5px;
-      background: linear-gradient(to right, #888, #ddd, #888);
-      border-radius: 2px; border: 1px solid #444;
-    }
-    
-    /* Variable Hose Widths */
-    .hose-line {
-      height: 35px;
-      border-left: 1px solid rgba(0,0,0,0.3);
-      border-right: 1px solid rgba(0,0,0,0.3);
-    }
-    .hose-44mm { width: 6px; }  /* Thinner 44mm hose */
-    .hose-65mm { width: 10px; } /* Noticeably wider 65mm hose */
+    .hose-line { height: 32px; border-left: 1px solid rgba(0,0,0,0.4); border-right: 1px solid rgba(0,0,0,0.4); }
+    .hose-44mm { width: 6px; }
+    .hose-65mm { width: 14px; } /* Wider 65mm hose */
 
-    /* Hose Line Color Coding */
-    .color-attack1 { background-color: #fdfd04; } /* Yellow */
-    .color-attack2 { background-color: #3182ce; } /* Blue */
-    .color-bumper  { background-color: #e53e3e; } /* Red */
-    .color-monitor { background-color: #38a169; } /* Green */
+    .color-attack1 { background-color: #fdfd04; }
+    .color-attack2 { background-color: #3182ce; }
+    .color-bumper  { background-color: #e53e3e; }
+    .color-monitor { background-color: #38a169; }
 
-    /* Smooth Bore: Tapered tip pointing UP towards the fire */
+    /* Nozzles with Water Spray Effects pointing UP */
+    .nozzle-wrapper { display: flex; flex-direction: column; align-items: center; margin-bottom: 2px; }
+    .water-spray {
+      width: 0; height: 0;
+      border-left: 12px solid transparent; border-right: 12px solid transparent;
+      border-top: 20px solid rgba(56, 189, 248, 0.8);
+      transform: rotate(180deg);
+    }
     .smooth-bore-nozzle {
       width: 0; height: 0;
-      border-left: 5px solid transparent; border-right: 5px solid transparent;
-      border-bottom: 24px solid #d4af37;
-      margin-bottom: 2px;
+      border-left: 4px solid transparent; border-right: 4px solid transparent;
+      border-bottom: 20px solid #d4af37;
     }
-
-    /* Fog Nozzle: Triangle spray cone (pointing UP: narrow at hose, broad away) */
     .fog-nozzle {
       width: 0; height: 0;
-      border-left: 10px solid transparent; border-right: 10px solid transparent;
-      border-bottom: 20px solid #38bdf8; /* Blue water fog spray cone */
-      margin-bottom: 2px;
+      border-left: 8px solid transparent; border-right: 8px solid transparent;
+      border-bottom: 16px solid #38bdf8;
     }
+
+    /* Warning Card Styling */
+    .warning-card {
+      background: rgba(220, 38, 38, 0.2); border: 1px solid #ef4444;
+      border-radius: 6px; padding: 10px; margin-bottom: 10px; font-size: 11px;
+    }
+    .warning-title { font-weight: bold; color: #fca5a5; font-size: 12px; margin-bottom: 4px; }
+
+    .rule-card {
+      background: rgba(255, 255, 255, 0.05); border: 1px solid #555;
+      border-radius: 6px; padding: 10px; margin-bottom: 8px; font-size: 11px;
+    }
+    .rule-title { font-weight: bold; color: #39ff14; margin-bottom: 4px; }
   </style>
 </head>
 <body>
 
-  <!-- Left Box: PDP Dashboard Controls -->
-  <div class="calc-box">
-    
-    <!-- MASTER ENGINE PDP DISPLAY -->
+  <!-- Box 1: Calculator Controls -->
+  <div class="box calc-box">
     <div class="master-gauge">
       <div class="master-title">MASTER PUMP DISCHARGE PRESSURE (HIGHEST REQUIRED)</div>
-      <div class="master-value"><span id="master-pdp">0</span> <small style="font-size:20px;">kPa</small></div>
+      <div class="master-value"><span id="master-pdp">0</span> <small style="font-size:18px;">kPa</small></div>
     </div>
 
-    <!-- 1. Line Selector Tabs -->
+    <!-- Line Tabs -->
     <div class="line-selector">
       <div class="line-tab active" id="tab-attack1" onclick="selectLine('attack1')">Attack 1</div>
       <div class="line-tab" id="tab-attack2" onclick="selectLine('attack2')">Attack 2</div>
@@ -244,64 +162,130 @@
       <div class="line-tab" id="tab-monitor" onclick="selectLine('monitor')">Monitor</div>
     </div>
 
-    <!-- 2. Active Line PDP Gauge -->
+    <!-- Selected Line Gauge -->
     <div class="gauge-card">
       <div class="gauge-title" id="gauge-label">ATTACK LINE 1 - TARGET PDP</div>
-      <div class="gauge-value"><span id="pdp-gauge">0</span> <small style="font-size:16px;">kPa</small></div>
+      <div class="gauge-value"><span id="pdp-gauge">0</span> <small style="font-size:14px;">kPa</small></div>
+      <div id="line-gate-status" style="font-size:11px; font-weight:bold; color:#ff5e00;">FULLY OPEN</div>
     </div>
 
-    <!-- 3. Nozzle Controls -->
+    <!-- Quick Presets -->
+    <div class="btn-group">
+      <h3>Quick Preconnect Short-Cuts</h3>
+      <button class="preset-btn" onclick="applyPreset('crosslay')">Crosslay (60m 44mm + Fog)</button>
+      <button class="preset-btn" onclick="applyPreset('highrise')">High-Rise (30m 65mm + Smooth)</button>
+    </div>
+
+    <!-- Water Supply Mode -->
+    <div class="btn-group">
+      <h3>Supply Mode</h3>
+      <button onclick="setSupply('Hydrant')">Hydrant Supply</button>
+      <button onclick="setSupply('Drafting')">Drafting (Static)</button>
+      <button onclick="setSupply('Nursing')">Nursing (Relay)</button>
+    </div>
+
+    <!-- Nozzle Controls -->
     <div class="btn-group">
       <h3>1. Nozzle Selection</h3>
       <button onclick="setNozzle('Fog Nozzle', 700)">Fog Nozzle (700 kPa)</button>
       <button onclick="setNozzle('Smooth Bore', 350)">Smooth Bore (350 kPa)</button>
-      <button class="remove-btn" onclick="removeNozzle()">- Remove Nozzle</button>
+      <button class="remove-btn" onclick="removeNozzle()">- Nozzle</button>
     </div>
 
-    <!-- 4. Hose Controls -->
+    <!-- Hose Controls -->
     <div class="btn-group">
-      <h3>2. Hose Length Controls</h3>
-      <button onclick="addHose('44mm', 100)">+ 1 Length 44mm (100 kPa)</button>
-      <button onclick="addHose('65mm', 30)">+ 1 Length 65mm (30 kPa)</button>
-      <button class="remove-btn" onclick="removeHose()">- Remove 1 Hose Length</button>
+      <h3>2. Hose Lengths</h3>
+      <button onclick="addHose('44mm', 100)">+ 1x 44mm (100 kPa)</button>
+      <button onclick="addHose('65mm', 30)">+ 1x 65mm (30 kPa)</button>
+      <button class="remove-btn" onclick="removeHose()">- Hose</button>
     </div>
 
-    <button class="reset" onclick="resetActiveLine()">Reset Selected Line</button>
+    <!-- Elevation Controls -->
+    <div class="btn-group">
+      <h3>3. Elevation Adjustment (10 kPa / floor / 10ft)</h3>
+      <button onclick="addElevation(10)">+ 1 Floor Up (+10 kPa)</button>
+      <button onclick="addElevation(-10)">- 1 Floor Down (-10 kPa)</button>
+    </div>
 
-    <div class="summary-box">
-      <strong>Active Line Summary:</strong>
-      <div id="line-summary">No nozzle or hose added.</div>
+    <button class="reset" onclick="resetActiveLine()">Reset Active Line</button>
+  </div>
+
+  <!-- Box 2: Multi-Line Diagram -->
+  <div class="box diagram-box">
+    <h2>Lay Diagram</h2>
+    <div id="diagram-container">
+      <div class="structure-part">🏠🔥</div>
+      <div class="multi-lines-wrapper" id="multi-lines-container"></div>
+      <div class="truck-part">🚒</div>
     </div>
   </div>
 
-  <!-- Right Box: Persistent Multi-Line Lay Diagram -->
-  <div class="diagram-box">
-    <h2>Full Lay Diagram</h2>
-    <div id="diagram-container">
-      <div class="structure-part">🏠🔥</div> <!-- House on fire at top -->
-      <div class="multi-lines-wrapper" id="multi-lines-container"></div>
-      <div class="truck-part">🚒</div> <!-- Fire truck at bottom -->
+  <!-- Box 3: Tactical Guidance, Warnings & Rules of Thumb -->
+  <div class="box guidance-box">
+    <h2>Tactical Advisor</h2>
+    
+    <div id="warning-container">
+      <div class="rule-card">
+        <div class="rule-title">System Ready</div>
+        Select nozzle, hose lengths, or water supply to begin monitoring hydraulic limits.
+      </div>
+    </div>
+
+    <h3>Standard Rules of Thumb</h3>
+
+    <div class="rule-card">
+      <div class="rule-title">Rule 1: Hydrant Residual Pressure</div>
+      Always keep residual intake pressure above <strong>140 kPa (20 psi)</strong> to prevent pump cavitation or supply hose collapse.
+    </div>
+
+    <div class="rule-card">
+      <div class="rule-title">Rule 2: Elevation Loss/Gain</div>
+      Add or subtract <strong>10 kPa per floor</strong> (approx. 1 kPa/ft or 10 kPa/3m height).
+    </div>
+
+    <div class="rule-card">
+      <div class="rule-title">Rule 3: Master PDP Setting</div>
+      Throttle the main engine pump pressure to match the <strong>highest line demand</strong>. Gate down any lines requiring lower pressure.
     </div>
   </div>
 
   <script>
     const lines = {
-      attack1: { name: "Attack 1", code: "attack1", np: 0, nozzleName: "None", fl: 0, hoses: [] },
-      attack2: { name: "Attack 2", code: "attack2", np: 0, nozzleName: "None", fl: 0, hoses: [] },
-      bumper:  { name: "Bumper",   code: "bumper",  np: 0, nozzleName: "None", fl: 0, hoses: [] },
-      monitor: { name: "Monitor",  code: "monitor", np: 0, nozzleName: "None", fl: 0, hoses: [] }
+      attack1: { name: "Attack 1", code: "attack1", np: 0, nozzleName: "None", fl: 0, elev: 0, hoses: [] },
+      attack2: { name: "Attack 2", code: "attack2", np: 0, nozzleName: "None", fl: 0, elev: 0, hoses: [] },
+      bumper:  { name: "Bumper",   code: "bumper",  np: 0, nozzleName: "None", fl: 0, elev: 0, hoses: [] },
+      monitor: { name: "Monitor",  code: "monitor", np: 0, nozzleName: "None", fl: 0, elev: 0, hoses: [] }
     };
 
     let currentLineKey = 'attack1';
+    let supplyMode = 'None';
 
     function selectLine(lineKey) {
       currentLineKey = lineKey;
-
       document.querySelectorAll('.line-tab').forEach(tab => tab.classList.remove('active'));
       document.getElementById(`tab-${lineKey}`).classList.add('active');
-
       document.getElementById('gauge-label').innerText = `${lines[lineKey].name.toUpperCase()} - TARGET PDP`;
+      updateDashboard();
+    }
 
+    function setSupply(mode) {
+      supplyMode = mode;
+      updateDashboard();
+    }
+
+    function applyPreset(preset) {
+      resetActiveLine();
+      if (preset === 'crosslay') {
+        lines[currentLineKey].nozzleName = "Fog Nozzle";
+        lines[currentLineKey].np = 700;
+        addHose('44mm', 100); addHose('44mm', 100);
+        addHose('44mm', 100); addHose('44mm', 100);
+      } else if (preset === 'highrise') {
+        lines[currentLineKey].nozzleName = "Smooth Bore";
+        lines[currentLineKey].np = 350;
+        addHose('65mm', 30); addHose('65mm', 30);
+        lines[currentLineKey].elev = 30; // 3 floors default
+      }
       updateDashboard();
     }
 
@@ -332,61 +316,139 @@
       }
     }
 
+    function addElevation(val) {
+      lines[currentLineKey].elev += val;
+      updateDashboard();
+    }
+
     function resetActiveLine() {
       lines[currentLineKey].np = 0;
       lines[currentLineKey].nozzleName = "None";
       lines[currentLineKey].fl = 0;
+      lines[currentLineKey].elev = 0;
       lines[currentLineKey].hoses = [];
       updateDashboard();
     }
 
     function updateDashboard() {
       const activeLine = lines[currentLineKey];
-      const activePDP = activeLine.np + activeLine.fl;
+      const activePDP = activeLine.np + activeLine.fl + activeLine.elev;
 
       document.getElementById('pdp-gauge').innerText = activePDP;
 
+      // Find Master PDP
       let maxPDP = 0;
       Object.keys(lines).forEach(key => {
-        let linePDP = lines[key].np + lines[key].fl;
-        if (linePDP > maxPDP) maxPDP = linePDP;
+        let lPdp = lines[key].np + lines[key].fl + lines[key].elev;
+        if (lPdp > maxPDP) maxPDP = lPdp;
       });
       document.getElementById('master-pdp').innerText = maxPDP;
 
-      let summaryText = `Nozzle: ${activeLine.nozzleName} (${activeLine.np} kPa) | Hoses: ${activeLine.hoses.length} lengths (${activeLine.fl} kPa FL)`;
-      document.getElementById('line-summary').innerText = summaryText;
+      // Gate Down Status on active line
+      const gateElem = document.getElementById('line-gate-status');
+      if (activePDP === maxPDP && maxPDP > 0) {
+        gateElem.innerText = "FULLY OPEN DISCHARGE";
+        gateElem.style.color = "#39ff14";
+      } else if (activePDP < maxPDP && activePDP > 0) {
+        let diff = maxPDP - activePDP;
+        gateElem.innerText = `GATE DOWN BY ${diff} kPa`;
+        gateElem.style.color = "#eab308";
+      } else {
+        gateElem.innerText = "LINE INACTIVE";
+        gateElem.style.color = "#aaa";
+      }
 
-      drawDiagram();
+      updateWarnings(maxPDP, activePDP);
+      drawDiagram(maxPDP);
     }
 
-    function drawDiagram() {
+    function updateWarnings(maxPDP, activePDP) {
+      const container = document.getElementById('warning-container');
+      container.innerHTML = "";
+
+      // Hydrant warning
+      if (supplyMode === 'Hydrant') {
+        container.innerHTML += `
+          <div class="warning-card">
+            <div class="warning-title">⚠️ HYDRANT RESIDUAL WARNING</div>
+            Monitor intake gauge closely. Ensure intake residual pressure remains above <strong>140 kPa (20 psi)</strong> to protect supply line and pump.
+          </div>`;
+      } else if (supplyMode === 'Drafting') {
+        container.innerHTML += `
+          <div class="warning-card">
+            <div class="warning-title">⚠️ DRAFTING STATIC SOURCE</div>
+            Ensure hard suction lift height does not exceed 3 meters (10 ft) to prevent prime loss.
+          </div>`;
+      }
+
+      // Dangerous Overpressure Warning
+      if (maxPDP > 1750) {
+        container.innerHTML += `
+          <div class="warning-card">
+            <div class="warning-title">🚨 DANGER: OVERPRESSURE RISK</div>
+            Target PDP exceeds 1750 kPa (250 psi). Verify hose rating and pressure relief valve settings immediately!
+          </div>`;
+      }
+
+      // No Nozzle Warning
+      if (lines[currentLineKey].hoses.length > 0 && lines[currentLineKey].nozzleName === "None") {
+        container.innerHTML += `
+          <div class="warning-card">
+            <div class="warning-title">⚠️ MISSING NOZZLE</div>
+            Hoses added without a nozzle selected. Select Fog or Smooth Bore to establish accurate Nozzle Pressure (NP).
+          </div>`;
+      }
+    }
+
+    function drawDiagram(maxPDP) {
       const wrapper = document.getElementById('multi-lines-container');
       wrapper.innerHTML = "";
 
       Object.keys(lines).forEach(key => {
         const line = lines[key];
+        let linePDP = line.np + line.fl + line.elev;
 
         const col = document.createElement('div');
         col.className = 'line-column';
 
+        // Gate Directive Label
+        const gateDiv = document.createElement('div');
+        if (linePDP === maxPDP && maxPDP > 0) {
+          gateDiv.className = 'gate-indicator gate-full';
+          gateDiv.innerText = 'FULL OPEN';
+        } else if (linePDP < maxPDP && linePDP > 0) {
+          gateDiv.className = 'gate-indicator gate-down';
+          gateDiv.innerText = `GATE -${maxPDP - linePDP}`;
+        }
+        col.appendChild(gateDiv);
+
         const label = document.createElement('div');
         label.className = 'line-label';
-        let linePDP = line.np + line.fl;
         label.innerHTML = `${line.name}<br><span style="color:#39ff14">${linePDP} kPa</span>`;
         col.appendChild(label);
 
-        // Render Nozzle at top end of line
-        if (line.nozzleName === "Fog Nozzle") {
-          const fog = document.createElement('div');
-          fog.className = 'fog-nozzle';
-          col.appendChild(fog);
-        } else if (line.nozzleName === "Smooth Bore") {
-          const smoothBore = document.createElement('div');
-          smoothBore.className = 'smooth-bore-nozzle';
-          col.appendChild(smoothBore);
+        // Render Nozzle & Water Spray at TOP towards fire
+        if (line.nozzleName !== "None") {
+          const nozzleWrap = document.createElement('div');
+          nozzleWrap.className = 'nozzle-wrapper';
+
+          const spray = document.createElement('div');
+          spray.className = 'water-spray';
+          nozzleWrap.appendChild(spray);
+
+          if (line.nozzleName === "Fog Nozzle") {
+            const fog = document.createElement('div');
+            fog.className = 'fog-nozzle';
+            nozzleWrap.appendChild(fog);
+          } else if (line.nozzleName === "Smooth Bore") {
+            const smoothBore = document.createElement('div');
+            smoothBore.className = 'smooth-bore-nozzle';
+            nozzleWrap.appendChild(smoothBore);
+          }
+          col.appendChild(nozzleWrap);
         }
 
-        // Render Hoses upwards from engine to nozzle
+        // Render Hoses UPWARDS from truck
         line.hoses.forEach(hoseObj => {
           const hoseSection = document.createElement('div');
           hoseSection.className = 'hose-section';
@@ -395,7 +457,6 @@
           topCoupling.className = 'coupling';
 
           const hoseLine = document.createElement('div');
-          // Applies width class based on 44mm vs 65mm
           const widthClass = hoseObj.type === '65mm' ? 'hose-65mm' : 'hose-44mm';
           hoseLine.className = `hose-line ${widthClass} color-${line.code}`;
 
@@ -414,6 +475,5 @@
 
     updateDashboard();
   </script>
-
 </body>
 </html>
