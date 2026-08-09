@@ -114,23 +114,36 @@
     .color-bumper  { background-color: #e53e3e; }
     .color-monitor { background-color: #38a169; }
 
-    /* Nozzles Fixed: Attached to top end of hose pointing UP */
-    .nozzle-wrapper { display: flex; flex-direction: column; align-items: center; margin-bottom: 2px; }
-    .water-spray {
-      width: 0; height: 0;
-      border-left: 12px solid transparent; border-right: 12px solid transparent;
-      border-bottom: 20px solid rgba(56, 189, 248, 0.8);
-      margin-bottom: 2px;
+    /* Improved Water Spray Graphic */
+    .water-spray-effect {
+      font-size: 16px;
+      line-height: 1;
+      margin-bottom: -4px;
+      text-align: center;
+      animation: pulseSpray 0.8s infinite alternate;
     }
+    @keyframes pulseSpray {
+      0% { opacity: 0.7; transform: translateY(0); }
+      100% { opacity: 1; transform: translateY(-3px); }
+    }
+
+    /* Fixed Nozzle Graphics */
+    .nozzle-wrapper { display: flex; flex-direction: column; align-items: center; margin-bottom: 2px; }
+    
     .smooth-bore-nozzle {
       width: 0; height: 0;
-      border-left: 4px solid transparent; border-right: 4px solid transparent;
-      border-bottom: 20px solid #d4af37;
+      border-left: 4px solid transparent;
+      border-right: 4px solid transparent;
+      border-bottom: 22px solid #d4af37;
     }
+
+    /* Fog Nozzle: Correct Narrow Point at Hose Coupling, Broad Head facing Up */
     .fog-nozzle {
       width: 0; height: 0;
-      border-left: 8px solid transparent; border-right: 8px solid transparent;
-      border-bottom: 16px solid #38bdf8;
+      border-left: 8px solid transparent;
+      border-right: 8px solid transparent;
+      border-top: 18px solid #38bdf8; /* Points broad edge upwards toward spray */
+      margin-bottom: 2px;
     }
 
     .warning-card {
@@ -296,8 +309,8 @@
         lines[currentLineKey].nozzleName = "Smooth Bore";
         lines[currentLineKey].np = 350;
         addHose('65mm', 30); addHose('65mm', 30);
-        lines[currentLineKey].elev = 30; // 3 floors
-        lines[currentLineKey].appliance = 70; // Standpipe
+        lines[currentLineKey].elev = 30;
+        lines[currentLineKey].appliance = 70;
       }
       updateDashboard();
     }
@@ -361,7 +374,6 @@
 
       document.getElementById('pdp-gauge').innerText = activePDP;
 
-      // Find Master PDP
       let maxPDP = 0;
       Object.keys(lines).forEach(key => {
         let lPdp = lines[key].np + lines[key].fl + lines[key].elev + lines[key].appliance;
@@ -369,7 +381,6 @@
       });
       document.getElementById('master-pdp').innerText = maxPDP;
 
-      // Gate Down Percentage Status
       const gateElem = document.getElementById('line-gate-status');
       if (activePDP === maxPDP && maxPDP > 0) {
         gateElem.innerText = "100% FULLY OPEN DISCHARGE";
@@ -434,14 +445,16 @@
         const col = document.createElement('div');
         col.className = 'line-column';
 
-        // 1. Water Spray
+        // 1. Water Spray Stream (Emoji Graphic)
         if (line.nozzleName !== "None") {
           const spray = document.createElement('div');
-          spray.className = 'water-spray';
+          spray.className = 'water-spray-effect';
+          spray.innerText = '💦💧';
           col.appendChild(spray);
 
           const nozzleWrap = document.createElement('div');
           nozzleWrap.className = 'nozzle-wrapper';
+
           if (line.nozzleName === "Fog Nozzle") {
             const fog = document.createElement('div');
             fog.className = 'fog-nozzle';
@@ -462,7 +475,7 @@
           col.appendChild(flowDiv);
         }
 
-        // 3. Hoses (Built top-to-bottom towards engine)
+        // 3. Hoses
         line.hoses.forEach(hoseObj => {
           const hoseSection = document.createElement('div');
           hoseSection.className = 'hose-section';
