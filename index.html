@@ -89,7 +89,7 @@
       overflow-y: auto; padding-top: 5px;
     }
     .structure-part { font-size: 35px; line-height: 1; }
-    .truck-part { font-size: 55px; line-height: 1; margin: 6px 0; } /* Larger Truck */
+    .truck-part { font-size: 55px; line-height: 1; margin: 6px 0; }
 
     .multi-lines-wrapper { display: flex; justify-content: space-around; width: 100%; }
     .line-column { display: flex; flex-direction: column; align-items: center; width: 23%; }
@@ -242,7 +242,7 @@
       <button onclick="addElevation(-10)">- 1 Floor Down (-10 kPa)</button>
     </div>
 
-    <!-- Appliances / Standpipe (Moved to Bottom for Better Flow) -->
+    <!-- Appliances / Standpipe -->
     <div class="btn-group">
       <h3>4. Appliances / Connections</h3>
       <button onclick="toggleStandpipe()">Toggle Standpipe / Wye (+70 kPa FL)</button>
@@ -338,9 +338,9 @@
       </div>
     </div>
 
-    <!-- Select-a-Flow Nozzle Preset Customizer for Active Line -->
+    <!-- Nozzle Flow Rate Presets for Active Line -->
     <div class="btn-group" style="margin-top:10px;">
-      <h3>Select-a-Flow Fog Detents (Selected Line)</h3>
+      <h3>Nozzle Flow Rate (Selected Line)</h3>
       <button class="flow-btn" onclick="setCustomFlow(115)">115 L/m (30 GPM)</button>
       <button class="flow-btn" onclick="setCustomFlow(230)">230 L/m (60 GPM)</button>
       <button class="flow-btn" onclick="setCustomFlow(360)">360 L/m (95 GPM)</button>
@@ -443,7 +443,6 @@
         lines[currentLineKey].fl -= popped.fl;
         if (lines[currentLineKey].fl < 0) lines[currentLineKey].fl = 0;
       }
-      // Reset elevation to 0 if no hoses remain on line
       if (lines[currentLineKey].hoses.length === 0) {
         lines[currentLineKey].elev = 0;
       }
@@ -451,7 +450,6 @@
     }
 
     function addElevation(val) {
-      // Elevation only applies if there is at least one hose length
       if (lines[currentLineKey].hoses.length > 0) {
         lines[currentLineKey].elev += val;
       }
@@ -493,12 +491,10 @@
     function updateDashboard() {
       const activeLine = lines[currentLineKey];
       
-      // Enforce zero elevation if line has no hose
       if (activeLine.hoses.length === 0) {
         activeLine.elev = 0;
       }
 
-      // Calculate Line PDP
       let activePDP = 0;
       if (activeLine.hoses.length > 0 || activeLine.nozzleName !== "None") {
         activePDP = activeLine.np + activeLine.fl + activeLine.elev + activeLine.appliance;
@@ -650,7 +646,7 @@
           }
           col.appendChild(nozzleWrap);
 
-          // Explicit Nozzle Type Text Label
+          // Nozzle Type Label
           const nozzleTypeDiv = document.createElement('div');
           nozzleTypeDiv.className = 'nozzle-type-label';
           nozzleTypeDiv.innerText = line.nozzleName === "Fog Nozzle" ? '[FOG]' : '[SMOOTH BORE]';
