@@ -290,7 +290,7 @@
       <div class="section-label">Quick Preconnect Short-Cuts</div>
       <div class="btn-group">
         <button class="btn btn-blue" onclick="applyPreset('crosslay')">Crosslay (200ft 44mm + Fog)</button>
-        <button class="btn btn-blue" onclick="applyPreset('highrise')">High-Rise (100ft 65mm + SB)</button>
+        <button class="btn btn-blue" onclick="applyPreset('highrise')">High-Rise (100ft 50ft + SB)</button>
       </div>
 
       <div class="section-label">Supply Mode</div>
@@ -307,10 +307,10 @@
         <button class="btn btn-red" onclick="clearNozzle()">- Nozzle</button>
       </div>
 
-      <div class="section-label">2. Hose Lengths (25 ft / Segment)</div>
+      <div class="section-label">2. Hose Lengths (50 ft / Segment)</div>
       <div class="btn-group">
-        <button class="btn" onclick="addHose(44, 100)">+ 1x 25ft 44mm</button>
-        <button class="btn" onclick="addHose(65, 30)">+ 1x 25ft 65mm</button>
+        <button class="btn" onclick="addHose(44, 200)">+ 1x 50ft 44mm</button>
+        <button class="btn" onclick="addHose(50, 60)">+ 1x 50ft 50ft</button>
         <button class="btn btn-red" onclick="removeHose()">- Hose</button>
       </div>
 
@@ -515,10 +515,8 @@
         line.nozzleType = 'fog';
         line.nozzlePressure = 700;
         line.hoses = [
-          { size: 44, pressure: 100 }, { size: 44, pressure: 100 },
-          { size: 44, pressure: 100 }, { size: 44, pressure: 100 },
-          { size: 44, pressure: 100 }, { size: 44, pressure: 100 },
-          { size: 44, pressure: 100 }, { size: 44, pressure: 100 }
+          { size: 44, pressure: 200 }, { size: 44, pressure: 200 },
+          { size: 44, pressure: 200 }, { size: 44, pressure: 200 }
         ];
         line.hoseLoss = 800;
         line.elevationLoss = 0;
@@ -528,8 +526,7 @@
         line.nozzleType = 'smooth';
         line.nozzlePressure = 350;
         line.hoses = [
-          { size: 65, pressure: 30 }, { size: 65, pressure: 30 },
-          { size: 65, pressure: 30 }, { size: 65, pressure: 30 }
+          { size: 50, pressure: 60 }, { size: 50, pressure: 60 }
         ];
         line.hoseLoss = 120;
         line.elevationLoss = 30;
@@ -580,6 +577,13 @@
 
       const engineY = canvas.height - 75;
       const topY = 55;
+
+      // Calculate Master PDP across all lines first
+      let maxPDP = 0;
+      lineKeys.forEach(k => {
+        const pdp = calculateLinePDP(lines[k]);
+        if (pdp > maxPDP) maxPDP = pdp;
+      });
 
       ctx.font = '2.2rem sans-serif';
       ctx.textAlign = 'center';
@@ -693,12 +697,20 @@
           ctx.fillText(`SMOOTH | ${line.flowLpm} LPM`, x, topY - 30);
         }
 
+        // Render PDP & Percentage Dial-Back Label at Bottom
         ctx.fillStyle = key === activeLineKey ? '#00e676' : '#2a2a2a';
-        ctx.fillRect(x - 32, engineY - 26, 64, 20);
+        ctx.fillRect(x - 38, engineY - 26, 76, 20);
         ctx.fillStyle = key === activeLineKey ? '#000000' : '#ffffff';
-        ctx.font = 'bold 11px sans-serif';
+        ctx.font = 'bold 10px sans-serif';
         ctx.textAlign = 'center';
-        ctx.fillText(`${pdp} kPa`, x, engineY - 12);
+
+        if (maxPDP > 0 && pdp > 0) {
+          const diffPct = Math.round(((pdp - maxPDP) / maxPDP) * 100);
+          const pctStr = diffPct === 0 ? '0%' : `${diffPct}%`;
+          ctx.fillText(`${pdp} kPa (${pctStr})`, x, engineY - 12);
+        } else {
+          ctx.fillText(`${pdp} kPa`, x, engineY - 12);
+        }
       });
     }
 
@@ -722,7 +734,7 @@
       const targetPDP = calculateLinePDP(activeLine);
       document.getElementById('target-pdp').innerHTML = `${targetPDP} <span style="font-size: 0.9rem;">kPa</span>`;
 
-      const hoseSummary = `${activeLine.hoses.length * 25}ft (${activeLine.hoses.length} segments)`;
+      const hoseSummary = `${activeLine.hoses.length * 50}ft (${activeLine.hoses.length} segments)`;
       const elevSummary = `${activeLine.elevationLoss / 10} floors (${activeLine.elevationLoss} kPa)`;
       document.getElementById('line-summary-text').innerText = `${activeLine.nozzleType.toUpperCase()} (${activeLine.nozzlePressure} kPa) | ${hoseSummary} | ${elevSummary}`;
 
@@ -753,7 +765,6 @@
         activeTank = tanks.nursing;
         activeTankName = 'NURSING TENDER';
       } else {
-        // Default to on-board engine tank when no external supply mode is selected
         activeTank = tanks.engine;
       }
 
@@ -785,7 +796,7 @@
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         const swCode = `
-          const CACHE_NAME = 'pdp-dash-v8';
+          const CACHE_NAME = 'pdp-dash-v9';
           self.addEventListener('install', (e) => {
             e.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(['./'])));
           });
