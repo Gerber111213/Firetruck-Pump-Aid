@@ -12,29 +12,26 @@
       display: flex;
       justify-content: flex-start;
       align-items: flex-start;
-      padding: 20px;
-      gap: 15px;
+      padding: 15px;
+      gap: 12px;
     }
 
     .box {
-      background-color: rgba(0, 0, 0, 0.9);
+      background-color: rgba(0, 0, 0, 0.92);
       border-radius: 12px;
-      padding: 18px;
+      padding: 15px;
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
       box-sizing: border-box;
-      height: 780px;
+      height: 790px;
       display: flex;
       flex-direction: column;
     }
 
-    /* 1. Left Box: PDP Controls */
-    .calc-box { width: 500px; overflow-y: auto; }
-    
-    /* 2. Middle Box: Lay Diagram */
-    .diagram-box { width: 400px; align-items: center; }
-
-    /* 3. Right Box: Tactical Advisor */
-    .guidance-box { width: 320px; overflow-y: auto; }
+    /* 4 Column Layout */
+    .calc-box { width: 380px; overflow-y: auto; }
+    .diagram-box { width: 320px; align-items: center; }
+    .guidance-box { width: 280px; overflow-y: auto; }
+    .advanced-box { width: 380px; overflow-y: auto; }
 
     h1, h2, h3 { margin-top: 0; text-align: center; }
 
@@ -43,43 +40,44 @@
       background: #111;
       border: 3px solid #ff3333;
       border-radius: 10px;
-      padding: 8px;
+      padding: 6px;
       text-align: center;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
     }
-    .master-title { font-size: 11px; color: #ff3333; font-weight: bold; letter-spacing: 1px; }
-    .master-value { font-size: 36px; font-weight: bold; color: #ff3333; }
+    .master-title { font-size: 10px; color: #ff3333; font-weight: bold; letter-spacing: 1px; }
+    .master-value { font-size: 32px; font-weight: bold; color: #ff3333; }
 
     /* Line Selector Tabs */
-    .line-selector { display: flex; justify-content: space-between; gap: 4px; margin-bottom: 10px; }
+    .line-selector { display: flex; justify-content: space-between; gap: 4px; margin-bottom: 8px; }
     .line-tab {
-      flex: 1; padding: 8px 2px; background: #333; color: #ccc;
+      flex: 1; padding: 6px 2px; background: #333; color: #ccc;
       border: 2px solid #555; border-radius: 6px; cursor: pointer;
-      font-weight: bold; font-size: 11px; text-align: center;
+      font-weight: bold; font-size: 10px; text-align: center;
     }
     .line-tab.active { background: #ff5e00; color: white; border-color: #39ff14; }
 
     /* Active Line Gauge */
     .gauge-card {
       background: #111; border: 2px solid #39ff14; border-radius: 8px;
-      padding: 8px; text-align: center; margin-bottom: 8px;
+      padding: 6px; text-align: center; margin-bottom: 6px;
     }
-    .gauge-title { font-size: 11px; color: #aaa; text-transform: uppercase; }
-    .gauge-value { font-size: 28px; font-weight: bold; color: #39ff14; margin: 2px 0; }
+    .gauge-title { font-size: 10px; color: #aaa; text-transform: uppercase; }
+    .gauge-value { font-size: 24px; font-weight: bold; color: #39ff14; margin: 2px 0; }
 
     .btn-group {
-      margin: 5px 0; background: rgba(255, 255, 255, 0.05);
-      padding: 8px; border-radius: 6px;
+      margin: 4px 0; background: rgba(255, 255, 255, 0.05);
+      padding: 6px; border-radius: 6px;
     }
-    .btn-group h3 { margin: 0 0 5px 0; font-size: 12px; color: #ddd; text-align: left; }
+    .btn-group h3 { margin: 0 0 4px 0; font-size: 11px; color: #ddd; text-align: left; }
 
     button {
       background-color: #ff5e00; color: white; border: none;
-      padding: 6px 10px; margin: 2px; font-size: 11px;
+      padding: 5px 8px; margin: 2px; font-size: 10px;
       border-radius: 4px; cursor: pointer; font-weight: bold;
     }
     button:hover { background-color: #e05200; }
     button.preset-btn { background-color: #0284c7; }
+    button.flow-btn { background-color: #38bdf8; color: black; }
     button.supply-btn.active { background-color: #38bdf8; color: black; }
     button.remove-btn { background-color: #d9534f; }
     button.reset { background-color: #666; width: 100%; margin-top: 5px; }
@@ -90,25 +88,25 @@
       flex-direction: column; align-items: center;
       overflow-y: auto; padding-top: 5px;
     }
-    .structure-part { font-size: 40px; line-height: 1; }
-    .truck-part { font-size: 45px; line-height: 1; margin: 5px 0; }
+    .structure-part { font-size: 35px; line-height: 1; }
+    .truck-part { font-size: 40px; line-height: 1; margin: 4px 0; }
 
     .multi-lines-wrapper { display: flex; justify-content: space-around; width: 100%; }
     .line-column { display: flex; flex-direction: column; align-items: center; width: 23%; }
     
-    .line-label { font-size: 10px; font-weight: bold; margin-bottom: 4px; text-align: center; }
-    .flow-label { font-size: 9px; color: #38bdf8; font-weight: bold; text-align: center; margin-bottom: 2px; }
+    .line-label { font-size: 9px; font-weight: bold; margin-bottom: 2px; text-align: center; }
+    .flow-label { font-size: 8px; color: #38bdf8; font-weight: bold; text-align: center; margin-bottom: 2px; }
 
-    .gate-indicator { font-size: 9px; padding: 2px 4px; border-radius: 3px; font-weight: bold; margin-bottom: 4px; text-align: center; }
+    .gate-indicator { font-size: 8px; padding: 2px 3px; border-radius: 3px; font-weight: bold; margin-bottom: 2px; text-align: center; }
     .gate-full { background: #16a34a; color: white; }
     .gate-down { background: #eab308; color: black; }
 
     .hose-section { display: flex; flex-direction: column; align-items: center; }
-    .coupling { width: 18px; height: 4px; background: #bbb; border-radius: 1px; border: 1px solid #333; }
+    .coupling { width: 16px; height: 3px; background: #bbb; border-radius: 1px; border: 1px solid #333; }
     
-    .hose-line { height: 32px; border-left: 1px solid rgba(0,0,0,0.4); border-right: 1px solid rgba(0,0,0,0.4); }
+    .hose-line { height: 28px; border-left: 1px solid rgba(0,0,0,0.4); border-right: 1px solid rgba(0,0,0,0.4); }
     .hose-44mm { width: 6px; }
-    .hose-65mm { width: 14px; }
+    .hose-65mm { width: 12px; }
 
     .color-attack1 { background-color: #fdfd04; }
     .color-attack2 { background-color: #3182ce; }
@@ -117,7 +115,7 @@
 
     /* Water Spray Graphic */
     .water-spray-effect {
-      font-size: 16px; line-height: 1; margin-bottom: -4px; text-align: center;
+      font-size: 14px; line-height: 1; margin-bottom: -4px; text-align: center;
       animation: pulseSpray 0.8s infinite alternate;
     }
     @keyframes pulseSpray {
@@ -129,43 +127,56 @@
     .smooth-bore-nozzle {
       width: 0; height: 0;
       border-left: 4px solid transparent; border-right: 4px solid transparent;
-      border-bottom: 22px solid #d4af37;
+      border-bottom: 18px solid #d4af37;
     }
     .fog-nozzle {
       width: 0; height: 0;
-      border-left: 8px solid transparent; border-right: 8px solid transparent;
-      border-top: 18px solid #38bdf8;
+      border-left: 7px solid transparent; border-right: 7px solid transparent;
+      border-top: 16px solid #38bdf8;
       margin-bottom: 2px;
     }
 
     /* Supply Diagram Area */
-    .supply-area {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      margin-top: 5px;
-      width: 100%;
-    }
-    .supply-hose {
-      width: 12px;
-      height: 35px;
-      background: #0284c7; /* Large Diameter Supply Line Blue */
-      border: 1px solid #0369a1;
-      border-radius: 2px;
-    }
-    .supply-icon { font-size: 35px; line-height: 1; text-align: center; }
+    .supply-area { display: flex; flex-direction: column; align-items: center; margin-top: 4px; width: 100%; }
+    .supply-hose { width: 10px; height: 30px; background: #0284c7; border: 1px solid #0369a1; border-radius: 2px; }
+    .supply-icon { font-size: 30px; line-height: 1; text-align: center; }
 
+    /* Warnings & Cards */
     .warning-card {
       background: rgba(220, 38, 38, 0.2); border: 1px solid #ef4444;
-      border-radius: 6px; padding: 10px; margin-bottom: 10px; font-size: 11px;
+      border-radius: 6px; padding: 8px; margin-bottom: 8px; font-size: 10px;
     }
-    .warning-title { font-weight: bold; color: #fca5a5; font-size: 12px; margin-bottom: 4px; }
+    .warning-title { font-weight: bold; color: #fca5a5; font-size: 11px; margin-bottom: 3px; }
 
     .rule-card {
       background: rgba(255, 255, 255, 0.05); border: 1px solid #555;
-      border-radius: 6px; padding: 10px; margin-bottom: 8px; font-size: 11px;
+      border-radius: 6px; padding: 8px; margin-bottom: 6px; font-size: 10px;
     }
-    .rule-title { font-weight: bold; color: #39ff14; margin-bottom: 4px; }
+    .rule-title { font-weight: bold; color: #39ff14; margin-bottom: 3px; }
+
+    /* Window 4: Water Volume & Timer Styles */
+    .timer-card {
+      background: #111;
+      border: 3px solid #0284c7;
+      border-radius: 8px;
+      padding: 10px;
+      text-align: center;
+      margin-bottom: 10px;
+    }
+    .timer-title { font-size: 10px; color: #38bdf8; font-weight: bold; letter-spacing: 1px; }
+    .timer-clock { font-size: 36px; font-weight: bold; color: #38bdf8; margin: 4px 0; }
+    
+    .vol-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.05);
+      padding: 6px;
+      border-radius: 6px;
+      margin-bottom: 6px;
+    }
+    .vol-info { font-size: 11px; }
+    .vol-val { font-size: 14px; font-weight: bold; color: #39ff14; }
   </style>
 </head>
 <body>
@@ -174,7 +185,7 @@
   <div class="box calc-box">
     <div class="master-gauge">
       <div class="master-title">MASTER PUMP DISCHARGE PRESSURE (HIGHEST REQUIRED)</div>
-      <div class="master-value"><span id="master-pdp">0</span> <small style="font-size:18px;">kPa</small></div>
+      <div class="master-value"><span id="master-pdp">0</span> <small style="font-size:16px;">kPa</small></div>
     </div>
 
     <!-- Line Tabs -->
@@ -188,8 +199,8 @@
     <!-- Selected Line Gauge -->
     <div class="gauge-card">
       <div class="gauge-title" id="gauge-label">ATTACK LINE 1 - TARGET PDP</div>
-      <div class="gauge-value"><span id="pdp-gauge">0</span> <small style="font-size:14px;">kPa</small></div>
-      <div id="line-gate-status" style="font-size:11px; font-weight:bold; color:#ff5e00;">FULLY OPEN</div>
+      <div class="gauge-value"><span id="pdp-gauge">0</span> <small style="font-size:12px;">kPa</small></div>
+      <div id="line-gate-status" style="font-size:10px; font-weight:bold; color:#ff5e00;">FULLY OPEN</div>
     </div>
 
     <!-- Quick Presets -->
@@ -246,7 +257,7 @@
       <div class="structure-part">🏠🔥</div>
       <div class="multi-lines-wrapper" id="multi-lines-container"></div>
       <div class="truck-part">🚒</div>
-      <div class="supply-area" id="supply-container"></div> <!-- Dynamic Intake Supply -->
+      <div class="supply-area" id="supply-container"></div>
     </div>
   </div>
 
@@ -279,16 +290,84 @@
     </div>
   </div>
 
+  <!-- Box 4: Advanced Config & Water Management -->
+  <div class="box advanced-box">
+    <h2>Advanced Config</h2>
+
+    <!-- Live Timer Clock -->
+    <div class="timer-card">
+      <div class="timer-title">TIME TO EMPTY WATER SUPPLY</div>
+      <div class="timer-clock" id="tte-clock">--:--</div>
+      <div style="font-size:10px; color:#aaa;">Total Flow Rate: <span id="total-flow-label" style="color:#38bdf8; font-weight:bold;">0 L/m</span></div>
+    </div>
+
+    <!-- On-Board Tank Volume Adjuster -->
+    <div class="vol-row">
+      <div class="vol-info">
+        <strong>On-Board Tank:</strong><br>
+        <span class="vol-val" id="val-board">2500 L</span>
+      </div>
+      <div>
+        <button onclick="adjVol('board', 500)">+ 500L</button>
+        <button onclick="adjVol('board', -500)">- 500L</button>
+      </div>
+    </div>
+
+    <!-- Dump Tank Volume Adjuster (Drafting) -->
+    <div class="vol-row">
+      <div class="vol-info">
+        <strong>Draft Dump Tank:</strong><br>
+        <span class="vol-val" id="val-dump">10000 L</span>
+      </div>
+      <div>
+        <button onclick="adjVol('dump', 500)">+ 500L</button>
+        <button onclick="adjVol('dump', -500)">- 500L</button>
+      </div>
+    </div>
+
+    <!-- Nursing Tender Volume Adjuster -->
+    <div class="vol-row">
+      <div class="vol-info">
+        <strong>Nursing Tender:</strong><br>
+        <span class="vol-val" id="val-tender">12000 L</span>
+      </div>
+      <div>
+        <button onclick="adjVol('tender', 500)">+ 500L</button>
+        <button onclick="adjVol('tender', -500)">- 500L</button>
+      </div>
+    </div>
+
+    <!-- Select-a-Flow Nozzle Preset Customizer for Active Line -->
+    <div class="btn-group" style="margin-top:10px;">
+      <h3>Select-a-Flow Fog Detents (Selected Line)</h3>
+      <button class="flow-btn" onclick="setCustomFlow(115)">115 L/m (30 GPM)</button>
+      <button class="flow-btn" onclick="setCustomFlow(230)">230 L/m (60 GPM)</button>
+      <button class="flow-btn" onclick="setCustomFlow(360)">360 L/m (95 GPM)</button>
+      <button class="flow-btn" onclick="setCustomFlow(470)">470 L/m (125 GPM)</button>
+      <button class="flow-btn" onclick="setCustomFlow(570)">570 L/m (150 GPM)</button>
+      <button class="flow-btn" onclick="setCustomFlow(750)">750 L/m (200 GPM)</button>
+      <button class="flow-btn" onclick="setCustomFlow(950)">950 L/m (250 GPM)</button>
+      <button class="flow-btn" onclick="setCustomFlow(1900)">1900 L/m (500 GPM Monitor)</button>
+    </div>
+  </div>
+
   <script>
     const lines = {
-      attack1: { name: "Attack 1", code: "attack1", np: 0, nozzleName: "None", fl: 0, elev: 0, appliance: 0, hoses: [] },
-      attack2: { name: "Attack 2", code: "attack2", np: 0, nozzleName: "None", fl: 0, elev: 0, appliance: 0, hoses: [] },
-      bumper:  { name: "Bumper",   code: "bumper",  np: 0, nozzleName: "None", fl: 0, elev: 0, appliance: 0, hoses: [] },
-      monitor: { name: "Monitor",  code: "monitor", np: 0, nozzleName: "None", fl: 0, elev: 0, appliance: 0, hoses: [] }
+      attack1: { name: "Attack 1", code: "attack1", np: 0, nozzleName: "None", fl: 0, elev: 0, appliance: 0, customFlow: 0, hoses: [] },
+      attack2: { name: "Attack 2", code: "attack2", np: 0, nozzleName: "None", fl: 0, elev: 0, appliance: 0, customFlow: 0, hoses: [] },
+      bumper:  { name: "Bumper",   code: "bumper",  np: 0, nozzleName: "None", fl: 0, elev: 0, appliance: 0, customFlow: 0, hoses: [] },
+      monitor: { name: "Monitor",  code: "monitor", np: 0, nozzleName: "None", fl: 0, elev: 0, appliance: 0, customFlow: 0, hoses: [] }
     };
 
     let currentLineKey = 'attack1';
     let supplyMode = 'None';
+
+    // Volume Capacities (Liters)
+    let volumes = {
+      board: 2500,
+      dump: 10000,
+      tender: 12000
+    };
 
     function selectLine(lineKey) {
       currentLineKey = lineKey;
@@ -299,11 +378,7 @@
     }
 
     function setSupply(mode) {
-      if (supplyMode === mode) {
-        supplyMode = 'None';
-      } else {
-        supplyMode = mode;
-      }
+      supplyMode = supplyMode === mode ? 'None' : mode;
       document.querySelectorAll('.supply-btn').forEach(btn => btn.classList.remove('active'));
       if (supplyMode !== 'None') {
         document.getElementById(`btn-${supplyMode.toLowerCase()}`).classList.add('active');
@@ -336,12 +411,23 @@
     function setNozzle(name, pressure) {
       lines[currentLineKey].nozzleName = name;
       lines[currentLineKey].np = pressure;
+      lines[currentLineKey].customFlow = 0; // Reset custom flow on nozzle change
+      updateDashboard();
+    }
+
+    function setCustomFlow(lpm) {
+      if (lines[currentLineKey].nozzleName === "None") {
+        lines[currentLineKey].nozzleName = "Fog Nozzle";
+        lines[currentLineKey].np = 700;
+      }
+      lines[currentLineKey].customFlow = lpm;
       updateDashboard();
     }
 
     function removeNozzle() {
       lines[currentLineKey].nozzleName = "None";
       lines[currentLineKey].np = 0;
+      lines[currentLineKey].customFlow = 0;
       updateDashboard();
     }
 
@@ -365,18 +451,29 @@
       updateDashboard();
     }
 
+    function adjVol(key, val) {
+      volumes[key] += val;
+      if (volumes[key] < 0) volumes[key] = 0;
+      document.getElementById(`val-${key}`).innerText = `${volumes[key]} L`;
+      updateDashboard();
+    }
+
     function resetActiveLine() {
       lines[currentLineKey].np = 0;
       lines[currentLineKey].nozzleName = "None";
       lines[currentLineKey].fl = 0;
       lines[currentLineKey].elev = 0;
       lines[currentLineKey].appliance = 0;
+      lines[currentLineKey].customFlow = 0;
       lines[currentLineKey].hoses = [];
       updateDashboard();
     }
 
     function calculateFlow(line) {
       if (line.nozzleName === "None") return { lpm: 0, gpm: 0 };
+      if (line.customFlow > 0) {
+        return { lpm: line.customFlow, gpm: Math.round(line.customFlow / 3.785) };
+      }
       let has65 = line.hoses.some(h => h.type === '65mm');
       if (line.nozzleName === "Fog Nozzle") {
         return has65 ? { lpm: 950, gpm: 250 } : { lpm: 570, gpm: 150 };
@@ -393,11 +490,18 @@
       document.getElementById('pdp-gauge').innerText = activePDP;
 
       let maxPDP = 0;
+      let totalLPM = 0;
+
       Object.keys(lines).forEach(key => {
         let lPdp = lines[key].np + lines[key].fl + lines[key].elev + lines[key].appliance;
         if (lPdp > maxPDP) maxPDP = lPdp;
+
+        let flow = calculateFlow(lines[key]);
+        totalLPM += flow.lpm;
       });
+
       document.getElementById('master-pdp').innerText = maxPDP;
+      document.getElementById('total-flow-label').innerText = `${totalLPM} L/m`;
 
       const gateElem = document.getElementById('line-gate-status');
       if (activePDP === maxPDP && maxPDP > 0) {
@@ -412,8 +516,45 @@
         gateElem.style.color = "#aaa";
       }
 
+      updateTimer(totalLPM);
       updateWarnings(maxPDP, activePDP);
       drawDiagram(maxPDP);
+    }
+
+    function updateTimer(totalLPM) {
+      const clockElem = document.getElementById('tte-clock');
+      
+      // Hydrant has continuous supply unless low pressure
+      if (supplyMode === 'Hydrant') {
+        clockElem.innerText = "∞ (HYDRANT)";
+        clockElem.style.color = "#39ff14";
+        return;
+      }
+
+      let activeWaterSource = volumes.board;
+      if (supplyMode === 'Drafting') activeWaterSource = volumes.dump;
+      if (supplyMode === 'Nursing') activeWaterSource = volumes.tender;
+
+      if (totalLPM <= 0) {
+        clockElem.innerText = "--:--";
+        clockElem.style.color = "#38bdf8";
+        return;
+      }
+
+      let totalMinutes = activeWaterSource / totalLPM;
+      let mins = Math.floor(totalMinutes);
+      let secs = Math.floor((totalMinutes - mins) * 60);
+
+      let minStr = mins < 10 ? `0${mins}` : `${mins}`;
+      let secStr = secs < 10 ? `0${secs}` : `${secs}`;
+
+      clockElem.innerText = `${minStr}:${secStr}`;
+
+      if (mins < 2) {
+        clockElem.style.color = "#ff3333";
+      } else {
+        clockElem.style.color = "#38bdf8";
+      }
     }
 
     function updateWarnings(maxPDP, activePDP) {
@@ -461,7 +602,6 @@
       const wrapper = document.getElementById('multi-lines-container');
       wrapper.innerHTML = "";
 
-      // Render Discharge Lines
       Object.keys(lines).forEach(key => {
         const line = lines[key];
         let linePDP = line.np + line.fl + line.elev + line.appliance;
@@ -541,7 +681,7 @@
         wrapper.appendChild(col);
       });
 
-      // Render Dynamic Water Supply Source at Bottom of Diagram
+      // Render Intake Supply Graphic
       const supplyContainer = document.getElementById('supply-container');
       supplyContainer.innerHTML = "";
 
@@ -549,19 +689,19 @@
         supplyContainer.innerHTML = `
           <div class="supply-hose"></div>
           <div class="supply-icon">🚰</div>
-          <div style="font-size:10px; font-weight:bold; color:#38bdf8;">HYDRANT SUPPLY</div>
+          <div style="font-size:9px; font-weight:bold; color:#38bdf8;">HYDRANT SUPPLY</div>
         `;
       } else if (supplyMode === 'Drafting') {
         supplyContainer.innerHTML = `
           <div class="supply-hose" style="background:#555; border-color:#888;"></div>
           <div class="supply-icon">🌊</div>
-          <div style="font-size:10px; font-weight:bold; color:#38bdf8;">STATIC POND / DRAFT</div>
+          <div style="font-size:9px; font-weight:bold; color:#38bdf8;">STATIC DUMP TANK</div>
         `;
       } else if (supplyMode === 'Nursing') {
         supplyContainer.innerHTML = `
           <div class="supply-hose"></div>
           <div class="supply-icon">🚒</div>
-          <div style="font-size:10px; font-weight:bold; color:#38bdf8;">SUPPLY ENGINE (NURSING)</div>
+          <div style="font-size:9px; font-weight:bold; color:#38bdf8;">NURSING TENDER</div>
         `;
       }
     }
