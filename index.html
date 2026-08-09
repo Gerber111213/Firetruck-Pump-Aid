@@ -1,10 +1,142 @@
 <!DOCTYPE html>
-<html> 
+<html>
 <head>
-  <title> My First Webpage</title>
+  <title>Firefighting PDP Calculator</title>
+  <style>
+    body {
+      background-image: linear-gradient(to right, #ff5e00, #39ff14);
+      min-height: 100vh;
+      margin: 0;
+      font-family: sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: white;
+    }
+    .calculator-card {
+      background-color: rgba(0, 0, 0, 0.85);
+      padding: 30px;
+      border-radius: 12px;
+      max-width: 500px;
+      width: 90%;
+      text-align: center;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+    }
+    .btn-group {
+      margin: 15px 0;
+    }
+    button {
+      background-color: #ff5e00;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      margin: 5px;
+      font-size: 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    button:hover {
+      background-color: #e05200;
+    }
+    button.reset {
+      background-color: #d9534f;
+    }
+    .display {
+      font-size: 28px;
+      font-weight: bold;
+      color: #39ff14;
+      margin: 20px 0;
+      padding: 10px;
+      border: 2px solid #39ff14;
+      border-radius: 8px;
+    }
+    .summary {
+      text-align: left;
+      background: rgba(255, 255, 255, 0.1);
+      padding: 10px 15px;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+  </style>
 </head>
-<body style="background-image: linear-gradient(to right, #ff5e00, #39ff14); min-height:100vh; margin: 0; font-family: sans-serif; text-align: center; margin-top: 50px; color: white; text-shadow: 2px 2px 8px black;">
-  <h1>Hello, World!</h1>
-  <p>Welcome to my first project </p>
+<body>
+
+  <div class="calculator-card">
+    <h1>PDP Calculator</h1>
+    
+    <div class="display">
+      PDP: <span id="pdp">0</span> kPa
+    </div>
+
+    <!-- Nozzle Selection -->
+    <div class="btn-group">
+      <h3>1. Select Nozzle (NP)</h3>
+      <button onclick="setNozzle('Fog Nozzle', 700)">Fog Nozzle (700 kPa)</button>
+      <button onclick="setNozzle('Smooth Bore', 350)">Smooth Bore (350 kPa)</button>
+    </div>
+
+    <!-- Hose Selection -->
+    <div class="btn-group">
+      <h3>2. Add Hose Lengths</h3>
+      <button onclick="addHose('44mm Hose Length', 100)">+ 1 Length 44mm (100 kPa FL)</button>
+      <button onclick="addHose('65mm Hose Length', 30)">+ 1 Length 65mm (30 kPa FL)</button>
+    </div>
+
+    <!-- Controls -->
+    <div class="btn-group">
+      <button class="reset" onclick="resetCalc()">Reset All</button>
+    </div>
+
+    <!-- Layout Summary -->
+    <div class="summary">
+      <strong>Layout Summary:</strong>
+      <ul id="summary-list">
+        <li>No nozzle selected</li>
+      </ul>
+    </div>
+  </div>
+
+  <script>
+    let nozzlePressure = 0;
+    let nozzleName = "None";
+    let frictionLoss = 0;
+    let hoses = [];
+
+    function updateDisplay() {
+      let totalPDP = nozzlePressure + frictionLoss;
+      document.getElementById('pdp').innerText = totalPDP;
+
+      // Update Summary
+      let listHtml = `<li><strong>Nozzle:</strong> ${nozzleName} (${nozzlePressure} kPa)</li>`;
+      if (hoses.length > 0) {
+        listHtml += `<li><strong>Hose FL:</strong> ${frictionLoss} kPa (${hoses.length} lengths)</li>`;
+      } else {
+        listHtml += `<li><strong>Hose FL:</strong> 0 kPa</li>`;
+      }
+      document.getElementById('summary-list').innerHTML = listHtml;
+    }
+
+    function setNozzle(name, pressure) {
+      nozzleName = name;
+      nozzlePressure = pressure;
+      updateDisplay();
+    }
+
+    function addHose(name, flValue) {
+      hoses.push(name);
+      frictionLoss += flValue;
+      updateDisplay();
+    }
+
+    function resetCalc() {
+      nozzlePressure = 0;
+      nozzleName = "None";
+      frictionLoss = 0;
+      hoses = [];
+      updateDisplay();
+    }
+  </script>
+
 </body>
-</html>  
+</html>
