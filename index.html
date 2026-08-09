@@ -30,7 +30,6 @@
       --shadow-color: rgba(0, 0, 0, 0.5);
     }
 
-    /* Direct Sunlight High-Contrast Theme */
     body.sunlight-mode {
       --bg-color: #ffffff;
       --card-bg: #f4f4f6;
@@ -63,7 +62,6 @@
       transition: background-color 0.2s ease, color 0.2s ease;
     }
 
-    /* Dashboard Layout: Responsive Grid */
     .dashboard-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -76,7 +74,6 @@
       }
     }
 
-    /* Card Panels */
     .panel {
       background-color: var(--card-bg);
       border: 1px solid var(--card-border);
@@ -102,7 +99,6 @@
       color: var(--text-main);
     }
 
-    /* Sunlight Toggle Button */
     .sunlight-btn {
       background-color: var(--button-bg);
       color: var(--text-main);
@@ -114,7 +110,6 @@
       cursor: pointer;
     }
 
-    /* Master PDP Display in Lay Diagram */
     .master-pdp-box {
       border: 2px solid var(--accent-orange);
       border-radius: 8px;
@@ -139,7 +134,6 @@
       line-height: 1.1;
     }
 
-    /* Target PDP Display */
     .target-pdp-box {
       border: 2px solid var(--accent-green);
       border-radius: 8px;
@@ -154,7 +148,6 @@
       color: var(--accent-green);
     }
 
-    /* Button Grids & Touch Targets */
     .btn-group {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
@@ -182,7 +175,6 @@
       transform: scale(0.97);
     }
 
-    /* High Visibility Selected States */
     .btn.active {
       background-color: var(--accent-orange);
       color: #ffffff;
@@ -196,7 +188,6 @@
       box-shadow: 0 0 8px rgba(2, 136, 209, 0.5);
     }
 
-    /* Explicit Red Buttons for Subtract Actions */
     .btn-red {
       background-color: var(--btn-red) !important;
       color: #ffffff !important;
@@ -207,7 +198,6 @@
       background-color: var(--btn-red-hover) !important;
     }
 
-    /* Section Subheadings */
     .section-label {
       font-size: 0.8rem;
       font-weight: bold;
@@ -215,15 +205,14 @@
       margin-top: 4px;
     }
 
-    /* Visual Lay Diagram Graphic View */
+    /* Graphical Lay Canvas */
     .visual-diagram {
       background: rgba(0, 0, 0, 0.25);
       border-radius: 8px;
-      padding: 16px 12px;
+      padding: 12px;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 12px;
       border: 1px dashed var(--card-border);
       position: relative;
     }
@@ -231,81 +220,41 @@
     .scene-top {
       display: flex;
       align-items: center;
-      justify-content: center;
-      gap: 10px;
+      justify-content: space-around;
       width: 100%;
+      padding-bottom: 8px;
     }
 
-    .structure-icon {
-      font-size: 2.2rem;
-    }
-
-    .hose-lines-container {
-      width: 100%;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      margin: 6px 0;
-    }
-
-    .diagram-line-card {
+    .graphic-box {
       background: var(--button-bg);
       border: 1px solid var(--card-border);
-      border-radius: 6px;
-      padding: 8px 10px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      cursor: pointer;
+      border-radius: 8px;
+      padding: 6px 12px;
       font-size: 0.8rem;
-      transition: border-color 0.2s ease;
-    }
-
-    .diagram-line-card.active-line {
-      border: 2px solid var(--accent-green);
-      background: rgba(0, 230, 118, 0.1);
-    }
-
-    .diagram-line-info {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
-
-    .scene-bottom {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 12px;
-      width: 100%;
-      border-top: 1px dashed var(--card-border);
-      padding-top: 10px;
-      margin-top: 4px;
-    }
-
-    .truck-icon {
-      font-size: 2.4rem;
-    }
-
-    .water-source-graphic {
-      font-size: 1.8rem;
+      font-weight: bold;
       display: flex;
       align-items: center;
       gap: 6px;
     }
 
-    .alert-badge {
-      background-color: #b71c1c;
-      color: #ffffff;
-      font-size: 0.65rem;
-      font-weight: bold;
-      padding: 2px 6px;
-      border-radius: 4px;
-      display: none;
-      margin-top: 2px;
+    /* Canvas Drawing Area for Hose Lay Graphic */
+    #hoseCanvas {
+      width: 100%;
+      height: 220px;
+      background: rgba(0,0,0,0.15);
+      border-radius: 6px;
+      margin: 8px 0;
     }
 
-    /* Tank Manager */
+    .scene-bottom {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      padding-top: 8px;
+      border-top: 1px dashed var(--card-border);
+    }
+
     .timer-display {
       text-align: center;
       font-size: 2.2rem;
@@ -404,74 +353,34 @@
       </div>
     </div>
 
-    <!-- COLUMN 2: LAY DIAGRAM WITH GRAPHICS & MASTER PDP -->
+    <!-- COLUMN 2: LAY DIAGRAM WITH GRAPHICAL HOSES -->
     <div class="panel">
       <div class="panel-header">
         <span class="panel-title">Lay Diagram</span>
       </div>
 
-      <!-- Master PDP Box -->
       <div class="master-pdp-box">
         <div class="master-pdp-label">Master Pump Discharge Pressure (Highest Required)</div>
         <div class="master-pdp-value" id="master-pdp">700 <span style="font-size: 1rem;">kPa</span></div>
       </div>
 
-      <!-- Restored Graphical Lay Diagram -->
       <div class="visual-diagram">
         <div class="scene-top">
-          <span class="structure-icon">🏠🔥</span>
-          <span style="font-size: 0.8rem; font-weight: bold; color: var(--text-sub);">FIRE INCIDENT GROUND</span>
+          <div class="graphic-box">🏠 Structure / Incident</div>
+          <div class="graphic-box">🔥 Fire Target</div>
         </div>
 
-        <div class="hose-lines-container">
-          <div class="diagram-line-card active-line" id="diag-line-attack1" onclick="selectLine('attack1')">
-            <div class="diagram-line-info">
-              <strong>💦 Attack 1</strong>
-              <span style="font-size: 0.7rem; color: var(--text-sub);" id="diag-sub-attack1">FOG | 0m Hose | 470 L/m</span>
-              <div class="alert-badge" id="alert-attack1">⚠️ HIGH FRICTION LOSS (>300 kPa)</div>
-            </div>
-            <div><strong id="diag-pdp-attack1">700 kPa</strong></div>
-          </div>
-
-          <div class="diagram-line-card" id="diag-line-attack2" onclick="selectLine('attack2')">
-            <div class="diagram-line-info">
-              <strong>💦 Attack 2</strong>
-              <span style="font-size: 0.7rem; color: var(--text-sub);" id="diag-sub-attack2">FOG | 0m Hose | 470 L/m</span>
-              <div class="alert-badge" id="alert-attack2">⚠️ HIGH FRICTION LOSS (>300 kPa)</div>
-            </div>
-            <div><strong id="diag-pdp-attack2">700 kPa</strong></div>
-          </div>
-
-          <div class="diagram-line-card" id="diag-line-bumper" onclick="selectLine('bumper')">
-            <div class="diagram-line-info">
-              <strong>💦 Bumper Line</strong>
-              <span style="font-size: 0.7rem; color: var(--text-sub);" id="diag-sub-bumper">FOG | 0m Hose | 470 L/m</span>
-              <div class="alert-badge" id="alert-bumper">⚠️ HIGH FRICTION LOSS (>300 kPa)</div>
-            </div>
-            <div><strong id="diag-pdp-bumper">700 kPa</strong></div>
-          </div>
-
-          <div class="diagram-line-card" id="diag-line-monitor" onclick="selectLine('monitor')">
-            <div class="diagram-line-info">
-              <strong>💦 Monitor</strong>
-              <span style="font-size: 0.7rem; color: var(--text-sub);" id="diag-sub-monitor">FOG | 0m Hose | 470 L/m</span>
-              <div class="alert-badge" id="alert-monitor">⚠️ HIGH FRICTION LOSS (>300 kPa)</div>
-            </div>
-            <div><strong id="diag-pdp-monitor">700 kPa</strong></div>
-          </div>
-        </div>
+        <!-- Canvas drawing engine to show true hose lines -->
+        <canvas id="hoseCanvas"></canvas>
 
         <div class="scene-bottom">
-          <span class="truck-icon">🚒</span>
-          <div class="water-source-graphic">
-            <span>🌊</span>
-            <span style="font-size: 0.8rem; font-weight: bold; color: var(--accent-blue);" id="supply-label-display">STATIC DUMP TANK</span>
-          </div>
+          <div class="graphic-box">🚒 Engine Discharge</div>
+          <div class="graphic-box" id="supply-label-display">🌊 Static Dump Tank</div>
         </div>
       </div>
     </div>
 
-    <!-- COLUMN 3: WATER SUPPLY & TANK CAPACITY MANAGER -->
+    <!-- COLUMN 3: WATER SUPPLY & TANK MANAGER -->
     <div class="panel">
       <div class="panel-header">
         <span class="panel-title">Water Supply & Tank Manager</span>
@@ -488,7 +397,6 @@
         <div id="tank-bar" style="width: 100%; height: 100%; background-color: var(--accent-green); transition: width 0.3s ease;"></div>
       </div>
 
-      <!-- Tanks with Capacity Sizing Adjustments -->
       <div class="tank-row">
         <div style="font-size: 0.85rem; font-weight: bold;">On-Board Engine Tank: <span id="engine-tank-val">2500 L / 2500 L</span></div>
         <div class="tank-controls">
@@ -532,7 +440,6 @@
   </div>
 
   <script>
-    // State Management
     const defaultLineState = () => ({
       nozzleType: 'fog',
       nozzlePressure: 700,
@@ -561,13 +468,13 @@
 
     function toggleSunlightMode() {
       document.body.classList.toggle('sunlight-mode');
+      drawHoseDiagram();
     }
 
     function selectLine(key) {
       activeLineKey = key;
       ['attack1', 'attack2', 'bumper', 'monitor'].forEach(k => {
         document.getElementById(`line-btn-${k}`).classList.toggle('active', k === key);
-        document.getElementById(`diag-line-${k}`).classList.toggle('active-line', k === key);
       });
       document.getElementById('active-line-title').innerText = `${key.toUpperCase()} - TARGET PDP`;
       updateUI();
@@ -578,22 +485,20 @@
       ['hydrant', 'drafting', 'nursing'].forEach(m => {
         document.getElementById(`sup-btn-${m}`).classList.toggle('active', m === mode);
       });
-      const labelMap = { hydrant: 'HYDRANT SUPPLY', drafting: 'STATIC DUMP TANK', nursing: 'NURSING TENDER' };
+      const labelMap = { hydrant: '🚰 Hydrant Supply', drafting: '🌊 Static Dump Tank', nursing: '🚛 Nursing Tender' };
       document.getElementById('supply-label-display').innerText = labelMap[mode];
       updateUI();
     }
 
     function setNozzle(type, pressure) {
-      const line = lines[activeLineKey];
-      line.nozzleType = type;
-      line.nozzlePressure = pressure;
+      lines[activeLineKey].nozzleType = type;
+      lines[activeLineKey].nozzlePressure = pressure;
       updateUI();
     }
 
     function clearNozzle() {
-      const line = lines[activeLineKey];
-      line.nozzleType = 'none';
-      line.nozzlePressure = 0;
+      lines[activeLineKey].nozzleType = 'none';
+      lines[activeLineKey].nozzlePressure = 0;
       updateUI();
     }
 
@@ -614,8 +519,7 @@
     }
 
     function adjustElevation(amount) {
-      const line = lines[activeLineKey];
-      line.elevationLoss += amount;
+      lines[activeLineKey].elevationLoss += amount;
       updateUI();
     }
 
@@ -659,16 +563,10 @@
       updateUI();
     }
 
-    /* Adjusts the overall max capacity of a tank/tender */
     function adjustTankCapacity(type, amount) {
       const tank = tanks[type];
-      const newMax = Math.max(500, tank.max + amount);
-      tank.max = newMax;
-      if (tank.current > newMax) {
-        tank.current = newMax;
-      } else if (tank.current === tank.max - amount) {
-        tank.current = newMax; // Auto-scale current water if it was full
-      }
+      tank.max = Math.max(500, tank.max + amount);
+      if (tank.current > tank.max) tank.current = tank.max;
       updateUI();
     }
 
@@ -681,23 +579,68 @@
       return line.nozzlePressure + line.hoseLoss + line.elevationLoss + line.standpipeLoss;
     }
 
+    /* Canvas Hose Drawing Function */
+    function drawHoseDiagram() {
+      const canvas = document.getElementById('hoseCanvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+
+      // Sync internal canvas width/height with container size
+      canvas.width = canvas.offsetWidth;
+      canvas.height = canvas.offsetHeight;
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      const lineKeys = ['attack1', 'attack2', 'bumper', 'monitor'];
+      const lineColors = {
+        attack1: '#ff6b00', // Orange
+        attack2: '#00e676', // Green
+        bumper: '#0288d1',  // Blue
+        monitor: '#e91e63'  // Pink
+      };
+
+      const startY = canvas.height - 20;
+      const endY = 20;
+      const spacing = canvas.width / (lineKeys.length + 1);
+
+      lineKeys.forEach((key, index) => {
+        const line = lines[key];
+        const pdp = calculateLinePDP(line);
+        const startX = spacing * (index + 1);
+        const endX = spacing * (index + 1);
+
+        ctx.lineWidth = key === activeLineKey ? 6 : 3;
+        ctx.strokeStyle = lineColors[key];
+
+        // Draw curved hose line graphic
+        ctx.beginPath();
+        ctx.moveTo(startX, startY);
+        ctx.bezierCurveTo(startX - 20, startY - 50, endX + 20, endY + 50, endX, endY);
+        ctx.stroke();
+
+        // Hose Label Box over Canvas
+        ctx.fillStyle = key === activeLineKey ? '#00e676' : '#2a2a2a';
+        ctx.fillRect(startX - 35, (startY + endY) / 2 - 12, 70, 24);
+
+        ctx.fillStyle = key === activeLineKey ? '#000000' : '#ffffff';
+        ctx.font = 'bold 11px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(`${pdp} kPa`, startX, (startY + endY) / 2 + 4);
+      });
+    }
+
     function updateUI() {
       const activeLine = lines[activeLineKey];
 
-      // Update Nozzle buttons
       document.getElementById('nozzle-btn-fog').classList.toggle('active', activeLine.nozzleType === 'fog');
       document.getElementById('nozzle-btn-smooth').classList.toggle('active', activeLine.nozzleType === 'smooth');
-
-      // Update Standpipe button state
       document.getElementById('standpipe-btn').classList.toggle('active', activeLine.standpipeLoss > 0);
 
-      // Update Flow buttons
       [115, 230, 360, 470, 570, 750, 950, 1900].forEach(f => {
         const btn = document.getElementById(`flow-btn-${f}`);
         if (btn) btn.classList.toggle('active', activeLine.flowLpm === f);
       });
 
-      // Update Target PDP Display
       const targetPDP = calculateLinePDP(activeLine);
       document.getElementById('target-pdp').innerHTML = `${targetPDP} <span style="font-size: 0.9rem;">kPa</span>`;
 
@@ -705,7 +648,6 @@
       const elevSummary = `${activeLine.elevationLoss / 10} floors (${activeLine.elevationLoss} kPa)`;
       document.getElementById('line-summary-text').innerText = `${activeLine.nozzleType.toUpperCase()} (${activeLine.nozzlePressure} kPa) | ${hoseSummary} | ${elevSummary}`;
 
-      // Update Lay Diagram & Master PDP Calculation
       let maxPDP = 0;
       let totalFlow = 0;
 
@@ -714,22 +656,11 @@
         const pdp = calculateLinePDP(l);
         if (pdp > maxPDP) maxPDP = pdp;
         totalFlow += l.flowLpm;
-
-        document.getElementById(`diag-pdp-${k}`).innerText = `${pdp} kPa`;
-        document.getElementById(`diag-sub-${k}`).innerText = `${l.nozzleType.toUpperCase()} | ${l.hoses.length * 30}m Hose | ${l.flowLpm} L/m`;
-
-        const alertEl = document.getElementById(`alert-${k}`);
-        if (l.hoseLoss >= 300) {
-          alertEl.style.display = 'block';
-        } else {
-          alertEl.style.display = 'none';
-        }
       });
 
       document.getElementById('master-pdp').innerHTML = `${maxPDP} <span style="font-size: 1rem;">kPa</span>`;
       document.getElementById('total-flow').innerText = `${totalFlow} L/m`;
 
-      // Update Water Supply & Timer calculations
       document.getElementById('engine-tank-val').innerText = `${tanks.engine.current} L / ${tanks.engine.max} L`;
       document.getElementById('draft-tank-val').innerText = `${tanks.draft.current} L / ${tanks.draft.max} L`;
       document.getElementById('nursing-tank-val').innerText = `${tanks.nursing.current} L / ${tanks.nursing.max} L`;
@@ -750,13 +681,18 @@
       } else {
         document.getElementById('empty-timer').innerText = `00:00`;
       }
+
+      // Redraw Hose Diagram on UI changes
+      drawHoseDiagram();
     }
 
-    // Register Service Worker for Offline Functionality
+    // Window resize handler to maintain graphic scale
+    window.addEventListener('resize', drawHoseDiagram);
+
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         const swCode = `
-          const CACHE_NAME = 'pdp-dash-v3';
+          const CACHE_NAME = 'pdp-dash-v4';
           self.addEventListener('install', (e) => {
             e.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(['./'])));
           });
