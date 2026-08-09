@@ -29,23 +29,25 @@
     }
 
     /* Streamlined 3 Column Layout */
-    .calc-box { width: 440px; overflow-y: auto; }
-    .diagram-box { width: 380px; align-items: center; }
+    .calc-box { width: 420px; overflow-y: auto; }
+    .diagram-box { width: 400px; align-items: center; }
     .advanced-box { width: 440px; overflow-y: auto; }
 
     h1, h2, h3 { margin-top: 0; text-align: center; color: #fff; }
 
-    /* Master Engine Gauge */
+    /* Master Engine Gauge (Centerpiece on Diagram Column) */
     .master-gauge {
       background: #000;
       border: 3px solid #ef4444;
       border-radius: 10px;
-      padding: 8px;
+      padding: 10px;
       text-align: center;
-      margin-bottom: 10px;
+      margin-bottom: 12px;
+      width: 100%;
+      box-sizing: border-box;
     }
-    .master-title { font-size: 10px; color: #ef4444; font-weight: bold; letter-spacing: 1px; }
-    .master-value { font-size: 34px; font-weight: bold; color: #ef4444; }
+    .master-title { font-size: 11px; color: #ef4444; font-weight: bold; letter-spacing: 1px; }
+    .master-value { font-size: 38px; font-weight: bold; color: #ef4444; }
 
     /* Line Selector Tabs */
     .line-selector { display: flex; justify-content: space-between; gap: 4px; margin-bottom: 10px; }
@@ -194,11 +196,6 @@
     <!-- Integrated Tactical Advisor (Populates dynamically) -->
     <div id="integrated-warning-container"></div>
 
-    <div class="master-gauge">
-      <div class="master-title">MASTER PUMP DISCHARGE PRESSURE (HIGHEST REQUIRED)</div>
-      <div class="master-value"><span id="master-pdp">0</span> <small style="font-size:16px;">kPa</small></div>
-    </div>
-
     <!-- Line Tabs -->
     <div class="line-selector">
       <div class="line-tab active" id="tab-attack1" onclick="selectLine('attack1')">Attack 1</div>
@@ -261,8 +258,14 @@
     <button class="reset" onclick="resetActiveLine()">Reset Active Line</button>
   </div>
 
-  <!-- Column 2: Multi-Line Lay Diagram -->
+  <!-- Column 2: Master Gauge & Multi-Line Lay Diagram -->
   <div class="box diagram-box">
+    <!-- Highlighted Master Pump Discharge Pressure Box -->
+    <div class="master-gauge">
+      <div class="master-title">MASTER PUMP DISCHARGE PRESSURE (HIGHEST REQUIRED)</div>
+      <div class="master-value"><span id="master-pdp">0</span> <small style="font-size:18px;">kPa</small></div>
+    </div>
+
     <h2>Lay Diagram</h2>
     <div id="diagram-container">
       <div class="structure-part">🏠🔥</div>
