@@ -203,7 +203,6 @@
       margin-top: 4px;
     }
 
-    /* Lay Diagram Box Container */
     .lay-diagram-container {
       background: rgba(0, 0, 0, 0.25);
       border-radius: 8px;
@@ -284,46 +283,46 @@
 
       <div class="target-pdp-box">
         <div style="font-size: 0.75rem; font-weight: bold; color: var(--accent-green);" id="active-line-title">ATTACK 1 - TARGET PDP</div>
-        <div class="target-pdp-value" id="target-pdp">700 <span style="font-size: 0.9rem;">kPa</span></div>
-        <div style="font-size: 0.75rem; color: var(--text-sub);" id="line-summary-text">Fog Nozzle (700 kPa) | No extra hose</div>
+        <div class="target-pdp-value" id="target-pdp">0 <span style="font-size: 0.9rem;">kPa</span></div>
+        <div style="font-size: 0.75rem; color: var(--text-sub);" id="line-summary-text">NONE (0 kPa) | 0 hoses (0 kPa FL) | 0 floors (0 kPa)</div>
       </div>
 
       <div class="section-label">Quick Preconnect Short-Cuts</div>
       <div class="btn-group">
-        <button class="btn btn-blue" onclick="applyPreset('crosslay')">Crosslay (60m 44mm + Fog)</button>
-        <button class="btn btn-blue" onclick="applyPreset('highrise')">High-Rise (30m 65mm + SB)</button>
+        <button class="btn btn-blue" onclick="applyPreset('crosslay')">Crosslay (200ft 44mm + Fog)</button>
+        <button class="btn btn-blue" onclick="applyPreset('highrise')">High-Rise (100ft 65mm + SB)</button>
       </div>
 
       <div class="section-label">Supply Mode</div>
       <div class="btn-group">
         <button class="btn" id="sup-btn-hydrant" onclick="setSupply('hydrant')">Hydrant Supply</button>
-        <button class="btn active" id="sup-btn-drafting" onclick="setSupply('drafting')">Drafting (Static)</button>
+        <button class="btn" id="sup-btn-drafting" onclick="setSupply('drafting')">Drafting (Static)</button>
         <button class="btn" id="sup-btn-nursing" onclick="setSupply('nursing')">Nursing (Relay)</button>
       </div>
 
       <div class="section-label">1. Nozzle Selection</div>
       <div class="btn-group">
-        <button class="btn active" id="nozzle-btn-fog" onclick="setNozzle('fog', 700)">Fog Nozzle (700 kPa)</button>
+        <button class="btn" id="nozzle-btn-fog" onclick="setNozzle('fog', 700)">Fog Nozzle (700 kPa)</button>
         <button class="btn" id="nozzle-btn-smooth" onclick="setNozzle('smooth', 350)">Smooth Bore (350 kPa)</button>
         <button class="btn btn-red" onclick="clearNozzle()">- Nozzle</button>
       </div>
 
-      <div class="section-label">2. Hose Lengths</div>
+      <div class="section-label">2. Hose Lengths (25 ft / Segment)</div>
       <div class="btn-group">
-        <button class="btn" onclick="addHose(44, 100)">+ 1x 44mm (+100 kPa)</button>
-        <button class="btn" onclick="addHose(65, 30)">+ 1x 65mm (+30 kPa)</button>
+        <button class="btn" onclick="addHose(44, 100)">+ 1x 25ft 44mm</button>
+        <button class="btn" onclick="addHose(65, 30)">+ 1x 25ft 65mm</button>
         <button class="btn btn-red" onclick="removeHose()">- Hose</button>
       </div>
 
       <div class="section-label">3. Elevation Adjustment</div>
       <div class="btn-group">
-        <button class="btn" onclick="adjustElevation(10)">+1 Floor Up (+10 kPa)</button>
-        <button class="btn btn-red" onclick="adjustElevation(-10)">-1 Floor Down (-10 kPa)</button>
+        <button class="btn" onclick="adjustElevation(10)">+1 Floor Up</button>
+        <button class="btn btn-red" onclick="adjustElevation(-10)">-1 Floor Down</button>
       </div>
 
       <div class="section-label">4. Appliances / Connections</div>
       <div class="btn-group">
-        <button class="btn" id="standpipe-btn" onclick="toggleStandpipe()">Toggle Standpipe/Wye (+70 kPa)</button>
+        <button class="btn" id="standpipe-btn" onclick="toggleStandpipe()">Toggle Standpipe/Wye</button>
         <button class="btn btn-red" onclick="resetActiveLine()">Reset Active Line</button>
       </div>
     </div>
@@ -336,17 +335,15 @@
 
       <div class="master-pdp-box">
         <div class="master-pdp-label">Master Pump Discharge Pressure (Highest Required)</div>
-        <div class="master-pdp-value" id="master-pdp">700 <span style="font-size: 1rem;">kPa</span></div>
+        <div class="master-pdp-value" id="master-pdp">0 <span style="font-size: 1rem;">kPa</span></div>
       </div>
 
       <div class="lay-diagram-container">
-        <!-- Cartoon House and Fire Side-by-Side -->
         <div class="scene-top-icons">
           <span>🏠</span>
           <span>🔥</span>
         </div>
 
-        <!-- Dynamic Visual Hose Canvas -->
         <canvas id="hoseCanvas"></canvas>
       </div>
     </div>
@@ -359,13 +356,13 @@
 
       <div style="text-align: center;">
         <div class="section-label">TIME TO EMPTY WATER SUPPLY</div>
-        <div class="timer-display" id="empty-timer">08:51</div>
-        <div style="font-size: 0.8rem; color: var(--text-sub);">Total Discharge Flow: <strong id="total-flow">470 L/m</strong></div>
+        <div class="timer-display" id="empty-timer">00:00</div>
+        <div style="font-size: 0.8rem; color: var(--text-sub);">Total Discharge Flow: <strong id="total-flow">0 L/m</strong></div>
       </div>
 
-      <div class="section-label" id="tank-capacity-label">ACTIVE SOURCE: DRAFT DUMP TANK (10000 L)</div>
+      <div class="section-label" id="tank-capacity-label">ACTIVE SOURCE: NONE</div>
       <div style="width: 100%; background-color: var(--button-bg); height: 12px; border-radius: 6px; overflow: hidden;">
-        <div id="tank-bar" style="width: 100%; height: 100%; background-color: var(--accent-green); transition: width 0.3s ease;"></div>
+        <div id="tank-bar" style="width: 0%; height: 100%; background-color: var(--accent-green); transition: width 0.3s ease;"></div>
       </div>
 
       <div class="tank-row">
@@ -400,7 +397,7 @@
         <button class="btn" id="flow-btn-115" onclick="setFlow(115)">115 L/m (30 GPM)</button>
         <button class="btn" id="flow-btn-230" onclick="setFlow(230)">230 L/m (60 GPM)</button>
         <button class="btn" id="flow-btn-360" onclick="setFlow(360)">360 L/m (95 GPM)</button>
-        <button class="btn active" id="flow-btn-470" onclick="setFlow(470)">470 L/m (125 GPM)</button>
+        <button class="btn" id="flow-btn-470" onclick="setFlow(470)">470 L/m (125 GPM)</button>
         <button class="btn" id="flow-btn-570" onclick="setFlow(570)">570 L/m (150 GPM)</button>
         <button class="btn" id="flow-btn-750" onclick="setFlow(750)">750 L/m (200 GPM)</button>
         <button class="btn" id="flow-btn-950" onclick="setFlow(950)">950 L/m (250 GPM)</button>
@@ -412,13 +409,13 @@
 
   <script>
     const defaultLineState = () => ({
-      nozzleType: 'fog',
-      nozzlePressure: 700,
+      nozzleType: 'none',
+      nozzlePressure: 0,
       hoseLoss: 0,
       hoses: [],
       elevationLoss: 0,
       standpipeLoss: 0,
-      flowLpm: 470
+      flowLpm: 0
     });
 
     const lines = {
@@ -429,7 +426,7 @@
     };
 
     let activeLineKey = 'attack1';
-    let supplyMode = 'drafting';
+    let supplyMode = 'none';
 
     const tanks = {
       engine: { current: 2500, max: 2500 },
@@ -451,17 +448,26 @@
       updateUI();
     }
 
+    /* Toggle Off / Deselect Logic for Supply Modes */
     function setSupply(mode) {
-      supplyMode = mode;
-      ['hydrant', 'drafting', 'nursing'].forEach(m => {
-        document.getElementById(`sup-btn-${m}`).classList.toggle('active', m === mode);
-      });
+      if (supplyMode === mode) {
+        supplyMode = 'none';
+      } else {
+        supplyMode = mode;
+      }
       updateUI();
     }
 
+    /* Toggle Off / Deselect Logic for Nozzles */
     function setNozzle(type, pressure) {
-      lines[activeLineKey].nozzleType = type;
-      lines[activeLineKey].nozzlePressure = pressure;
+      const line = lines[activeLineKey];
+      if (line.nozzleType === type) {
+        line.nozzleType = 'none';
+        line.nozzlePressure = 0;
+      } else {
+        line.nozzleType = type;
+        line.nozzlePressure = pressure;
+      }
       updateUI();
     }
 
@@ -499,6 +505,7 @@
       updateUI();
     }
 
+    /* Fully Active Reset Line Function */
     function resetActiveLine() {
       lines[activeLineKey] = defaultLineState();
       document.getElementById('standpipe-btn').classList.remove('active');
@@ -510,16 +517,24 @@
       if (preset === 'crosslay') {
         line.nozzleType = 'fog';
         line.nozzlePressure = 700;
-        line.hoses = [{ size: 44, pressure: 100 }, { size: 44, pressure: 100 }];
-        line.hoseLoss = 200;
+        line.hoses = [
+          { size: 44, pressure: 100 }, { size: 44, pressure: 100 },
+          { size: 44, pressure: 100 }, { size: 44, pressure: 100 },
+          { size: 44, pressure: 100 }, { size: 44, pressure: 100 },
+          { size: 44, pressure: 100 }, { size: 44, pressure: 100 }
+        ];
+        line.hoseLoss = 800;
         line.elevationLoss = 0;
         line.standpipeLoss = 0;
         line.flowLpm = 470;
       } else if (preset === 'highrise') {
         line.nozzleType = 'smooth';
         line.nozzlePressure = 350;
-        line.hoses = [{ size: 65, pressure: 30 }];
-        line.hoseLoss = 30;
+        line.hoses = [
+          { size: 65, pressure: 30 }, { size: 65, pressure: 30 },
+          { size: 65, pressure: 30 }, { size: 65, pressure: 30 }
+        ];
+        line.hoseLoss = 120;
         line.elevationLoss = 30;
         line.standpipeLoss = 70;
         line.flowLpm = 950;
@@ -527,8 +542,14 @@
       updateUI();
     }
 
+    /* Toggle Off / Deselect Logic for Flow Rate */
     function setFlow(lpm) {
-      lines[activeLineKey].flowLpm = lpm;
+      const line = lines[activeLineKey];
+      if (line.flowLpm === lpm) {
+        line.flowLpm = 0;
+      } else {
+        line.flowLpm = lpm;
+      }
       updateUI();
     }
 
@@ -548,7 +569,7 @@
       return line.nozzlePressure + line.hoseLoss + line.elevationLoss + line.standpipeLoss;
     }
 
-    /* FULL GRAPHICAL CANVAS RENDERER FOR LAY DIAGRAM */
+    /* Canvas Graphic Renderer */
     function drawHoseDiagram() {
       const canvas = document.getElementById('hoseCanvas');
       if (!canvas) return;
@@ -562,7 +583,6 @@
       const lineKeys = ['attack1', 'attack2', 'bumper', 'monitor'];
       const spacing = canvas.width / (lineKeys.length + 1);
 
-      // Bottom baseline position for Firetruck
       const engineY = canvas.height - 60;
       const topY = 40;
 
@@ -571,11 +591,10 @@
       ctx.textAlign = 'center';
       ctx.fillText('🚒', canvas.width / 2, engineY + 30);
 
-      // Draw Water Source connected to Firetruck
+      // Draw Water Source connected to Firetruck (Nursing Relay now uses 🚒)
       if (supplyMode === 'hydrant') {
         ctx.font = '1.8rem sans-serif';
         ctx.fillText('🚰', 35, engineY + 25);
-        // Yellow supply hose
         ctx.strokeStyle = '#ffd600';
         ctx.lineWidth = 6;
         ctx.beginPath();
@@ -584,7 +603,7 @@
         ctx.stroke();
       } else if (supplyMode === 'nursing') {
         ctx.font = '1.8rem sans-serif';
-        ctx.fillText('🚛', 35, engineY + 25);
+        ctx.fillText('🚒', 35, engineY + 25);
         ctx.strokeStyle = '#ffd600';
         ctx.lineWidth = 6;
         ctx.beginPath();
@@ -602,13 +621,11 @@
         ctx.stroke();
       }
 
-      // Render Each Active Hose Line & Nozzle
       lineKeys.forEach((key, index) => {
         const line = lines[key];
         const pdp = calculateLinePDP(line);
         const x = spacing * (index + 1);
 
-        // Highlight Active Selected Line
         if (key === activeLineKey) {
           ctx.strokeStyle = 'rgba(0, 255, 102, 0.4)';
           ctx.lineWidth = 16;
@@ -618,31 +635,28 @@
           ctx.stroke();
         }
 
-        // Render Hose Length Segments (Yellow with Grey Couplings)
         const totalHoseCount = line.hoses.length;
-        const hoseSegmentHeight = (engineY - topY - 30) / Math.max(1, totalHoseCount);
+        if (totalHoseCount > 0) {
+          const hoseSegmentHeight = (engineY - topY - 30) / Math.max(1, totalHoseCount);
 
-        for (let i = 0; i < totalHoseCount; i++) {
-          const segStartY = engineY - (i * hoseSegmentHeight);
-          const segEndY = segStartY - hoseSegmentHeight + 6;
+          for (let i = 0; i < totalHoseCount; i++) {
+            const segStartY = engineY - (i * hoseSegmentHeight);
+            const segEndY = segStartY - hoseSegmentHeight + 6;
 
-          // Yellow Hose
-          ctx.strokeStyle = '#ffeb3b';
-          ctx.lineWidth = 6;
-          ctx.beginPath();
-          ctx.moveTo(x, segStartY);
-          ctx.lineTo(x, segEndY);
-          ctx.stroke();
+            ctx.strokeStyle = '#ffeb3b';
+            ctx.lineWidth = 6;
+            ctx.beginPath();
+            ctx.moveTo(x, segStartY);
+            ctx.lineTo(x, segEndY);
+            ctx.stroke();
 
-          // Grey Couplings (End Caps)
-          ctx.fillStyle = '#9e9e9e';
-          ctx.fillRect(x - 6, segStartY - 3, 12, 4);
-          ctx.fillRect(x - 6, segEndY - 3, 12, 4);
+            ctx.fillStyle = '#9e9e9e';
+            ctx.fillRect(x - 6, segStartY - 3, 12, 4);
+            ctx.fillRect(x - 6, segEndY - 3, 12, 4);
+          }
         }
 
-        // Draw Nozzles at top of hose line
         if (line.nozzleType === 'fog') {
-          // Fog Nozzle Cone opening TOWARD the fire (Upwards)
           ctx.fillStyle = '#ff6b00';
           ctx.beginPath();
           ctx.moveTo(x, topY + 15);
@@ -654,7 +668,6 @@
           ctx.lineWidth = 2;
           ctx.stroke();
         } else if (line.nozzleType === 'smooth') {
-          // Smooth Bore Tapered Tip closing TOWARD the fire (Upwards)
           ctx.fillStyle = '#0288d1';
           ctx.beginPath();
           ctx.moveTo(x - 10, topY + 15);
@@ -668,7 +681,6 @@
           ctx.stroke();
         }
 
-        // PDP Pressure Tag Over Line
         ctx.fillStyle = key === activeLineKey ? '#00e676' : '#2a2a2a';
         ctx.fillRect(x - 32, (engineY + topY) / 2 - 12, 64, 24);
         ctx.fillStyle = key === activeLineKey ? '#000000' : '#ffffff';
@@ -681,10 +693,18 @@
     function updateUI() {
       const activeLine = lines[activeLineKey];
 
+      // Update Supply buttons
+      ['hydrant', 'drafting', 'nursing'].forEach(m => {
+        const btn = document.getElementById(`sup-btn-${m}`);
+        if (btn) btn.classList.toggle('active', supplyMode === m);
+      });
+
+      // Update Nozzle buttons
       document.getElementById('nozzle-btn-fog').classList.toggle('active', activeLine.nozzleType === 'fog');
       document.getElementById('nozzle-btn-smooth').classList.toggle('active', activeLine.nozzleType === 'smooth');
       document.getElementById('standpipe-btn').classList.toggle('active', activeLine.standpipeLoss > 0);
 
+      // Update Flow Rate buttons
       [115, 230, 360, 470, 570, 750, 950, 1900].forEach(f => {
         const btn = document.getElementById(`flow-btn-${f}`);
         if (btn) btn.classList.toggle('active', activeLine.flowLpm === f);
@@ -693,7 +713,7 @@
       const targetPDP = calculateLinePDP(activeLine);
       document.getElementById('target-pdp').innerHTML = `${targetPDP} <span style="font-size: 0.9rem;">kPa</span>`;
 
-      const hoseSummary = `${activeLine.hoses.length} hoses (${activeLine.hoseLoss} kPa FL)`;
+      const hoseSummary = `${activeLine.hoses.length * 25}ft (${activeLine.hoses.length} segments)`;
       const elevSummary = `${activeLine.elevationLoss / 10} floors (${activeLine.elevationLoss} kPa)`;
       document.getElementById('line-summary-text').innerText = `${activeLine.nozzleType.toUpperCase()} (${activeLine.nozzlePressure} kPa) | ${hoseSummary} | ${elevSummary}`;
 
@@ -714,15 +734,20 @@
       document.getElementById('draft-tank-val').innerText = `${tanks.draft.current} L / ${tanks.draft.max} L`;
       document.getElementById('nursing-tank-val').innerText = `${tanks.nursing.current} L / ${tanks.nursing.max} L`;
 
-      let activeTank = tanks.engine;
+      let activeTank = null;
       if (supplyMode === 'drafting') activeTank = tanks.draft;
       if (supplyMode === 'nursing') activeTank = tanks.nursing;
 
-      document.getElementById('tank-capacity-label').innerText = `ACTIVE SOURCE: ${supplyMode.toUpperCase()} (${activeTank.current} L / ${activeTank.max} L)`;
-      const pct = (activeTank.current / activeTank.max) * 100;
-      document.getElementById('tank-bar').style.width = `${pct}%`;
+      if (activeTank) {
+        document.getElementById('tank-capacity-label').innerText = `ACTIVE SOURCE: ${supplyMode.toUpperCase()} (${activeTank.current} L / ${activeTank.max} L)`;
+        const pct = (activeTank.current / activeTank.max) * 100;
+        document.getElementById('tank-bar').style.width = `${pct}%`;
+      } else {
+        document.getElementById('tank-capacity-label').innerText = `ACTIVE SOURCE: ${supplyMode === 'hydrant' ? 'HYDRANT (UNLIMITED)' : 'NONE'}`;
+        document.getElementById('tank-bar').style.width = supplyMode === 'hydrant' ? '100%' : '0%';
+      }
 
-      if (totalFlow > 0 && activeTank.current > 0) {
+      if (activeTank && totalFlow > 0 && activeTank.current > 0) {
         const totalSeconds = Math.floor((activeTank.current / totalFlow) * 60);
         const mins = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
         const secs = (totalSeconds % 60).toString().padStart(2, '0');
@@ -739,7 +764,7 @@
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         const swCode = `
-          const CACHE_NAME = 'pdp-dash-v5';
+          const CACHE_NAME = 'pdp-dash-v6';
           self.addEventListener('install', (e) => {
             e.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(['./'])));
           });
