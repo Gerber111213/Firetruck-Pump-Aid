@@ -1,68 +1,96 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Firefighting PDP Calculator</title>
+  <title>PDP Calculator & Diagram</title>
   <style>
     body {
       background-image: linear-gradient(to right, #ff5e00, #39ff14);
       min-height: 100vh;
       margin: 0;
       font-family: sans-serif;
+      color: white;
       display: flex;
-      justify-content: center;
-      align-items: center;
-      color: white;
+      justify-content: flex-start; /* Align boxes to the left */
+      align-items: flex-start;     /* Align boxes to the top */
+      padding: 40px;               /* Space from the top-left corner */
+      gap: 20px;                   /* Gap between the two boxes */
     }
-    .calculator-card {
+
+    /* Standard Card Styling */
+    .calc-box, .diagram-box {
       background-color: rgba(0, 0, 0, 0.85);
-      padding: 30px;
       border-radius: 12px;
-      max-width: 500px;
-      width: 90%;
+      padding: 25px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+      height: 520px; /* Fixed height for symmetry */
+      display: flex;
+      flex-direction: column;
+      box-sizing: border-box;
+    }
+
+    /* Left Box (Calculator) - 6 inches wide */
+    .calc-box {
+      width: 360px;
       text-align: center;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.5);
     }
-    .btn-group {
-      margin: 15px 0;
+
+    /* Right Box (Diagram) - 4 inches wide */
+    .diagram-box {
+      width: 240px;
+      position: relative;
+      align-items: center;
     }
-    button {
-      background-color: #ff5e00;
-      color: white;
-      border: none;
-      padding: 10px 15px;
-      margin: 5px;
-      font-size: 14px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: bold;
-    }
-    button:hover {
-      background-color: #e05200;
-    }
-    button.reset {
-      background-color: #d9534f;
-    }
+
+    /* Calculator Specifics */
     .display {
       font-size: 28px;
       font-weight: bold;
       color: #39ff14;
-      margin: 20px 0;
+      margin: 15px 0;
       padding: 10px;
       border: 2px solid #39ff14;
       border-radius: 8px;
     }
-    .summary {
-      text-align: left;
-      background: rgba(255, 255, 255, 0.1);
-      padding: 10px 15px;
-      border-radius: 6px;
-      font-size: 14px;
+    .btn-group { margin: 15px 0; }
+    button {
+      background-color: #ff5e00; color: white; border: none;
+      padding: 10px 15px; margin: 5px; font-size: 14px;
+      border-radius: 6px; cursor: pointer; font-weight: bold;
     }
+    button:hover { background-color: #e05200; }
+    button.reset { background-color: #d9534f; margin-top: 15px; }
+    .summary {
+      text-align: left; background: rgba(255, 255, 255, 0.1);
+      padding: 10px 15px; border-radius: 6px; font-size: 14px;
+      margin-top: auto; /* Push to the bottom */
+    }
+
+    /* Diagram Specifics */
+    h2.diag-title { font-size: 18px; margin-top: 0; margin-bottom: 20px;}
+    
+    #diagram-container {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px; /* space between components */
+      overflow-y: auto; /* Scroll if layout gets too long */
+      padding-top: 20px;
+    }
+
+    .dia-part { font-size: 40px; margin: 0; padding: 0; line-height: 1;}
+    .truck-part { font-size: 55px; } /* Engine 🚒 */
+    .hose-part { color: #fdfd04; } /* Hose (Coupling) */
+    .coupling-part { font-size: 16px; color: #aaa; margin-top: -8px; } /* Coupling ⛓️ */
+    .nozzle-part { margin-top: -10px;} /* Nozzle 🛠️ */
+
   </style>
 </head>
 <body>
 
-  <div class="calculator-card">
+  <!-- Left Box: Calculator -->
+  <div class="calc-box">
     <h1>PDP Calculator</h1>
     
     <div class="display">
@@ -85,38 +113,98 @@
 
     <!-- Controls -->
     <div class="btn-group">
-      <button class="reset" onclick="resetCalc()">Reset All</button>
+      <button class="reset" onclick="resetCalc()">Reset Layout</button>
     </div>
 
     <!-- Layout Summary -->
     <div class="summary">
-      <strong>Layout Summary:</strong>
-      <ul id="summary-list">
-        <li>No nozzle selected</li>
+      <strong>Current Layout:</strong>
+      <ul id="summary-list" style="margin: 5px 0 0 18px; padding: 0;">
+        <li>No components selected</li>
       </ul>
     </div>
   </div>
 
+  <!-- Right Box: Visual Diagram -->
+  <div class="diagram-box">
+    <h2 class="diag-title">Layout Diagram</h2>
+    
+    <!-- Diagram Drawing Area -->
+    <div id="diagram-container">
+      <div class="dia-part truck-part">🚒</div> <!-- Engine always there -->
+      <div id="active-diagram">
+        <!-- Javascript fills hose lines and nozzle here -->
+      </div>
+    </div>
+  </div>
+
   <script>
+    // State variables
     let nozzlePressure = 0;
     let nozzleName = "None";
     let frictionLoss = 0;
-    let hoses = [];
+    let hoses = []; // array to store names/types of hoses added
 
     function updateDisplay() {
+      // 1. Calculate and update PDP display
       let totalPDP = nozzlePressure + frictionLoss;
       document.getElementById('pdp').innerText = totalPDP;
 
-      // Update Summary
-      let listHtml = `<li><strong>Nozzle:</strong> ${nozzleName} (${nozzlePressure} kPa)</li>`;
+      // 2. Update Text Summary
+      let listHtml = "";
+      if (nozzleName !== "None") {
+        listHtml += `<li><strong>Nozzle:</strong> ${nozzleName} (${nozzlePressure} kPa)</li>`;
+      } else {
+        listHtml += `<li>No nozzle selected</li>`;
+      }
+      
       if (hoses.length > 0) {
         listHtml += `<li><strong>Hose FL:</strong> ${frictionLoss} kPa (${hoses.length} lengths)</li>`;
       } else {
-        listHtml += `<li><strong>Hose FL:</strong> 0 kPa</li>`;
+        listHtml += `<li>No hose added</li>`;
       }
       document.getElementById('summary-list').innerHTML = listHtml;
+
+      // 3. Update Visual Diagram
+      drawDiagram();
     }
 
+    function drawDiagram() {
+      const container = document.getElementById('active-diagram');
+      container.innerHTML = ""; // Clear current diagram
+
+      // --- Draw Hoses ---
+      hoses.forEach(hoseType => {
+        // Hose Section Visual
+        const hoseDiv = document.createElement('div');
+        hoseDiv.className = 'dia-part hose-part';
+        hoseDiv.innerText = '▰'; // Standard visual represention of hose section
+        container.appendChild(hoseDiv);
+
+        // Coupling Visual (⛓️)
+        const couplingDiv = document.createElement('div');
+        couplingDiv.className = 'dia-part coupling-part';
+        couplingDiv.innerText = '⛓️'; // Metal Coupling visual
+        container.appendChild(couplingDiv);
+      });
+
+      // --- Draw Nozzle ---
+      if (nozzleName === "Fog Nozzle") {
+        const nozzleDiv = document.createElement('div');
+        nozzleDiv.className = 'dia-part nozzle-part';
+        nozzleDiv.innerText = '🛠️'; // Fog Nozzle visual (more complex tool shape)
+        nozzleDiv.style.color = '#39ff14'; // specific color for fog nozzle
+        container.appendChild(nozzleDiv);
+      } else if (nozzleName === "Smooth Bore") {
+        const nozzleDiv = document.createElement('div');
+        nozzleDiv.className = 'dia-part nozzle-part';
+        nozzleDiv.innerText = '🗼'; // Smooth bore visual (tower/tapered shape)
+        nozzleDiv.style.color = '#39ff14'; // specific color for smooth bore nozzle
+        container.appendChild(nozzleDiv);
+      }
+    }
+
+    // --- Interaction Functions ---
     function setNozzle(name, pressure) {
       nozzleName = name;
       nozzlePressure = pressure;
@@ -124,7 +212,7 @@
     }
 
     function addHose(name, flValue) {
-      hoses.push(name);
+      hoses.push(name); // Add hose length to the list
       frictionLoss += flValue;
       updateDisplay();
     }
@@ -133,7 +221,7 @@
       nozzlePressure = 0;
       nozzleName = "None";
       frictionLoss = 0;
-      hoses = [];
+      hoses = []; // Clear hose list
       updateDisplay();
     }
   </script>
