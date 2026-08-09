@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Engine PDP Dashboard</title>
 
-  <!-- PWA Manifest embedded via Data URI for seamless GitHub Pages deployment -->
+  <!-- PWA Manifest embedded via Data URI -->
   <link rel="manifest" href='data:application/manifest+json,{"name":"Engine PDP Dashboard","short_name":"PDP Dash","start_url":".","display":"standalone","background_color":"#121212","theme_color":"#121212","icons":[{"src":"https://fav.farm/🚒","sizes":"192x192","type":"image/png"}]}' />
   <meta name="theme-color" content="#121212" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -25,6 +25,8 @@
       --active-border: #00ff66;
       --button-bg: #2a2a2a;
       --button-hover: #3a3a3a;
+      --btn-red: #8b0000;
+      --btn-red-hover: #a50000;
       --shadow-color: rgba(0, 0, 0, 0.5);
     }
 
@@ -41,6 +43,8 @@
       --active-border: #000000;
       --button-bg: #e0e0e0;
       --button-hover: #cccccc;
+      --btn-red: #c62828;
+      --btn-red-hover: #b71c1c;
       --shadow-color: rgba(0, 0, 0, 0.1);
     }
 
@@ -49,7 +53,7 @@
       margin: 0;
       padding: 0;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      user-select: none; /* Prevents text selection accidental highlights during rapid touch inputs */
+      user-select: none;
     }
 
     body {
@@ -59,28 +63,13 @@
       transition: background-color 0.2s ease, color 0.2s ease;
     }
 
-    /* Warning Banner */
-    .alert-banner {
-      background-color: #b71c1c;
-      color: #ffffff;
-      padding: 8px 12px;
-      border-radius: 6px;
-      font-size: 0.85rem;
-      font-weight: bold;
-      margin-bottom: 12px;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    /* Dashboard Layout: Responsive Grid/Flex Stacking */
+    /* Dashboard Layout: Responsive Grid */
     .dashboard-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 16px;
     }
 
-    /* Tablet Portrait & Smaller Screens (Stack automatically) */
     @media (max-width: 1024px) {
       .dashboard-grid {
         grid-template-columns: 1fr;
@@ -125,13 +114,14 @@
       cursor: pointer;
     }
 
-    /* Master PDP Display */
+    /* Master PDP Display in Lay Diagram */
     .master-pdp-box {
       border: 2px solid var(--accent-orange);
       border-radius: 8px;
       padding: 10px;
       text-align: center;
-      background-color: rgba(255, 107, 0, 0.05);
+      background-color: rgba(255, 107, 0, 0.08);
+      margin-bottom: 8px;
     }
 
     .master-pdp-label {
@@ -182,7 +172,7 @@
       cursor: pointer;
       text-align: center;
       transition: all 0.15s ease;
-      min-height: 44px; /* Apple's recommended touch target size */
+      min-height: 44px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -206,6 +196,17 @@
       box-shadow: 0 0 8px rgba(2, 136, 209, 0.5);
     }
 
+    /* Explicit Red Buttons for Subtract Actions */
+    .btn-red {
+      background-color: var(--btn-red) !important;
+      color: #ffffff !important;
+      border: 1px solid #ff4444 !important;
+    }
+
+    .btn-red:hover {
+      background-color: var(--btn-red-hover) !important;
+    }
+
     /* Section Subheadings */
     .section-label {
       font-size: 0.8rem;
@@ -218,12 +219,11 @@
     .diagram-container {
       background: rgba(0, 0, 0, 0.2);
       border-radius: 8px;
-      padding: 16px;
+      padding: 12px;
       min-height: 250px;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      justify-content: space-between;
+      gap: 10px;
       border: 1px dashed var(--card-border);
     }
 
@@ -232,17 +232,35 @@
       background: var(--button-bg);
       border: 1px solid var(--card-border);
       border-radius: 6px;
-      padding: 8px;
-      margin-bottom: 8px;
+      padding: 10px;
       display: flex;
       justify-content: space-between;
       align-items: center;
       font-size: 0.85rem;
+      cursor: pointer;
     }
 
     .line-indicator.active-line {
       border: 2px solid var(--accent-green);
       background: rgba(0, 230, 118, 0.1);
+    }
+
+    .line-details {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    /* Inline Alert Badges */
+    .alert-badge {
+      background-color: #b71c1c;
+      color: #ffffff;
+      font-size: 0.7rem;
+      font-weight: bold;
+      padding: 4px 8px;
+      border-radius: 4px;
+      display: none;
+      margin-top: 4px;
     }
 
     /* Tank Manager */
@@ -273,7 +291,6 @@
       font-size: 0.75rem;
     }
 
-    /* Nozzle Grid Touch Adjustments */
     .flow-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
@@ -283,104 +300,121 @@
 </head>
 <body>
 
-  <!-- Severe Warning Banners -->
-  <div class="alert-banner">
-    <div>⚠️ <strong>SEVERE FRICTION LOSS:</strong> Friction loss exceeds 300 kPa on this line. Consider extending with 65mm hose.</div>
-    <div>⚠️ <strong>DRAFTING LIFT HEIGHT:</strong> Ensure maximum vertical lift height does not exceed 3 meters (10 ft).</div>
-  </div>
-
   <div class="dashboard-grid">
 
-    <!-- COLUMN 1: PDP & CONTROL PANEL -->
+    <!-- COLUMN 1: CONTROL PANEL -->
     <div class="panel">
       <div class="panel-header">
         <span class="panel-title">Control Panel</span>
         <button class="sunlight-btn" onclick="toggleSunlightMode()">☀️ Sun Mode</button>
       </div>
 
-      <div class="master-pdp-box">
-        <div class="master-pdp-label">Master Pump Discharge Pressure (Highest Required)</div>
-        <div class="master-pdp-value" id="master-pdp">1100 <span style="font-size: 1rem;">kPa</span></div>
-      </div>
-
       <div class="btn-group">
-        <button class="btn active" onclick="selectLine('attack1', this)">Attack 1</button>
-        <button class="btn" onclick="selectLine('attack2', this)">Attack 2</button>
-        <button class="btn" onclick="selectLine('bumper', this)">Bumper Line</button>
-        <button class="btn" onclick="selectLine('monitor', this)">Monitor</button>
+        <button class="btn active" id="line-btn-attack1" onclick="selectLine('attack1')">Attack 1</button>
+        <button class="btn" id="line-btn-attack2" onclick="selectLine('attack2')">Attack 2</button>
+        <button class="btn" id="line-btn-bumper" onclick="selectLine('bumper')">Bumper Line</button>
+        <button class="btn" id="line-btn-monitor" onclick="selectLine('monitor')">Monitor</button>
       </div>
 
       <div class="target-pdp-box">
         <div style="font-size: 0.75rem; font-weight: bold; color: var(--accent-green);" id="active-line-title">ATTACK 1 - TARGET PDP</div>
-        <div class="target-pdp-value" id="target-pdp">1100 <span style="font-size: 0.9rem;">kPa</span></div>
-        <div style="font-size: 0.7rem; color: var(--accent-green); font-weight: bold;">100% FULLY OPEN DISCHARGE</div>
+        <div class="target-pdp-value" id="target-pdp">700 <span style="font-size: 0.9rem;">kPa</span></div>
+        <div style="font-size: 0.75rem; color: var(--text-sub);" id="line-summary-text">Fog Nozzle (700 kPa) | No extra hose</div>
       </div>
 
       <div class="section-label">Quick Preconnect Short-Cuts</div>
       <div class="btn-group">
         <button class="btn btn-blue" onclick="applyPreset('crosslay')">Crosslay (60m 44mm + Fog)</button>
-        <button class="btn btn-blue" onclick="applyPreset('highrise')">High-Rise Standpipe (30m 65mm + SB)</button>
+        <button class="btn btn-blue" onclick="applyPreset('highrise')">High-Rise (30m 65mm + SB)</button>
       </div>
 
       <div class="section-label">Supply Mode</div>
       <div class="btn-group">
-        <button class="btn" onclick="setSupply('hydrant', this)">Hydrant Supply</button>
-        <button class="btn active" onclick="setSupply('drafting', this)">Drafting (Static)</button>
-        <button class="btn" onclick="setSupply('nursing', this)">Nursing (Relay)</button>
+        <button class="btn" id="sup-btn-hydrant" onclick="setSupply('hydrant')">Hydrant Supply</button>
+        <button class="btn active" id="sup-btn-drafting" onclick="setSupply('drafting')">Drafting (Static)</button>
+        <button class="btn" id="sup-btn-nursing" onclick="setSupply('nursing')">Nursing (Relay)</button>
       </div>
 
       <div class="section-label">1. Nozzle Selection</div>
       <div class="btn-group">
-        <button class="btn active" onclick="setNozzle('fog', 700, this)">Fog Nozzle (700 kPa)</button>
-        <button class="btn" onclick="setNozzle('smooth', 350, this)">Smooth Bore (350 kPa)</button>
-        <button class="btn" onclick="clearNozzle()">- Nozzle</button>
+        <button class="btn active" id="nozzle-btn-fog" onclick="setNozzle('fog', 700)">Fog Nozzle (700 kPa)</button>
+        <button class="btn" id="nozzle-btn-smooth" onclick="setNozzle('smooth', 350)">Smooth Bore (350 kPa)</button>
+        <button class="btn btn-red" onclick="clearNozzle()">- Nozzle</button>
       </div>
 
       <div class="section-label">2. Hose Lengths</div>
       <div class="btn-group">
-        <button class="btn" onclick="addHose(44, 100)">+ 1x 44mm (100 kPa)</button>
-        <button class="btn" onclick="addHose(65, 30)">+ 1x 65mm (30 kPa)</button>
-        <button class="btn" onclick="removeHose()">- Hose</button>
+        <button class="btn" onclick="addHose(44, 100)">+ 1x 44mm (+100 kPa)</button>
+        <button class="btn" onclick="addHose(65, 30)">+ 1x 65mm (+30 kPa)</button>
+        <button class="btn btn-red" onclick="removeHose()">- Hose</button>
       </div>
 
-      <div class="section-label">3. Elevation Adjustment (10 kPa / floor)</div>
+      <div class="section-label">3. Elevation Adjustment</div>
       <div class="btn-group">
         <button class="btn" onclick="adjustElevation(10)">+1 Floor Up (+10 kPa)</button>
-        <button class="btn" onclick="adjustElevation(-10)">-1 Floor Down (-10 kPa)</button>
+        <button class="btn btn-red" onclick="adjustElevation(-10)">-1 Floor Down (-10 kPa)</button>
       </div>
 
       <div class="section-label">4. Appliances / Connections</div>
       <div class="btn-group">
-        <button class="btn" id="standpipe-btn" onclick="toggleStandpipe()">Toggle Standpipe / Wye (+70 kPa FL)</button>
-        <button class="btn" onclick="resetActiveLine()" style="background-color: #5c1d1d;">Reset Active Line</button>
+        <button class="btn" id="standpipe-btn" onclick="toggleStandpipe()">Toggle Standpipe/Wye (+70 kPa)</button>
+        <button class="btn btn-red" onclick="resetActiveLine()">Reset Active Line</button>
       </div>
     </div>
 
-    <!-- COLUMN 2: LAY DIAGRAM -->
+    <!-- COLUMN 2: LAY DIAGRAM & MASTER PDP -->
     <div class="panel">
       <div class="panel-header">
         <span class="panel-title">Lay Diagram</span>
       </div>
+
+      <!-- Master PDP Box Relocated Here -->
+      <div class="master-pdp-box">
+        <div class="master-pdp-label">Master Pump Discharge Pressure (Highest Required)</div>
+        <div class="master-pdp-value" id="master-pdp">700 <span style="font-size: 1rem;">kPa</span></div>
+      </div>
+
       <div class="diagram-container">
-        <div style="font-size: 1.5rem;">🏠🔥</div>
+        <div style="font-size: 1.5rem; text-align: center;">🏠🔥</div>
 
-        <div class="line-indicator active-line" id="diag-line-1">
-          <span>💦💧 [FOG] Attack 1</span>
-          <span>470 L/m (124 GPM) | <strong>1100 kPa</strong> (100% OPEN)</span>
+        <div class="line-indicator active-line" id="diag-line-attack1" onclick="selectLine('attack1')">
+          <div class="line-details">
+            <strong>💦 Attack 1</strong>
+            <span style="font-size: 0.75rem; color: var(--text-sub);" id="diag-sub-attack1">Fog | 0m Hose | 0 Floors</span>
+            <div class="alert-badge" id="alert-attack1">⚠️ HIGH FRICTION LOSS (>300 kPa)</div>
+          </div>
+          <div><strong id="diag-pdp-attack1">700 kPa</strong></div>
         </div>
 
-        <div class="line-indicator" id="diag-line-2">
-          <span>💦💧 [FOG] Attack 2</span>
-          <span>470 L/m (124 GPM) | <strong>1100 kPa</strong> (100% OPEN)</span>
+        <div class="line-indicator" id="diag-line-attack2" onclick="selectLine('attack2')">
+          <div class="line-details">
+            <strong>💦 Attack 2</strong>
+            <span style="font-size: 0.75rem; color: var(--text-sub);" id="diag-sub-attack2">Fog | 0m Hose | 0 Floors</span>
+            <div class="alert-badge" id="alert-attack2">⚠️ HIGH FRICTION LOSS (>300 kPa)</div>
+          </div>
+          <div><strong id="diag-pdp-attack2">700 kPa</strong></div>
         </div>
 
-        <div class="line-indicator" id="diag-line-3">
-          <span>💦💧 [FOG] Monitor</span>
-          <span>950 L/m (251 GPM) | <strong>700 kPa</strong> (GATE 64%)</span>
+        <div class="line-indicator" id="diag-line-bumper" onclick="selectLine('bumper')">
+          <div class="line-details">
+            <strong>💦 Bumper Line</strong>
+            <span style="font-size: 0.75rem; color: var(--text-sub);" id="diag-sub-bumper">Fog | 0m Hose | 0 Floors</span>
+            <div class="alert-badge" id="alert-bumper">⚠️ HIGH FRICTION LOSS (>300 kPa)</div>
+          </div>
+          <div><strong id="diag-pdp-bumper">700 kPa</strong></div>
         </div>
 
-        <div style="font-size: 2rem; margin-top: auto;">🚒 🌊</div>
-        <div style="font-size: 0.8rem; font-weight: bold; color: var(--accent-blue);">STATIC DUMP TANK</div>
+        <div class="line-indicator" id="diag-line-monitor" onclick="selectLine('monitor')">
+          <div class="line-details">
+            <strong>💦 Monitor</strong>
+            <span style="font-size: 0.75rem; color: var(--text-sub);" id="diag-sub-monitor">Fog | 0m Hose | 0 Floors</span>
+            <div class="alert-badge" id="alert-monitor">⚠️ HIGH FRICTION LOSS (>300 kPa)</div>
+          </div>
+          <div><strong id="diag-pdp-monitor">700 kPa</strong></div>
+        </div>
+
+        <div style="font-size: 1.8rem; text-align: center; margin-top: auto;">🚒 🌊</div>
+        <div style="font-size: 0.8rem; font-weight: bold; color: var(--accent-blue); text-align: center;" id="supply-label-display">STATIC DUMP TANK</div>
       </div>
     </div>
 
@@ -392,148 +426,291 @@
 
       <div style="text-align: center;">
         <div class="section-label">TIME TO EMPTY WATER SUPPLY</div>
-        <div class="timer-display" id="empty-timer">05:17</div>
-        <div style="font-size: 0.8rem; color: var(--text-sub);">Total Discharge Flow: <strong id="total-flow">1890 L/m</strong></div>
+        <div class="timer-display" id="empty-timer">08:51</div>
+        <div style="font-size: 0.8rem; color: var(--text-sub);">Total Discharge Flow: <strong id="total-flow">470 L/m</strong></div>
       </div>
 
-      <div class="section-label">ACTIVE SOURCE: STATIC DUMP TANK (100%)</div>
+      <div class="section-label" id="tank-capacity-label">ACTIVE TANK: ENGINE (2500 L)</div>
       <div style="width: 100%; background-color: var(--button-bg); height: 12px; border-radius: 6px; overflow: hidden;">
-        <div id="tank-bar" style="width: 100%; height: 100%; background-color: var(--accent-green);"></div>
+        <div id="tank-bar" style="width: 100%; height: 100%; background-color: var(--accent-green); transition: width 0.3s ease;"></div>
       </div>
 
       <!-- Tanks -->
       <div class="tank-row">
         <div style="font-size: 0.85rem; font-weight: bold;">On-Board Engine Tank: <span id="engine-tank-val">2500 L / 2500 L</span></div>
         <div class="tank-controls">
-          <button class="btn" onclick="adjustTank('engine', -500)">- 500L</button>
+          <button class="btn btn-red" onclick="adjustTank('engine', -500)">- 500L</button>
           <button class="btn" onclick="adjustTank('engine', 500)">+ 500L</button>
-          <button class="btn btn-blue" onclick="refillTank('engine')">FULL REFILL</button>
+          <button class="btn btn-blue" onclick="refillTank('engine')">FULL</button>
         </div>
       </div>
 
       <div class="tank-row">
         <div style="font-size: 0.85rem; font-weight: bold;">Draft Dump Tank: <span id="draft-tank-val">10000 L / 10000 L</span></div>
         <div class="tank-controls">
-          <button class="btn" onclick="adjustTank('draft', -500)">- 500L</button>
+          <button class="btn btn-red" onclick="adjustTank('draft', -500)">- 500L</button>
           <button class="btn" onclick="adjustTank('draft', 500)">+ 500L</button>
-          <button class="btn btn-blue" onclick="refillTank('draft')">FULL REFILL</button>
+          <button class="btn btn-blue" onclick="refillTank('draft')">FULL</button>
         </div>
       </div>
 
       <div class="tank-row">
         <div style="font-size: 0.85rem; font-weight: bold;">Nursing Tender: <span id="nursing-tank-val">12000 L / 12000 L</span></div>
         <div class="tank-controls">
-          <button class="btn" onclick="adjustTank('nursing', -500)">- 500L</button>
+          <button class="btn btn-red" onclick="adjustTank('nursing', -500)">- 500L</button>
           <button class="btn" onclick="adjustTank('nursing', 500)">+ 500L</button>
-          <button class="btn btn-blue" onclick="refillTank('nursing')">FULL REFILL</button>
+          <button class="btn btn-blue" onclick="refillTank('nursing')">FULL</button>
         </div>
       </div>
 
       <div class="section-label">Nozzle Flow Rate (Selected Line)</div>
       <div class="flow-grid">
-        <button class="btn" onclick="setFlow(115, '30 GPM', this)">115 L/m (30 GPM)</button>
-        <button class="btn" onclick="setFlow(230, '60 GPM', this)">230 L/m (60 GPM)</button>
-        <button class="btn" onclick="setFlow(360, '95 GPM', this)">360 L/m (95 GPM)</button>
-        <button class="btn active" onclick="setFlow(470, '125 GPM', this)">470 L/m (125 GPM)</button>
-        <button class="btn" onclick="setFlow(570, '150 GPM', this)">570 L/m (150 GPM)</button>
-        <button class="btn" onclick="setFlow(750, '200 GPM', this)">750 L/m (200 GPM)</button>
-        <button class="btn" onclick="setFlow(950, '250 GPM', this)">950 L/m (250 GPM)</button>
-        <button class="btn" onclick="setFlow(1900, '500 GPM', this)">1900 L/m (500 GPM Monitor)</button>
+        <button class="btn" id="flow-btn-115" onclick="setFlow(115)">115 L/m (30 GPM)</button>
+        <button class="btn" id="flow-btn-230" onclick="setFlow(230)">230 L/m (60 GPM)</button>
+        <button class="btn" id="flow-btn-360" onclick="setFlow(360)">360 L/m (95 GPM)</button>
+        <button class="btn active" id="flow-btn-470" onclick="setFlow(470)">470 L/m (125 GPM)</button>
+        <button class="btn" id="flow-btn-570" onclick="setFlow(570)">570 L/m (150 GPM)</button>
+        <button class="btn" id="flow-btn-750" onclick="setFlow(750)">750 L/m (200 GPM)</button>
+        <button class="btn" id="flow-btn-950" onclick="setFlow(950)">950 L/m (250 GPM)</button>
+        <button class="btn" id="flow-btn-1900" onclick="setFlow(1900)">1900 L/m (500 GPM)</button>
       </div>
 
     </div>
   </div>
 
   <script>
-    /* Sunlight Mode Toggle */
+    // State Management Data Structure
+    const defaultLineState = () => ({
+      nozzleType: 'fog',
+      nozzlePressure: 700,
+      hoseLoss: 0,
+      hoses: [],
+      elevationLoss: 0,
+      standpipeLoss: 0,
+      flowLpm: 470
+    });
+
+    const lines = {
+      attack1: defaultLineState(),
+      attack2: defaultLineState(),
+      bumper: defaultLineState(),
+      monitor: defaultLineState()
+    };
+
+    let activeLineKey = 'attack1';
+    let supplyMode = 'drafting';
+
+    const tanks = {
+      engine: { current: 2500, max: 2500 },
+      draft: { current: 10000, max: 10000 },
+      nursing: { current: 12000, max: 12000 }
+    };
+
     function toggleSunlightMode() {
       document.body.classList.toggle('sunlight-mode');
     }
 
-    /* Line Selection Logic */
-    let currentLine = 'attack1';
-
-    function selectLine(lineId, element) {
-      currentLine = lineId;
-      const buttons = element.parentElement.querySelectorAll('.btn');
-      buttons.forEach(btn => btn.classList.remove('active'));
-      element.classList.add('active');
-      
-      const title = document.getElementById('active-line-title');
-      title.innerText = `${lineId.toUpperCase()} - TARGET PDP`;
+    function selectLine(key) {
+      activeLineKey = key;
+      ['attack1', 'attack2', 'bumper', 'monitor'].forEach(k => {
+        document.getElementById(`line-btn-${k}`).classList.toggle('active', k === key);
+        document.getElementById(`diag-line-${k}`).classList.toggle('active-line', k === key);
+      });
+      document.getElementById('active-line-title').innerText = `${key.toUpperCase()} - TARGET PDP`;
+      updateUI();
     }
 
-    /* Supply Mode Toggle */
-    function setSupply(mode, element) {
-      const buttons = element.parentElement.querySelectorAll('.btn');
-      buttons.forEach(btn => btn.classList.remove('active'));
-      element.classList.add('active');
+    function setSupply(mode) {
+      supplyMode = mode;
+      ['hydrant', 'drafting', 'nursing'].forEach(m => {
+        document.getElementById(`sup-btn-${m}`).classList.toggle('active', m === mode);
+      });
+      const labelMap = { hydrant: 'HYDRANT SUPPLY', drafting: 'STATIC DUMP TANK', nursing: 'NURSING TENDER' };
+      document.getElementById('supply-label-display').innerText = labelMap[mode];
+      updateUI();
     }
 
-    /* Nozzle Selection */
-    function setNozzle(type, pressure, element) {
-      const buttons = element.parentElement.querySelectorAll('.btn');
-      buttons.forEach(btn => btn.classList.remove('active'));
-      element.classList.add('active');
+    function setNozzle(type, pressure) {
+      const line = lines[activeLineKey];
+      line.nozzleType = type;
+      line.nozzlePressure = pressure;
+      updateUI();
     }
 
     function clearNozzle() {
-      // Logic to remove nozzle selection
+      const line = lines[activeLineKey];
+      line.nozzleType = 'none';
+      line.nozzlePressure = 0;
+      updateUI();
     }
 
-    /* Hose Adjustments */
-    function addHose(size, pressure) {}
-    function removeHose() {}
+    function addHose(size, pressure) {
+      const line = lines[activeLineKey];
+      line.hoses.push({ size, pressure });
+      line.hoseLoss += pressure;
+      updateUI();
+    }
 
-    /* Elevation */
-    function adjustElevation(amount) {}
+    function removeHose() {
+      const line = lines[activeLineKey];
+      if (line.hoses.length > 0) {
+        const removed = line.hoses.pop();
+        line.hoseLoss -= removed.pressure;
+        updateUI();
+      }
+    }
 
-    /* Appliances */
+    function adjustElevation(amount) {
+      const line = lines[activeLineKey];
+      line.elevationLoss += amount;
+      updateUI();
+    }
+
     function toggleStandpipe() {
-      document.getElementById('standpipe-btn').classList.toggle('active');
+      const line = lines[activeLineKey];
+      line.standpipeLoss = line.standpipeLoss === 0 ? 70 : 0;
+      document.getElementById('standpipe-btn').classList.toggle('active', line.standpipeLoss > 0);
+      updateUI();
     }
 
-    function resetActiveLine() {}
-
-    /* Presets */
-    function applyPreset(type) {}
-
-    /* Flow Selection */
-    function setFlow(flowLpm, gpmText, element) {
-      const buttons = element.parentElement.querySelectorAll('.btn');
-      buttons.forEach(btn => btn.classList.remove('active'));
-      element.classList.add('active');
+    function resetActiveLine() {
+      lines[activeLineKey] = defaultLineState();
+      document.getElementById('standpipe-btn').classList.remove('active');
+      updateUI();
     }
 
-    /* Tank Adjustments */
-    function adjustTank(tankType, amount) {}
-    function refillTank(tankType) {}
+    function applyPreset(preset) {
+      const line = lines[activeLineKey];
+      if (preset === 'crosslay') {
+        line.nozzleType = 'fog';
+        line.nozzlePressure = 700;
+        line.hoses = [{ size: 44, pressure: 100 }, { size: 44, pressure: 100 }];
+        line.hoseLoss = 200;
+        line.elevationLoss = 0;
+        line.standpipeLoss = 0;
+        line.flowLpm = 470;
+      } else if (preset === 'highrise') {
+        line.nozzleType = 'smooth';
+        line.nozzlePressure = 350;
+        line.hoses = [{ size: 65, pressure: 30 }];
+        line.hoseLoss = 30;
+        line.elevationLoss = 30;
+        line.standpipeLoss = 70;
+        line.flowLpm = 950;
+      }
+      updateUI();
+    }
 
-    /* Register Service Worker for Offline Functionality */
+    function setFlow(lpm) {
+      lines[activeLineKey].flowLpm = lpm;
+      updateUI();
+    }
+
+    function adjustTank(type, amount) {
+      tanks[type].current = Math.max(0, Math.min(tanks[type].max, tanks[type].current + amount));
+      updateUI();
+    }
+
+    function refillTank(type) {
+      tanks[type].current = tanks[type].max;
+      updateUI();
+    }
+
+    function calculateLinePDP(line) {
+      return line.nozzlePressure + line.hoseLoss + line.elevationLoss + line.standpipeLoss;
+    }
+
+    function updateUI() {
+      const activeLine = lines[activeLineKey];
+
+      // Update Nozzle buttons
+      document.getElementById('nozzle-btn-fog').classList.toggle('active', activeLine.nozzleType === 'fog');
+      document.getElementById('nozzle-btn-smooth').classList.toggle('active', activeLine.nozzleType === 'smooth');
+
+      // Update Standpipe button state
+      document.getElementById('standpipe-btn').classList.toggle('active', activeLine.standpipeLoss > 0);
+
+      // Update Flow buttons
+      [115, 230, 360, 470, 570, 750, 950, 1900].forEach(f => {
+        const btn = document.getElementById(`flow-btn-${f}`);
+        if (btn) btn.classList.toggle('active', activeLine.flowLpm === f);
+      });
+
+      // Update Target PDP Display
+      const targetPDP = calculateLinePDP(activeLine);
+      document.getElementById('target-pdp').innerHTML = `${targetPDP} <span style="font-size: 0.9rem;">kPa</span>`;
+
+      const hoseSummary = `${activeLine.hoses.length} hoses (${activeLine.hoseLoss} kPa FL)`;
+      const elevSummary = `${activeLine.elevationLoss / 10} floors (${activeLine.elevationLoss} kPa)`;
+      document.getElementById('line-summary-text').innerText = `${activeLine.nozzleType.toUpperCase()} (${activeLine.nozzlePressure} kPa) | ${hoseSummary} | ${elevSummary}`;
+
+      // Update Lay Diagram & Master PDP Calculation
+      let maxPDP = 0;
+      let totalFlow = 0;
+
+      Object.keys(lines).forEach(k => {
+        const l = lines[k];
+        const pdp = calculateLinePDP(l);
+        if (pdp > maxPDP) maxPDP = pdp;
+        totalFlow += l.flowLpm;
+
+        document.getElementById(`diag-pdp-${k}`).innerText = `${pdp} kPa`;
+        document.getElementById(`diag-sub-${k}`).innerText = `${l.nozzleType.toUpperCase()} | ${l.hoses.length * 30}m Hose | ${l.flowLpm} L/m`;
+
+        // Friction loss warnings inside individual diagram cards
+        const alertEl = document.getElementById(`alert-${k}`);
+        if (l.hoseLoss >= 300) {
+          alertEl.style.display = 'block';
+        } else {
+          alertEl.style.display = 'none';
+        }
+      });
+
+      document.getElementById('master-pdp').innerHTML = `${maxPDP} <span style="font-size: 1rem;">kPa</span>`;
+      document.getElementById('total-flow').innerText = `${totalFlow} L/m`;
+
+      // Update Water Supply & Timer calculations
+      document.getElementById('engine-tank-val').innerText = `${tanks.engine.current} L / ${tanks.engine.max} L`;
+      document.getElementById('draft-tank-val').innerText = `${tanks.draft.current} L / ${tanks.draft.max} L`;
+      document.getElementById('nursing-tank-val').innerText = `${tanks.nursing.current} L / ${tanks.nursing.max} L`;
+
+      let activeTank = tanks.engine;
+      if (supplyMode === 'drafting') activeTank = tanks.draft;
+      if (supplyMode === 'nursing') activeTank = tanks.nursing;
+
+      document.getElementById('tank-capacity-label').innerText = `ACTIVE SOURCE: ${supplyMode.toUpperCase()} (${activeTank.current} L)`;
+      const pct = (activeTank.current / activeTank.max) * 100;
+      document.getElementById('tank-bar').style.width = `${pct}%`;
+
+      if (totalFlow > 0 && activeTank.current > 0) {
+        const totalSeconds = Math.floor((activeTank.current / totalFlow) * 60);
+        const mins = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
+        const secs = (totalSeconds % 60).toString().padStart(2, '0');
+        document.getElementById('empty-timer').innerText = `${mins}:${secs}`;
+      } else {
+        document.getElementById('empty-timer').innerText = `00:00`;
+      }
+    }
+
+    // Register Service Worker for Offline Functionality
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         const swCode = `
-          const CACHE_NAME = 'pdp-dash-v1';
+          const CACHE_NAME = 'pdp-dash-v2';
           self.addEventListener('install', (e) => {
-            e.waitUntil(
-              caches.open(CACHE_NAME).then((cache) => {
-                return cache.addAll(['./']);
-              })
-            );
+            e.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(['./'])));
           });
           self.addEventListener('fetch', (e) => {
-            e.respondWith(
-              caches.match(e.request).then((res) => res || fetch(e.request))
-            );
+            e.respondWith(caches.match(e.request).then((res) => res || fetch(e.request)));
           });
         `;
         const blob = new Blob([swCode], { type: 'application/javascript' });
-        const blobURL = URL.createObjectURL(blob);
-        navigator.serviceWorker.register(blobURL).catch(() => {
-          // Fallback if Blob workers are restricted
-        });
+        navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(() => {});
       });
     }
+
+    // Initial load sync
+    updateUI();
   </script>
 </body>
 </html>
