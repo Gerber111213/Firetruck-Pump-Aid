@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Engine PDP Dashboard</title>
-
+  
   <!-- PWA Manifest embedded via Data URI -->
   <link rel="manifest" href='data:application/manifest+json,{"name":"Engine PDP Dashboard","short_name":"PDP Dash","start_url":".","display":"standalone","background_color":"#121212","theme_color":"#121212","icons":[{"src":"https://fav.farm/🚒","sizes":"192x192","type":"image/png"}]}' />
   <meta name="theme-color" content="#121212" />
@@ -46,233 +46,76 @@
       --shadow-color: rgba(0, 0, 0, 0.1);
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      user-select: none;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; user-select: none; }
+    body { background-color: var(--bg-color); color: var(--text-main); padding: 12px; transition: background-color 0.2s ease, color 0.2s ease; }
 
-    body {
-      background-color: var(--bg-color);
-      color: var(--text-main);
-      padding: 12px;
-      transition: background-color 0.2s ease, color 0.2s ease;
-    }
-
-    .dashboard-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 16px;
-    }
-
-    @media (max-width: 1024px) {
-      .dashboard-grid {
-        grid-template-columns: 1fr;
-      }
-    }
+    .dashboard-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    @media (max-width: 1024px) { .dashboard-grid { grid-template-columns: 1fr; } }
 
     .panel {
-      background-color: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 10px;
-      padding: 14px;
-      box-shadow: 0 4px 10px var(--shadow-color);
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
+      background-color: var(--card-bg); border: 1px solid var(--card-border);
+      border-radius: 10px; padding: 14px; box-shadow: 0 4px 10px var(--shadow-color);
+      display: flex; flex-direction: column; gap: 12px;
     }
-
-    .panel-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 1px solid var(--card-border);
-      padding-bottom: 8px;
-    }
-
-    .panel-title {
-      font-size: 1.1rem;
-      font-weight: 700;
-      color: var(--text-main);
-    }
-
+    .panel-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--card-border); padding-bottom: 8px; }
+    .panel-title { font-size: 1.1rem; font-weight: 700; color: var(--text-main); }
+    
     .sunlight-btn {
-      background-color: var(--button-bg);
-      color: var(--text-main);
-      border: 2px solid var(--card-border);
-      padding: 6px 12px;
-      border-radius: 6px;
-      font-size: 0.8rem;
-      font-weight: bold;
-      cursor: pointer;
+      background-color: var(--button-bg); color: var(--text-main); border: 2px solid var(--card-border);
+      padding: 6px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: bold; cursor: pointer;
     }
 
-    .master-pdp-box {
-      border: 2px solid var(--accent-orange);
-      border-radius: 8px;
-      padding: 8px;
-      text-align: center;
-      background-color: rgba(255, 107, 0, 0.08);
-      margin-bottom: 4px;
-    }
+    .master-pdp-box { border: 2px solid var(--accent-orange); border-radius: 8px; padding: 10px; text-align: center; background-color: rgba(255, 107, 0, 0.08); margin-bottom: 4px; }
+    .master-pdp-label { font-size: 0.75rem; font-weight: bold; color: var(--accent-orange); text-transform: uppercase; }
+    .master-pdp-value { font-size: 2.2rem; font-weight: 900; color: var(--accent-orange); line-height: 1.1; }
 
-    .master-pdp-label {
-      font-size: 0.7rem;
-      font-weight: bold;
-      color: var(--accent-orange);
-      text-transform: uppercase;
-    }
+    .target-pdp-box { border: 2px solid var(--accent-green); border-radius: 8px; padding: 10px; text-align: center; background-color: rgba(0, 230, 118, 0.05); }
+    .target-pdp-value { font-size: 1.8rem; font-weight: 800; color: var(--accent-green); }
 
-    .master-pdp-value {
-      font-size: 2rem;
-      font-weight: 900;
-      color: var(--accent-orange);
-      line-height: 1.1;
-    }
-
-    .target-pdp-box {
-      border: 2px solid var(--accent-green);
-      border-radius: 8px;
-      padding: 10px;
-      text-align: center;
-      background-color: rgba(0, 230, 118, 0.05);
-    }
-
-    .target-pdp-value {
-      font-size: 1.8rem;
-      font-weight: 800;
-      color: var(--accent-green);
-    }
-
-    .btn-group {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-      gap: 8px;
-    }
-
+    .btn-group { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 8px; }
     .btn {
-      background-color: var(--button-bg);
-      color: var(--text-main);
-      border: 1px solid var(--card-border);
-      padding: 10px 8px;
-      border-radius: 6px;
-      font-size: 0.85rem;
-      font-weight: 600;
-      cursor: pointer;
-      text-align: center;
-      transition: all 0.15s ease;
-      min-height: 44px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      background-color: var(--button-bg); color: var(--text-main); border: 1px solid var(--card-border);
+      padding: 10px 8px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer;
+      text-align: center; transition: all 0.15s ease; min-height: 44px; display: flex; align-items: center; justify-content: center;
     }
+    .btn:active { transform: scale(0.97); }
+    .btn.active { background-color: var(--accent-orange); color: #ffffff; border: 2px solid var(--active-border); box-shadow: 0 0 8px rgba(255, 107, 0, 0.5); font-weight: 800; }
+    .btn-blue.active { background-color: var(--accent-blue); box-shadow: 0 0 8px rgba(2, 136, 209, 0.5); }
+    .btn-red { background-color: var(--btn-red) !important; color: #ffffff !important; border: 1px solid #ff4444 !important; }
+    .btn-red:hover { background-color: var(--btn-red-hover) !important; }
 
-    .btn:active {
-      transform: scale(0.97);
-    }
+    .section-label { font-size: 0.8rem; font-weight: bold; color: var(--text-sub); margin-top: 4px; }
 
-    .btn.active {
-      background-color: var(--accent-orange);
-      color: #ffffff;
-      border: 2px solid var(--active-border);
-      box-shadow: 0 0 8px rgba(255, 107, 0, 0.5);
-      font-weight: 800;
+    /* Tactical Advisor Warning Box */
+    .warning-card {
+      background: rgba(220, 38, 38, 0.15); border: 1px solid #ef4444;
+      border-radius: 6px; padding: 8px; font-size: 0.8rem;
     }
+    .warning-title { font-weight: bold; color: #fca5a5; margin-bottom: 2px; }
 
-    .btn-blue.active {
-      background-color: var(--accent-blue);
-      box-shadow: 0 0 8px rgba(2, 136, 209, 0.5);
-    }
+    .lay-diagram-container { background: rgba(0, 0, 0, 0.25); border-radius: 8px; padding: 8px; display: flex; flex-direction: column; border: 1px dashed var(--card-border); position: relative; }
+    .scene-top-icons { display: flex; justify-content: center; align-items: center; gap: 20px; font-size: 2rem; padding: 4px 0; }
+    #hoseCanvas { width: 100%; height: 380px; background: rgba(0, 0, 0, 0.15); border-radius: 6px; }
 
-    .btn-red {
-      background-color: var(--btn-red) !important;
-      color: #ffffff !important;
-      border: 1px solid #ff4444 !important;
-    }
-
-    .btn-red:hover {
-      background-color: var(--btn-red-hover) !important;
-    }
-
-    .section-label {
-      font-size: 0.8rem;
-      font-weight: bold;
-      color: var(--text-sub);
-      margin-top: 4px;
-    }
-
-    .lay-diagram-container {
-      background: rgba(0, 0, 0, 0.25);
-      border-radius: 8px;
-      padding: 8px;
-      display: flex;
-      flex-direction: column;
-      border: 1px dashed var(--card-border);
-      position: relative;
-    }
-
-    .scene-top-icons {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 20px;
-      font-size: 2rem;
-      padding: 4px 0;
-    }
-
-    #hoseCanvas {
-      width: 100%;
-      height: 380px;
-      background: rgba(0, 0, 0, 0.15);
-      border-radius: 6px;
-    }
-
-    .timer-display {
-      text-align: center;
-      font-size: 2.2rem;
-      font-weight: 900;
-      color: var(--accent-blue);
-    }
-
-    .tank-row {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      background: rgba(0,0,0,0.15);
-      padding: 8px;
-      border-radius: 6px;
-    }
-
-    .tank-controls {
-      display: flex;
-      gap: 6px;
-    }
-
-    .tank-controls .btn {
-      flex: 1;
-      padding: 6px;
-      font-size: 0.75rem;
-    }
-
-    .flow-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 8px;
-    }
+    .timer-display { text-align: center; font-size: 2.2rem; font-weight: 900; color: var(--accent-blue); }
+    .tank-row { display: flex; flex-direction: column; gap: 4px; background: rgba(0,0,0,0.15); padding: 8px; border-radius: 6px; }
+    .tank-controls { display: flex; gap: 6px; }
+    .tank-controls .btn { flex: 1; padding: 6px; font-size: 0.75rem; }
+    .flow-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
   </style>
 </head>
 <body>
 
   <div class="dashboard-grid">
-
-    <!-- COLUMN 1: CONTROL PANEL -->
+    
+    <!-- COLUMN 1: CONTROL PANEL & TACTICAL ADVISOR -->
     <div class="panel">
       <div class="panel-header">
         <span class="panel-title">Control Panel</span>
         <button class="sunlight-btn" onclick="toggleSunlightMode()">☀️ Sun Mode</button>
       </div>
+
+      <div id="tactical-warning-container"></div>
 
       <div class="btn-group">
         <button class="btn active" id="line-btn-attack1" onclick="selectLine('attack1')">Attack 1</button>
@@ -284,13 +127,14 @@
       <div class="target-pdp-box">
         <div style="font-size: 0.75rem; font-weight: bold; color: var(--accent-green);" id="active-line-title">ATTACK 1 - TARGET PDP</div>
         <div class="target-pdp-value" id="target-pdp">0 <span style="font-size: 0.9rem;">kPa</span></div>
-        <div style="font-size: 0.75rem; color: var(--text-sub);" id="line-summary-text">NONE (0 kPa) | 0 hoses | 0 floors</div>
+        <div style="font-size: 0.75rem; color: var(--text-sub);" id="line-summary-text">INACTIVE</div>
+        <div style="font-size: 0.75rem; font-weight: bold; margin-top: 4px; color: var(--accent-orange);" id="line-gate-status">FULLY OPEN</div>
       </div>
 
       <div class="section-label">Quick Preconnect Short-Cuts</div>
       <div class="btn-group">
-        <button class="btn btn-blue" onclick="applyPreset('crosslay')">Crosslay (200ft 44mm + Fog)</button>
-        <button class="btn btn-blue" onclick="applyPreset('highrise')">High-Rise (100ft 50ft + SB)</button>
+        <button class="btn btn-blue" onclick="applyPreset('crosslay')">Crosslay (60m 44mm + Fog)</button>
+        <button class="btn btn-blue" onclick="applyPreset('highrise')">High-Rise Standpipe (30m 65mm + SB)</button>
       </div>
 
       <div class="section-label">Supply Mode</div>
@@ -302,32 +146,32 @@
 
       <div class="section-label">1. Nozzle Selection</div>
       <div class="btn-group">
-        <button class="btn" id="nozzle-btn-fog" onclick="setNozzle('fog', 700)">Fog Nozzle (700 kPa)</button>
-        <button class="btn" id="nozzle-btn-smooth" onclick="setNozzle('smooth', 350)">Smooth Bore (350 kPa)</button>
+        <button class="btn" id="nozzle-btn-fog" onclick="setNozzle('Fog Nozzle', 700)">Fog Nozzle (700 kPa)</button>
+        <button class="btn" id="nozzle-btn-smooth" onclick="setNozzle('Smooth Bore', 350)">Smooth Bore (350 kPa)</button>
         <button class="btn btn-red" onclick="clearNozzle()">- Nozzle</button>
       </div>
 
-      <div class="section-label">2. Hose Lengths (50 ft / Segment)</div>
+      <div class="section-label">2. Hose Lengths (30m Segments)</div>
       <div class="btn-group">
-        <button class="btn" onclick="addHose(44, 200)">+ 1x 50ft 44mm</button>
-        <button class="btn" onclick="addHose(50, 60)">+ 1x 50ft 50ft</button>
+        <button class="btn" onclick="addHose('44mm', 30)">+ 1x 30m 44mm</button>
+        <button class="btn" onclick="addHose('65mm', 30)">+ 1x 30m 65mm</button>
         <button class="btn btn-red" onclick="removeHose()">- Hose</button>
       </div>
 
       <div class="section-label">3. Elevation Adjustment</div>
       <div class="btn-group">
-        <button class="btn" onclick="adjustElevation(10)">+1 Floor Up</button>
-        <button class="btn btn-red" onclick="adjustElevation(-10)">-1 Floor Down</button>
+        <button class="btn" onclick="adjustElevation(10)">+1 Floor Up (+10 kPa)</button>
+        <button class="btn btn-red" onclick="adjustElevation(-10)">-1 Floor Down (-10 kPa)</button>
       </div>
 
       <div class="section-label">4. Appliances / Connections</div>
       <div class="btn-group">
-        <button class="btn" id="standpipe-btn" onclick="toggleStandpipe()">Toggle Standpipe/Wye</button>
+        <button class="btn" id="standpipe-btn" onclick="toggleStandpipe()">Toggle Standpipe/Wye (+70 kPa)</button>
         <button class="btn btn-red" onclick="resetActiveLine()">Reset Active Line</button>
       </div>
     </div>
 
-    <!-- COLUMN 2: REBUILT GRAPHICAL LAY DIAGRAM -->
+    <!-- COLUMN 2: MASTER PDP & REBUILT GRAPHICAL LAY DIAGRAM -->
     <div class="panel">
       <div class="panel-header">
         <span class="panel-title">Lay Diagram</span>
@@ -343,7 +187,6 @@
           <span>🏠</span>
           <span>🔥</span>
         </div>
-
         <canvas id="hoseCanvas"></canvas>
       </div>
     </div>
@@ -356,20 +199,20 @@
 
       <div style="text-align: center;">
         <div class="section-label">TIME TO EMPTY WATER SUPPLY</div>
-        <div class="timer-display" id="empty-timer">00:00</div>
+        <div class="timer-display" id="empty-timer">--:--</div>
         <div style="font-size: 0.8rem; color: var(--text-sub);">Total Discharge Flow: <strong id="total-flow">0 L/m</strong></div>
       </div>
 
       <div class="section-label" id="tank-capacity-label">ACTIVE SOURCE: ON-BOARD TANK</div>
-      <div style="width: 100%; background-color: var(--button-bg); height: 12px; border-radius: 6px; overflow: hidden;">
+      <div style="width: 100%; background-color: var(--button-bg); height: 14px; border-radius: 7px; overflow: hidden; border: 1px solid var(--card-border);">
         <div id="tank-bar" style="width: 100%; height: 100%; background-color: var(--accent-green); transition: width 0.3s ease;"></div>
       </div>
 
       <div class="tank-row">
         <div style="font-size: 0.85rem; font-weight: bold;">On-Board Engine Tank: <span id="engine-tank-val">2500 L / 2500 L</span></div>
         <div class="tank-controls">
-          <button class="btn btn-red" onclick="adjustTankCapacity('engine', -500)">- 500L Size</button>
-          <button class="btn" onclick="adjustTankCapacity('engine', 500)">+ 500L Size</button>
+          <button class="btn btn-red" onclick="adjustTankCapacity('engine', -500)">- 500L</button>
+          <button class="btn" onclick="adjustTankCapacity('engine', 500)">+ 500L</button>
           <button class="btn btn-blue" onclick="refillTank('engine')">FULL</button>
         </div>
       </div>
@@ -377,8 +220,8 @@
       <div class="tank-row">
         <div style="font-size: 0.85rem; font-weight: bold;">Draft Dump Tank: <span id="draft-tank-val">10000 L / 10000 L</span></div>
         <div class="tank-controls">
-          <button class="btn btn-red" onclick="adjustTankCapacity('draft', -500)">- 500L Size</button>
-          <button class="btn" onclick="adjustTankCapacity('draft', 500)">+ 500L Size</button>
+          <button class="btn btn-red" onclick="adjustTankCapacity('draft', -500)">- 500L</button>
+          <button class="btn" onclick="adjustTankCapacity('draft', 500)">+ 500L</button>
           <button class="btn btn-blue" onclick="refillTank('draft')">FULL</button>
         </div>
       </div>
@@ -386,8 +229,8 @@
       <div class="tank-row">
         <div style="font-size: 0.85rem; font-weight: bold;">Nursing Tender: <span id="nursing-tank-val">12000 L / 12000 L</span></div>
         <div class="tank-controls">
-          <button class="btn btn-red" onclick="adjustTankCapacity('nursing', -500)">- 500L Size</button>
-          <button class="btn" onclick="adjustTankCapacity('nursing', 500)">+ 500L Size</button>
+          <button class="btn btn-red" onclick="adjustTankCapacity('nursing', -500)">- 500L</button>
+          <button class="btn" onclick="adjustTankCapacity('nursing', 500)">+ 500L</button>
           <button class="btn btn-blue" onclick="refillTank('nursing')">FULL</button>
         </div>
       </div>
@@ -403,413 +246,440 @@
         <button class="btn" id="flow-btn-950" onclick="setFlow(950)">950 L/m (250 GPM)</button>
         <button class="btn" id="flow-btn-1900" onclick="setFlow(1900)">1900 L/m (500 GPM)</button>
       </div>
-
     </div>
+
   </div>
 
   <script>
-    const defaultLineState = () => ({
-      nozzleType: 'none',
-      nozzlePressure: 0,
-      hoseLoss: 0,
-      hoses: [],
-      elevationLoss: 0,
-      standpipeLoss: 0,
-      flowLpm: 0
-    });
-
+    // State management
     const lines = {
-      attack1: defaultLineState(),
-      attack2: defaultLineState(),
-      bumper: defaultLineState(),
-      monitor: defaultLineState()
+      attack1: { name: "Attack 1", code: "attack1", np: 0, nozzleName: "None", fl: 0, elev: 0, appliance: 0, customFlow: 0, hoses: [] },
+      attack2: { name: "Attack 2", code: "attack2", np: 0, nozzleName: "None", fl: 0, elev: 0, appliance: 0, customFlow: 0, hoses: [] },
+      bumper:  { name: "Bumper",   code: "bumper",  np: 0, nozzleName: "None", fl: 0, elev: 0, appliance: 0, customFlow: 0, hoses: [] },
+      monitor: { name: "Monitor",  code: "monitor", np: 0, nozzleName: "None", fl: 0, elev: 0, appliance: 0, customFlow: 0, hoses: [] }
     };
 
-    let activeLineKey = 'attack1';
+    let currentLineKey = 'attack1';
     let supplyMode = 'none';
 
     const tanks = {
-      engine: { current: 2500, max: 2500 },
-      draft: { current: 10000, max: 10000 },
-      nursing: { current: 12000, max: 12000 }
+      engine: { current: 2500, max: 2500, name: "On-Board Tank" },
+      draft: { current: 10000, max: 10000, name: "Draft Dump Tank" },
+      nursing: { current: 12000, max: 12000, name: "Nursing Tender" }
     };
 
     function toggleSunlightMode() {
       document.body.classList.toggle('sunlight-mode');
-      drawHoseDiagram();
+      const btn = document.querySelector('.sunlight-btn');
+      btn.innerText = document.body.classList.contains('sunlight-mode') ? "🌙 Night Mode" : "☀️ Sun Mode";
     }
 
-    function selectLine(key) {
-      activeLineKey = key;
-      ['attack1', 'attack2', 'bumper', 'monitor'].forEach(k => {
-        document.getElementById(`line-btn-${k}`).classList.toggle('active', k === key);
+    function selectLine(lineKey) {
+      currentLineKey = lineKey;
+      document.querySelectorAll('.btn-group .btn').forEach(b => {
+        if (b.id.startsWith('line-btn-')) b.classList.remove('active');
       });
-      document.getElementById('active-line-title').innerText = `${key.toUpperCase()} - TARGET PDP`;
-      updateUI();
+      document.getElementById(`line-btn-${lineKey}`).classList.add('active');
+      document.getElementById('active-line-title').innerText = `${lines[lineKey].name.toUpperCase()} - TARGET PDP`;
+      
+      // Update button active states for custom flows and nozzles
+      updateControlPanelStates();
+      calculateAll();
     }
 
     function setSupply(mode) {
-      if (supplyMode === mode) {
-        supplyMode = 'none';
-      } else {
-        supplyMode = mode;
+      supplyMode = supplyMode === mode ? 'none' : mode;
+      ['hydrant', 'drafting', 'nursing'].forEach(m => {
+        const b = document.getElementById(`sup-btn-${m}`);
+        if (b) b.classList.remove('active');
+      });
+      if (supplyMode !== 'none') {
+        const activeBtn = document.getElementById(`sup-btn-${supplyMode}`);
+        if (activeBtn) activeBtn.classList.add('active');
       }
-      updateUI();
+      calculateAll();
     }
 
-    function setNozzle(type, pressure) {
-      const line = lines[activeLineKey];
-      if (line.nozzleType === type) {
-        line.nozzleType = 'none';
-        line.nozzlePressure = 0;
-      } else {
-        line.nozzleType = type;
-        line.nozzlePressure = pressure;
-      }
-      updateUI();
+    function setNozzle(name, pressure) {
+      const line = lines[currentLineKey];
+      line.nozzleName = name;
+      line.np = pressure;
+      line.customFlow = 0;
+      updateControlPanelStates();
+      calculateAll();
     }
 
     function clearNozzle() {
-      lines[activeLineKey].nozzleType = 'none';
-      lines[activeLineKey].nozzlePressure = 0;
-      updateUI();
+      const line = lines[currentLineKey];
+      line.nozzleName = "None";
+      line.np = 0;
+      line.customFlow = 0;
+      updateControlPanelStates();
+      calculateAll();
     }
 
-    function addHose(size, pressure) {
-      const line = lines[activeLineKey];
-      line.hoses.push({ size, pressure });
-      line.hoseLoss += pressure;
-      updateUI();
+    function addHose(type, lengthMeters) {
+      const line = lines[currentLineKey];
+      // Accurate friction loss calculation per 30m segment
+      // 44mm hose = ~100 kPa per 30m segment; 65mm hose = ~30 kPa per 30m segment
+      let flPerSegment = (type === '44mm') ? 100 : 30;
+      line.hoses.push({ type: type, length: lengthMeters, fl: flPerSegment });
+      calculateAll();
     }
 
     function removeHose() {
-      const line = lines[activeLineKey];
+      const line = lines[currentLineKey];
       if (line.hoses.length > 0) {
-        const removed = line.hoses.pop();
-        line.hoseLoss -= removed.pressure;
-        updateUI();
+        line.hoses.pop();
       }
+      if (line.hoses.length === 0) {
+        line.elev = 0; // Guardrail: remove elevation if no hoses
+      }
+      calculateAll();
     }
 
-    function adjustElevation(amount) {
-      lines[activeLineKey].elevationLoss += amount;
-      updateUI();
+    function adjustElevation(val) {
+      const line = lines[currentLineKey];
+      if (line.hoses.length > 0) {
+        line.elev += val;
+        if (line.elev < 0) line.elev = 0;
+      }
+      calculateAll();
     }
 
     function toggleStandpipe() {
-      const line = lines[activeLineKey];
-      line.standpipeLoss = line.standpipeLoss === 0 ? 70 : 0;
-      document.getElementById('standpipe-btn').classList.toggle('active', line.standpipeLoss > 0);
-      updateUI();
-    }
-
-    function resetActiveLine() {
-      lines[activeLineKey] = defaultLineState();
-      document.getElementById('standpipe-btn').classList.remove('active');
-      updateUI();
-    }
-
-    function applyPreset(preset) {
-      const line = lines[activeLineKey];
-      if (preset === 'crosslay') {
-        line.nozzleType = 'fog';
-        line.nozzlePressure = 700;
-        line.hoses = [
-          { size: 44, pressure: 200 }, { size: 44, pressure: 200 },
-          { size: 44, pressure: 200 }, { size: 44, pressure: 200 }
-        ];
-        line.hoseLoss = 800;
-        line.elevationLoss = 0;
-        line.standpipeLoss = 0;
-        line.flowLpm = 470;
-      } else if (preset === 'highrise') {
-        line.nozzleType = 'smooth';
-        line.nozzlePressure = 350;
-        line.hoses = [
-          { size: 50, pressure: 60 }, { size: 50, pressure: 60 }
-        ];
-        line.hoseLoss = 120;
-        line.elevationLoss = 30;
-        line.standpipeLoss = 70;
-        line.flowLpm = 950;
+      const line = lines[currentLineKey];
+      line.appliance = line.appliance === 0 ? 70 : 0;
+      const btn = document.getElementById('standpipe-btn');
+      if (line.appliance > 0) {
+        btn.classList.add('active');
+      } else {
+        btn.classList.remove('active');
       }
-      updateUI();
+      calculateAll();
     }
 
     function setFlow(lpm) {
-      const line = lines[activeLineKey];
-      if (line.flowLpm === lpm) {
-        line.flowLpm = 0;
-      } else {
-        line.flowLpm = lpm;
+      const line = lines[currentLineKey];
+      if (line.nozzleName === "None") {
+        line.nozzleName = "Fog Nozzle";
+        line.np = 700;
       }
-      updateUI();
+      line.customFlow = lpm;
+      updateControlPanelStates();
+      calculateAll();
     }
 
-    function adjustTankCapacity(type, amount) {
-      const tank = tanks[type];
-      tank.max = Math.max(500, tank.max + amount);
+    function applyPreset(preset) {
+      resetActiveLine();
+      const line = lines[currentLineKey];
+      if (preset === 'crosslay') {
+        line.nozzleName = "Fog Nozzle";
+        line.np = 700;
+        line.customFlow = 470;
+        addHose('44mm', 30);
+        addHose('44mm', 30);
+      } else if (preset === 'highrise') {
+        line.nozzleName = "Smooth Bore";
+        line.np = 350;
+        line.customFlow = 700;
+        addHose('65mm', 30);
+        line.elev = 30;
+        line.appliance = 70;
+        document.getElementById('standpipe-btn').classList.add('active');
+      }
+      updateControlPanelStates();
+      calculateAll();
+    }
+
+    function resetActiveLine() {
+      const line = lines[currentLineKey];
+      line.np = 0;
+      line.nozzleName = "None";
+      line.fl = 0;
+      line.elev = 0;
+      line.appliance = 0;
+      line.customFlow = 0;
+      line.hoses = [];
+      document.getElementById('standpipe-btn').classList.remove('active');
+      updateControlPanelStates();
+      calculateAll();
+    }
+
+    function calculateFlow(line) {
+      if (line.nozzleName === "None") return { lpm: 0, gpm: 0 };
+      if (line.customFlow > 0) {
+        return { lpm: line.customFlow, gpm: Math.round(line.customFlow / 3.785) };
+      }
+      let has65 = line.hoses.some(h => h.type === '65mm');
+      if (line.nozzleName === "Fog Nozzle") {
+        return has65 ? { lpm: 950, gpm: 250 } : { lpm: 570, gpm: 150 };
+      } else if (line.nozzleName === "Smooth Bore") {
+        return has65 ? { lpm: 1000, gpm: 265 } : { lpm: 700, gpm: 185 };
+      }
+      return { lpm: 0, gpm: 0 };
+    }
+
+    function calculateAll() {
+      let maxPDP = 0;
+      let totalLPM = 0;
+
+      Object.keys(lines).forEach(key => {
+        const l = lines[key];
+        if (l.hoses.length === 0) l.elev = 0;
+
+        // Sum true friction loss across hose segments
+        let totalFL = l.hoses.reduce((sum, h) => sum + h.fl, 0);
+        l.fl = totalFL;
+
+        let linePDP = (l.hoses.length > 0 || l.nozzleName !== "None") ? (l.np + l.fl + l.elev + l.appliance) : 0;
+        if (linePDP > maxPDP) maxPDP = linePDP;
+
+        let flow = calculateFlow(l);
+        totalLPM += flow.lpm;
+      });
+
+      // Display Master PDP
+      document.getElementById('master-pdp').innerHTML = `${maxPDP} <span style="font-size: 1rem;">kPa</span>`;
+
+      // Display Active Line Stats
+      const activeLine = lines[currentLineKey];
+      let activeLineFL = activeLine.hoses.reduce((sum, h) => sum + h.fl, 0);
+      let activeLinePDP = (activeLine.hoses.length > 0 || activeLine.nozzleName !== "None") ? (activeLine.np + activeLineFL + activeLine.elev + activeLine.appliance) : 0;
+      
+      document.getElementById('target-pdp').innerHTML = `${activeLinePDP} <span style="font-size: 0.9rem;">kPa</span>`;
+      document.getElementById('line-summary-text').innerText = `${activeLine.nozzleName} (${activeLine.np} kPa) | ${activeLine.hoses.length} hoses (${activeLineFL} kPa FL) | ${activeLine.elev / 10} floors`;
+
+      const gateElem = document.getElementById('line-gate-status');
+      if (activeLinePDP === maxPDP && maxPDP > 0) {
+        gateElem.innerText = "100% FULLY OPEN DISCHARGE";
+        gateElem.style.color = "var(--accent-green)";
+      } else if (activeLinePDP < maxPDP && activeLinePDP > 0) {
+        let pct = Math.round((activeLinePDP / maxPDP) * 100);
+        gateElem.innerText = `GATE DOWN TO ${pct}% OPEN`;
+        gateElem.style.color = "#eab308";
+      } else {
+        gateElem.innerText = "LINE INACTIVE";
+        gateElem.style.color = "var(--text-sub)";
+      }
+
+      updateTacticalWarnings(maxPDP, activeLinePDP, activeLineFL);
+      updateTankAndTimer(totalLPM);
+      drawCanvas(maxPDP);
+    }
+
+    function updateTacticalWarnings(maxPDP, activePDP, activeFL) {
+      const container = document.getElementById('tactical-warning-container');
+      container.innerHTML = "";
+
+      const activeLine = lines[currentLineKey];
+      let flow = calculateFlow(activeLine);
+
+      if (activeFL >= 300) {
+        container.innerHTML += `
+          <div class="warning-card">
+            <div class="warning-title">⚠️ SEVERE FRICTION LOSS</div>
+            Friction loss on this line exceeds 300 kPa. Consider extending with 65mm supply line.
+          </div>`;
+      }
+
+      if (activeLine.nozzleName === "Smooth Bore" && flow.lpm >= 950) {
+        container.innerHTML += `
+          <div class="warning-card">
+            <div class="warning-title">💪 HIGH NOZZLE REACTION</div>
+            High-volume smooth bore stream (${flow.lpm} L/m). Ensure minimum 2 firefighters on nozzle.
+          </div>`;
+      }
+
+      if (supplyMode === 'hydrant') {
+        container.innerHTML += `
+          <div class="warning-card">
+            <div class="warning-title">⚠️ HYDRANT RESIDUAL WARNING</div>
+            Maintain intake residual above 140 kPa (20 psi) to avoid pump cavitation.
+          </div>`;
+      } else if (supplyMode === 'drafting') {
+        container.innerHTML += `
+          <div class="warning-card">
+            <div class="warning-title">⚠️ DRAFTING LIFT LIMIT</div>
+            Ensure maximum vertical lift height does not exceed 3 meters (10 ft).
+          </div>`;
+      } else if (supplyMode === 'nursing') {
+        container.innerHTML += `
+          <div class="warning-card">
+            <div class="warning-title">🚒 NURSING / RELAY BUFFER</div>
+            Supply engine must maintain at least 140 kPa intake buffer.
+          </div>`;
+      }
+
+      if (maxPDP > 1750) {
+        container.innerHTML += `
+          <div class="warning-card" style="border-color: #ff4444; background: rgba(255,0,0,0.2);">
+            <div class="warning-title">🚨 OVERPRESSURE DANGER</div>
+            Target PDP exceeds 1750 kPa (250 psi). Verify hose structural rating!
+          </div>`;
+      }
+    }
+
+    function updateTankAndTimer(totalLPM) {
+      const timerElem = document.getElementById('empty-timer');
+      const totalFlowElem = document.getElementById('total-flow');
+      const barElem = document.getElementById('tank-bar');
+      const labelElem = document.getElementById('tank-capacity-label');
+
+      totalFlowElem.innerText = `${totalLPM} L/m`;
+
+      if (supplyMode === 'hydrant') {
+        timerElem.innerText = "∞ (HYDRANT)";
+        timerElem.style.color = "var(--accent-green)";
+        labelElem.innerText = "ACTIVE SOURCE: HYDRANT (CONTINUOUS)";
+        barElem.style.width = "100%";
+        barElem.style.backgroundColor = "var(--accent-blue)";
+        return;
+      }
+
+      let activeTankKey = 'engine';
+      let sourceName = "ON-BOARD TANK";
+      if (supplyMode === 'drafting') { activeTankKey = 'draft'; sourceName = "STATIC DUMP TANK"; }
+      if (supplyMode === 'nursing') { activeTankKey = 'nursing'; sourceName = "NURSING TENDER"; }
+
+      const tank = tanks[activeTankKey];
+      labelElem.innerText = `ACTIVE SOURCE: ${sourceName}`;
+      
+      let pct = Math.round((tank.current / tank.max) * 100);
+      barElem.style.width = `${pct}%`;
+      barElem.style.backgroundColor = pct > 50 ? "var(--accent-green)" : (pct > 20 ? "#eab308" : "#ef4444");
+
+      if (totalLPM <= 0) {
+        timerElem.innerText = "--:--";
+        timerElem.style.color = "var(--accent-blue)";
+        return;
+      }
+
+      let totalMinutes = tank.current / totalLPM;
+      let mins = Math.floor(totalMinutes);
+      let secs = Math.floor((totalMinutes - mins) * 60);
+
+      timerElem.innerText = `${mins < 10 ? '0' + mins : mins}:${secs < 10 ? '0' + secs : secs}`;
+      timerElem.style.color = mins < 2 ? "#ef4444" : "var(--accent-blue)";
+    }
+
+    function adjustTankCapacity(tankKey, amount) {
+      const tank = tanks[tankKey];
+      tank.max += amount;
+      if (tank.max < 500) tank.max = 500;
       if (tank.current > tank.max) tank.current = tank.max;
-      updateUI();
+      document.getElementById(`${tankKey}-tank-val`).innerText = `${tank.current} L / ${tank.max} L`;
+      calculateAll();
     }
 
-    function refillTank(type) {
-      tanks[type].current = tanks[type].max;
-      updateUI();
+    function refillTank(tankKey) {
+      const tank = tanks[tankKey];
+      tank.current = tank.max;
+      document.getElementById(`${tankKey}-tank-val`).innerText = `${tank.current} L / ${tank.max} L`;
+      calculateAll();
     }
 
-    function calculateLinePDP(line) {
-      return line.nozzlePressure + line.hoseLoss + line.elevationLoss + line.standpipeLoss;
+    function updateControlPanelStates() {
+      // Clear active states
+      document.querySelectorAll('.flow-grid .btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('#nozzle-btn-fog, #nozzle-btn-smooth').forEach(b => b.classList.remove('active'));
+
+      const line = lines[currentLineKey];
+      if (line.nozzleName === "Fog Nozzle") document.getElementById('nozzle-btn-fog')?.classList.add('active');
+      if (line.nozzleName === "Smooth Bore") document.getElementById('nozzle-btn-smooth')?.classList.add('active');
+
+      if (line.customFlow > 0) {
+        const flowBtn = document.getElementById(`flow-btn-${line.customFlow}`);
+        if (flowBtn) flowBtn.classList.add('active');
+      }
     }
 
-    function drawHoseDiagram() {
+    function drawCanvas(maxPDP) {
       const canvas = document.getElementById('hoseCanvas');
-      if (!canvas) return;
       const ctx = canvas.getContext('2d');
-
-      canvas.width = canvas.offsetWidth;
-      canvas.height = canvas.offsetHeight;
+      
+      // Match canvas resolution to display size
+      canvas.width = canvas.parentElement.clientWidth - 16;
+      canvas.height = 380;
 
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      const lineKeys = ['attack1', 'attack2', 'bumper', 'monitor'];
-      const spacing = canvas.width / (lineKeys.length + 1);
-
-      const engineY = canvas.height - 75;
-      const topY = 55;
-
-      // Calculate Master PDP across all lines first
-      let maxPDP = 0;
-      lineKeys.forEach(k => {
-        const pdp = calculateLinePDP(lines[k]);
-        if (pdp > maxPDP) maxPDP = pdp;
-      });
-
-      ctx.font = '2.2rem sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText('🚒', canvas.width / 2, engineY + 25);
-
-      if (supplyMode === 'hydrant') {
-        ctx.font = '1.6rem sans-serif';
-        ctx.fillText('🚰', canvas.width / 2, engineY + 55);
-        ctx.strokeStyle = '#ffd600';
-        ctx.lineWidth = 5;
-        ctx.beginPath();
-        ctx.moveTo(canvas.width / 2, engineY + 25);
-        ctx.lineTo(canvas.width / 2, engineY + 42);
-        ctx.stroke();
-      } else if (supplyMode === 'nursing') {
-        ctx.font = '1.6rem sans-serif';
-        ctx.fillText('🚒', canvas.width / 2, engineY + 55);
-        ctx.strokeStyle = '#ffd600';
-        ctx.lineWidth = 5;
-        ctx.beginPath();
-        ctx.moveTo(canvas.width / 2, engineY + 25);
-        ctx.lineTo(canvas.width / 2, engineY + 42);
-        ctx.stroke();
-      } else if (supplyMode === 'drafting') {
-        ctx.font = '1.6rem sans-serif';
-        ctx.fillText('🌊', canvas.width / 2, engineY + 55);
-        ctx.strokeStyle = '#0288d1';
-        ctx.lineWidth = 6;
-        ctx.beginPath();
-        ctx.moveTo(canvas.width / 2, engineY + 25);
-        ctx.lineTo(canvas.width / 2, engineY + 42);
-        ctx.stroke();
-      }
+      const lineKeys = Object.keys(lines);
+      const colWidth = canvas.width / lineKeys.length;
 
       lineKeys.forEach((key, index) => {
-        const line = lines[key];
-        const pdp = calculateLinePDP(line);
-        const x = spacing * (index + 1);
+        const l = lines[key];
+        const centerX = colWidth * index + colWidth / 2;
+        let lineFL = l.hoses.reduce((sum, h) => sum + h.fl, 0);
+        let lPDP = (l.hoses.length > 0 || l.nozzleName !== "None") ? (l.np + lineFL + l.elev + l.appliance) : 0;
+        let flow = calculateFlow(l);
 
-        if (key === activeLineKey) {
-          ctx.strokeStyle = 'rgba(0, 255, 102, 0.4)';
-          ctx.lineWidth = 14;
+        // Draw Nozzle / Spray
+        if (l.nozzleName !== "None") {
+          ctx.font = "16px sans-serif";
+          ctx.textAlign = "center";
+          ctx.fillText("💧💦", centerX, 40);
+
+          ctx.fillStyle = l.nozzleName === "Fog Nozzle" ? "#0288d1" : "#eab308";
           ctx.beginPath();
-          ctx.moveTo(x, engineY);
-          ctx.lineTo(x, topY);
-          ctx.stroke();
-        }
-
-        const totalHoseCount = line.hoses.length;
-        if (totalHoseCount > 0) {
-          const hoseSegmentHeight = (engineY - topY - 30) / Math.max(1, totalHoseCount);
-
-          for (let i = 0; i < totalHoseCount; i++) {
-            const segStartY = engineY - (i * hoseSegmentHeight);
-            const segEndY = segStartY - hoseSegmentHeight + 6;
-
-            ctx.strokeStyle = '#ffeb3b';
-            ctx.lineWidth = 6;
-            ctx.beginPath();
-            ctx.moveTo(x, segStartY);
-            ctx.lineTo(x, segEndY);
-            ctx.stroke();
-
-            ctx.fillStyle = '#9e9e9e';
-            ctx.fillRect(x - 6, segStartY - 3, 12, 4);
-            ctx.fillRect(x - 6, segEndY - 3, 12, 4);
-          }
-        }
-
-        if (line.nozzleType === 'fog') {
-          ctx.fillStyle = '#ff6b00';
-          ctx.beginPath();
-          ctx.moveTo(x, topY + 15);
-          ctx.lineTo(x - 12, topY - 5);
-          ctx.lineTo(x + 12, topY - 5);
-          ctx.closePath();
+          ctx.arc(centerX, 60, 8, 0, Math.PI * 2);
           ctx.fill();
 
-          ctx.strokeStyle = 'rgba(2, 136, 209, 0.6)';
-          ctx.lineWidth = 2;
-          ctx.beginPath();
-          ctx.moveTo(x, topY - 5); ctx.lineTo(x - 16, topY - 22);
-          ctx.moveTo(x, topY - 5); ctx.lineTo(x - 8, topY - 24);
-          ctx.moveTo(x, topY - 5); ctx.lineTo(x + 8, topY - 24);
-          ctx.moveTo(x, topY - 5); ctx.lineTo(x + 16, topY - 22);
-          ctx.stroke();
-
-          ctx.fillStyle = '#ff6b00';
-          ctx.font = 'bold 10px sans-serif';
-          ctx.fillText(`FOG | ${line.flowLpm} LPM`, x, topY - 28);
-
-        } else if (line.nozzleType === 'smooth') {
-          ctx.fillStyle = '#0288d1';
-          ctx.beginPath();
-          ctx.moveTo(x - 10, topY + 15);
-          ctx.lineTo(x + 10, topY + 15);
-          ctx.lineTo(x + 3, topY - 5);
-          ctx.lineTo(x - 3, topY - 5);
-          ctx.closePath();
-          ctx.fill();
-
-          ctx.strokeStyle = 'rgba(2, 136, 209, 0.8)';
-          ctx.lineWidth = 4;
-          ctx.beginPath();
-          ctx.moveTo(x, topY - 5);
-          ctx.lineTo(x, topY - 26);
-          ctx.stroke();
-
-          ctx.fillStyle = '#0288d1';
-          ctx.font = 'bold 10px sans-serif';
-          ctx.fillText(`SMOOTH | ${line.flowLpm} LPM`, x, topY - 30);
+          ctx.fillStyle = document.body.classList.contains('sunlight-mode') ? "#000" : "#fff";
+          ctx.font = "bold 10px sans-serif";
+          ctx.fillText(l.nozzleName === "Fog Nozzle" ? "[FOG]" : "[BORE]", centerX, 78);
         }
 
-        // Render PDP & Percentage Dial-Back Label at Bottom
-        ctx.fillStyle = key === activeLineKey ? '#00e676' : '#2a2a2a';
-        ctx.fillRect(x - 38, engineY - 26, 76, 20);
-        ctx.fillStyle = key === activeLineKey ? '#000000' : '#ffffff';
-        ctx.font = 'bold 10px sans-serif';
-        ctx.textAlign = 'center';
+        // Draw Flow Rate
+        if (flow.lpm > 0) {
+          ctx.fillStyle = "#0288d1";
+          ctx.font = "bold 10px sans-serif";
+          ctx.fillText(`${flow.lpm} L/m`, centerX, 94);
+        }
 
-        if (maxPDP > 0 && pdp > 0) {
-          const diffPct = Math.round(((pdp - maxPDP) / maxPDP) * 100);
-          const pctStr = diffPct === 0 ? '0%' : `${diffPct}%`;
-          ctx.fillText(`${pdp} kPa (${pctStr})`, x, engineY - 12);
-        } else {
-          ctx.fillText(`${pdp} kPa`, x, engineY - 12);
+        // Draw Hoses
+        let startY = 110;
+        l.hoses.forEach(h => {
+          ctx.fillStyle = key === 'attack1' ? '#facc15' : (key === 'attack2' ? '#3b82f6' : (key === 'bumper' ? '#ef4444' : '#22c55e'));
+          let hoseWidth = h.type === '44mm' ? 8 : 14;
+          ctx.fillRect(centerX - hoseWidth / 2, startY, hoseWidth, 35);
+
+          // Coupling
+          ctx.fillStyle = '#888';
+          ctx.fillRect(centerX - hoseWidth / 2 - 2, startY + 15, hoseWidth + 4, 5);
+
+          startY += 40;
+        });
+
+        // Draw Line Name & PDP at Base
+        ctx.fillStyle = document.body.classList.contains('sunlight-mode') ? "#000" : "#fff";
+        ctx.font = "bold 11px sans-serif";
+        ctx.fillText(l.name, centerX, 320);
+
+        ctx.fillStyle = "var(--accent-green)";
+        ctx.font = "bold 12px sans-serif";
+        ctx.fillText(`${lPDP} kPa`, centerX, 336);
+
+        // Gate Directive Indicator
+        if (lPDP === maxPDP && maxPDP > 0) {
+          ctx.fillStyle = "#16a34a";
+          ctx.fillRect(centerX - 35, 346, 70, 18);
+          ctx.fillStyle = "#fff";
+          ctx.font = "bold 9px sans-serif";
+          ctx.fillText("100% OPEN", centerX, 358);
+        } else if (lPDP < maxPDP && maxPDP > 0 && lPDP > 0) {
+          let pct = Math.round((lPDP / maxPDP) * 100);
+          ctx.fillStyle = "#eab308";
+          ctx.fillRect(centerX - 35, 346, 70, 18);
+          ctx.fillStyle = "#000";
+          ctx.font = "bold 9px sans-serif";
+          ctx.fillText(`GATE ${pct}%`, centerX, 358);
         }
       });
     }
 
-    function updateUI() {
-      const activeLine = lines[activeLineKey];
-
-      ['hydrant', 'drafting', 'nursing'].forEach(m => {
-        const btn = document.getElementById(`sup-btn-${m}`);
-        if (btn) btn.classList.toggle('active', supplyMode === m);
-      });
-
-      document.getElementById('nozzle-btn-fog').classList.toggle('active', activeLine.nozzleType === 'fog');
-      document.getElementById('nozzle-btn-smooth').classList.toggle('active', activeLine.nozzleType === 'smooth');
-      document.getElementById('standpipe-btn').classList.toggle('active', activeLine.standpipeLoss > 0);
-
-      [115, 230, 360, 470, 570, 750, 950, 1900].forEach(f => {
-        const btn = document.getElementById(`flow-btn-${f}`);
-        if (btn) btn.classList.toggle('active', activeLine.flowLpm === f);
-      });
-
-      const targetPDP = calculateLinePDP(activeLine);
-      document.getElementById('target-pdp').innerHTML = `${targetPDP} <span style="font-size: 0.9rem;">kPa</span>`;
-
-      const hoseSummary = `${activeLine.hoses.length * 50}ft (${activeLine.hoses.length} segments)`;
-      const elevSummary = `${activeLine.elevationLoss / 10} floors (${activeLine.elevationLoss} kPa)`;
-      document.getElementById('line-summary-text').innerText = `${activeLine.nozzleType.toUpperCase()} (${activeLine.nozzlePressure} kPa) | ${hoseSummary} | ${elevSummary}`;
-
-      let maxPDP = 0;
-      let totalFlow = 0;
-
-      Object.keys(lines).forEach(k => {
-        const l = lines[k];
-        const pdp = calculateLinePDP(l);
-        if (pdp > maxPDP) maxPDP = pdp;
-        totalFlow += l.flowLpm;
-      });
-
-      document.getElementById('master-pdp').innerHTML = `${maxPDP} <span style="font-size: 1rem;">kPa</span>`;
-      document.getElementById('total-flow').innerText = `${totalFlow} L/m`;
-
-      document.getElementById('engine-tank-val').innerText = `${tanks.engine.current} L / ${tanks.engine.max} L`;
-      document.getElementById('draft-tank-val').innerText = `${tanks.draft.current} L / ${tanks.draft.max} L`;
-      document.getElementById('nursing-tank-val').innerText = `${tanks.nursing.current} L / ${tanks.nursing.max} L`;
-
-      let activeTank = null;
-      let activeTankName = 'ON-BOARD TANK';
-
-      if (supplyMode === 'drafting') {
-        activeTank = tanks.draft;
-        activeTankName = 'DRAFT DUMP TANK';
-      } else if (supplyMode === 'nursing') {
-        activeTank = tanks.nursing;
-        activeTankName = 'NURSING TENDER';
-      } else {
-        activeTank = tanks.engine;
-      }
-
-      if (supplyMode === 'hydrant') {
-        document.getElementById('tank-capacity-label').innerText = `ACTIVE SOURCE: HYDRANT (UNLIMITED)`;
-        document.getElementById('tank-bar').style.width = `100%`;
-      } else {
-        document.getElementById('tank-capacity-label').innerText = `ACTIVE SOURCE: ${activeTankName} (${activeTank.current} L / ${activeTank.max} L)`;
-        const pct = (activeTank.current / activeTank.max) * 100;
-        document.getElementById('tank-bar').style.width = `${pct}%`;
-      }
-
-      if (supplyMode !== 'hydrant' && totalFlow > 0 && activeTank.current > 0) {
-        const totalSeconds = Math.floor((activeTank.current / totalFlow) * 60);
-        const mins = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
-        const secs = (totalSeconds % 60).toString().padStart(2, '0');
-        document.getElementById('empty-timer').innerText = `${mins}:${secs}`;
-      } else if (supplyMode === 'hydrant') {
-        document.getElementById('empty-timer').innerText = `∞`;
-      } else {
-        document.getElementById('empty-timer').innerText = `00:00`;
-      }
-
-      drawHoseDiagram();
-    }
-
-    window.addEventListener('resize', drawHoseDiagram);
-
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        const swCode = `
-          const CACHE_NAME = 'pdp-dash-v9';
-          self.addEventListener('install', (e) => {
-            e.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(['./'])));
-          });
-          self.addEventListener('fetch', (e) => {
-            e.respondWith(caches.match(e.request).then((res) => res || fetch(e.request)));
-          });
-        `;
-        const blob = new Blob([swCode], { type: 'application/javascript' });
-        navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(() => {});
-      });
-    }
-
-    updateUI();
+    // Initialize
+    calculateAll();
   </script>
 </body>
 </html>
