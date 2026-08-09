@@ -31,8 +31,8 @@
     }
 
     .diagram-box {
-      width: 380px;
-      height: 650px;
+      width: 400px;
+      height: 670px;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -162,18 +162,18 @@
       padding-top: 10px;
     }
 
-    .truck-part { font-size: 55px; line-height: 1; }
+    .structure-part { font-size: 45px; line-height: 1; margin-bottom: 5px; }
+    .truck-part { font-size: 50px; line-height: 1; margin-top: 10px; }
 
     .multi-lines-wrapper {
       display: flex;
       justify-content: space-around;
       width: 100%;
-      margin-top: 10px;
     }
 
     .line-column {
       display: flex;
-      flex-direction: column;
+      flex-direction: column-reverse; /* Reverses order so bottom is truck and top is nozzle/fire */
       align-items: center;
       width: 23%;
     }
@@ -181,23 +181,26 @@
     .line-label {
       font-size: 11px;
       font-weight: bold;
-      margin-bottom: 5px;
+      margin-top: 5px;
       text-align: center;
     }
 
     .hose-section { display: flex; flex-direction: column; align-items: center; }
     
     .coupling {
-      width: 14px; height: 5px;
+      width: 16px; height: 5px;
       background: linear-gradient(to right, #888, #ddd, #888);
       border-radius: 2px; border: 1px solid #444;
     }
     
+    /* Variable Hose Widths */
     .hose-line {
-      width: 6px; height: 35px;
+      height: 35px;
       border-left: 1px solid rgba(0,0,0,0.3);
       border-right: 1px solid rgba(0,0,0,0.3);
     }
+    .hose-44mm { width: 6px; }  /* Thinner 44mm hose */
+    .hose-65mm { width: 10px; } /* Noticeably wider 65mm hose */
 
     /* Hose Line Color Coding */
     .color-attack1 { background-color: #fdfd04; } /* Yellow */
@@ -205,15 +208,21 @@
     .color-bumper  { background-color: #e53e3e; } /* Red */
     .color-monitor { background-color: #38a169; } /* Green */
 
+    /* Smooth Bore: Tapered tip pointing UP towards the fire */
     .smooth-bore-nozzle {
       width: 0; height: 0;
       border-left: 5px solid transparent; border-right: 5px solid transparent;
       border-bottom: 24px solid #d4af37;
-      transform: rotate(180deg); margin-top: 2px;
+      margin-bottom: 2px;
     }
 
-    .fog-nozzle-body { width: 8px; height: 14px; background: linear-gradient(to right, #444, #888, #444); }
-    .fog-nozzle-head { width: 18px; height: 8px; background-color: #222; border-radius: 3px; border: 1px solid #555; }
+    /* Fog Nozzle: Triangle spray cone (pointing UP: narrow at hose, broad away) */
+    .fog-nozzle {
+      width: 0; height: 0;
+      border-left: 10px solid transparent; border-right: 10px solid transparent;
+      border-bottom: 20px solid #38bdf8; /* Blue water fog spray cone */
+      margin-bottom: 2px;
+    }
   </style>
 </head>
 <body>
@@ -241,7 +250,7 @@
       <div class="gauge-value"><span id="pdp-gauge">0</span> <small style="font-size:16px;">kPa</small></div>
     </div>
 
-    <!-- 3. Nozzle Controls (Add & Remove) -->
+    <!-- 3. Nozzle Controls -->
     <div class="btn-group">
       <h3>1. Nozzle Selection</h3>
       <button onclick="setNozzle('Fog Nozzle', 700)">Fog Nozzle (700 kPa)</button>
@@ -249,7 +258,7 @@
       <button class="remove-btn" onclick="removeNozzle()">- Remove Nozzle</button>
     </div>
 
-    <!-- 4. Hose Controls (Add & Remove) -->
+    <!-- 4. Hose Controls -->
     <div class="btn-group">
       <h3>2. Hose Length Controls</h3>
       <button onclick="addHose('44mm', 100)">+ 1 Length 44mm (100 kPa)</button>
@@ -269,13 +278,13 @@
   <div class="diagram-box">
     <h2>Full Lay Diagram</h2>
     <div id="diagram-container">
-      <div class="truck-part">🚒</div>
+      <div class="structure-part">🏠🔥</div> <!-- House on fire at top -->
       <div class="multi-lines-wrapper" id="multi-lines-container"></div>
+      <div class="truck-part">🚒</div> <!-- Fire truck at bottom -->
     </div>
   </div>
 
   <script>
-    // Data state for all 4 lines
     const lines = {
       attack1: { name: "Attack 1", code: "attack1", np: 0, nozzleName: "None", fl: 0, hoses: [] },
       attack2: { name: "Attack 2", code: "attack2", np: 0, nozzleName: "None", fl: 0, hoses: [] },
@@ -308,8 +317,8 @@
       updateDashboard();
     }
 
-    function addHose(name, flValue) {
-      lines[currentLineKey].hoses.push({ name: name, fl: flValue });
+    function addHose(type, flValue) {
+      lines[currentLineKey].hoses.push({ type: type, fl: flValue });
       lines[currentLineKey].fl += flValue;
       updateDashboard();
     }
@@ -335,10 +344,8 @@
       const activeLine = lines[currentLineKey];
       const activePDP = activeLine.np + activeLine.fl;
 
-      // Update Selected Line PDP Gauge
       document.getElementById('pdp-gauge').innerText = activePDP;
 
-      // Calculate Master Engine PDP (Highest PDP across all active lines)
       let maxPDP = 0;
       Object.keys(lines).forEach(key => {
         let linePDP = lines[key].np + lines[key].fl;
@@ -346,7 +353,6 @@
       });
       document.getElementById('master-pdp').innerText = maxPDP;
 
-      // Update Text Summary
       let summaryText = `Nozzle: ${activeLine.nozzleName} (${activeLine.np} kPa) | Hoses: ${activeLine.hoses.length} lengths (${activeLine.fl} kPa FL)`;
       document.getElementById('line-summary').innerText = summaryText;
 
@@ -357,7 +363,6 @@
       const wrapper = document.getElementById('multi-lines-container');
       wrapper.innerHTML = "";
 
-      // Draw all 4 lines side by side under the engine
       Object.keys(lines).forEach(key => {
         const line = lines[key];
 
@@ -370,8 +375,19 @@
         label.innerHTML = `${line.name}<br><span style="color:#39ff14">${linePDP} kPa</span>`;
         col.appendChild(label);
 
-        // Draw Hoses for this line
-        line.hoses.forEach(() => {
+        // Render Nozzle at top end of line
+        if (line.nozzleName === "Fog Nozzle") {
+          const fog = document.createElement('div');
+          fog.className = 'fog-nozzle';
+          col.appendChild(fog);
+        } else if (line.nozzleName === "Smooth Bore") {
+          const smoothBore = document.createElement('div');
+          smoothBore.className = 'smooth-bore-nozzle';
+          col.appendChild(smoothBore);
+        }
+
+        // Render Hoses upwards from engine to nozzle
+        line.hoses.forEach(hoseObj => {
           const hoseSection = document.createElement('div');
           hoseSection.className = 'hose-section';
 
@@ -379,7 +395,9 @@
           topCoupling.className = 'coupling';
 
           const hoseLine = document.createElement('div');
-          hoseLine.className = `hose-line color-${line.code}`;
+          // Applies width class based on 44mm vs 65mm
+          const widthClass = hoseObj.type === '65mm' ? 'hose-65mm' : 'hose-44mm';
+          hoseLine.className = `hose-line ${widthClass} color-${line.code}`;
 
           const bottomCoupling = document.createElement('div');
           bottomCoupling.className = 'coupling';
@@ -389,20 +407,6 @@
           hoseSection.appendChild(bottomCoupling);
           col.appendChild(hoseSection);
         });
-
-        // Draw Nozzles for this line
-        if (line.nozzleName === "Fog Nozzle") {
-          const body = document.createElement('div');
-          body.className = 'fog-nozzle-body';
-          const head = document.createElement('div');
-          head.className = 'fog-nozzle-head';
-          col.appendChild(body);
-          col.appendChild(head);
-        } else if (line.nozzleName === "Smooth Bore") {
-          const smoothBore = document.createElement('div');
-          smoothBore.className = 'smooth-bore-nozzle';
-          col.appendChild(smoothBore);
-        }
 
         wrapper.appendChild(col);
       });
