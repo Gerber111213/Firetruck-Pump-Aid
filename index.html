@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>PDP Calculator & Diagram</title>
+  <title>Engine PDP Dashboard</title>
   <style>
     body {
       background-image: linear-gradient(to right, #ff5e00, #39ff14);
@@ -12,49 +12,123 @@
       display: flex;
       justify-content: flex-start;
       align-items: flex-start;
-      padding: 40px;
+      padding: 30px;
       gap: 20px;
     }
 
     .calc-box, .diagram-box {
-      background-color: rgba(0, 0, 0, 0.85);
+      background-color: rgba(0, 0, 0, 0.88);
       border-radius: 12px;
-      padding: 25px;
+      padding: 20px;
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
-      height: 520px;
-      display: flex;
-      flex-direction: column;
       box-sizing: border-box;
     }
 
-    .calc-box { width: 360px; text-align: center; }
-    .diagram-box { width: 240px; position: relative; align-items: center; }
+    .calc-box {
+      width: 540px;
+      display: flex;
+      flex-direction: column;
+    }
 
-    .display {
-      font-size: 28px;
+    .diagram-box {
+      width: 250px;
+      height: 600px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    h1, h2 { margin-top: 0; text-align: center; }
+
+    /* Line Selector Tabs */
+    .line-selector {
+      display: flex;
+      justify-content: space-between;
+      gap: 6px;
+      margin-bottom: 15px;
+    }
+
+    .line-tab {
+      flex: 1;
+      padding: 10px 4px;
+      background: #333;
+      color: #ccc;
+      border: 2px solid #555;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 13px;
+      text-align: center;
+    }
+
+    .line-tab.active {
+      background: #ff5e00;
+      color: white;
+      border-color: #39ff14;
+    }
+
+    /* PDP Gauge Display */
+    .gauge-card {
+      background: #111;
+      border: 2px solid #39ff14;
+      border-radius: 10px;
+      padding: 12px;
+      text-align: center;
+      margin-bottom: 15px;
+    }
+
+    .gauge-title {
+      font-size: 13px;
+      color: #aaa;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .gauge-value {
+      font-size: 36px;
       font-weight: bold;
       color: #39ff14;
-      margin: 15px 0;
-      padding: 10px;
-      border: 2px solid #39ff14;
-      border-radius: 8px;
-    }
-    .btn-group { margin: 15px 0; }
-    button {
-      background-color: #ff5e00; color: white; border: none;
-      padding: 10px 15px; margin: 5px; font-size: 14px;
-      border-radius: 6px; cursor: pointer; font-weight: bold;
-    }
-    button:hover { background-color: #e05200; }
-    button.reset { background-color: #d9534f; margin-top: 15px; }
-    .summary {
-      text-align: left; background: rgba(255, 255, 255, 0.1);
-      padding: 10px 15px; border-radius: 6px; font-size: 14px;
-      margin-top: auto;
+      margin: 5px 0;
     }
 
-    h2.diag-title { font-size: 18px; margin-top: 0; margin-bottom: 10px;}
-    
+    /* Control Buttons */
+    .btn-group {
+      margin: 8px 0;
+      background: rgba(255, 255, 255, 0.05);
+      padding: 10px;
+      border-radius: 8px;
+    }
+
+    .btn-group h3 {
+      margin: 0 0 8px 0;
+      font-size: 14px;
+      color: #ddd;
+    }
+
+    button {
+      background-color: #ff5e00;
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      margin: 3px;
+      font-size: 13px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    button:hover { background-color: #e05200; }
+    button.reset { background-color: #d9534f; width: 100%; margin-top: 10px; }
+
+    .summary-box {
+      background: rgba(255, 255, 255, 0.08);
+      padding: 10px;
+      border-radius: 6px;
+      font-size: 13px;
+      margin-top: 10px;
+    }
+
+    /* Custom Hose & Coupling Styling */
     #diagram-container {
       width: 100%;
       height: 100%;
@@ -65,270 +139,181 @@
       padding-top: 10px;
     }
 
-    .truck-part { font-size: 55px; line-height: 1; margin-bottom: -4px; }
-
-    /* Custom Hose & Coupling Styling */
-    .hose-section {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      width: 100%;
-    }
-
-    .coupling {
-      width: 18px;
-      height: 6px;
-      background: linear-gradient(to right, #888, #ddd, #888);
-      border-radius: 2px;
-      border: 1px solid #444;
-    }
-
-    .hose-line {
-      width: 8px; /* Thin, rope-like hose width */
-      height: 45px; /* Length of each hose section */
-      background-color: #fdfd04; /* Bright yellow hose */
-      border-left: 1px solid #c8c800;
-      border-right: 1px solid #c8c800;
-    }
-
-    /* Custom Nozzle Styling */
-    .nozzle-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-
-    /* Smooth Bore: Tapered metallic tip */
-    .smooth-bore-nozzle {
-      width: 0;
-      height: 0;
-      border-left: 6px solid transparent;
-      border-right: 6px solid transparent;
-      border-bottom: 30px solid #d4af37; /* Brass color */
-      transform: rotate(180deg); /* Point downwards */
-      margin-top: 2px;
-    }
-
-    /* Fog Nozzle: Body + Wide Rubber Bumper Head */
-    .fog-nozzle-body {
-      width: 10px;
-      height: 18px;
-      background: linear-gradient(to right, #444, #888, #444);
-    }
-
-    .fog-nozzle-head {
-      width: 22px;
-      height: 12px;
-      background-color: #222;
-      border-radius: 3px;
-      border: 1px solid #555;
-    }
-  </style>
-    h2.diag-title { font-size: 18px; margin-top: 0; margin-bottom: 20px;}
+    .truck-part { font-size: 55px; line-height: 1; }
+    .hose-section { display: flex; flex-direction: column; align-items: center; }
     
-    #diagram-container {
-      width: 100%;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 5px; /* space between components */
-      overflow-y: auto; /* Scroll if layout gets too long */
-      padding-top: 20px;
+    .coupling {
+      width: 18px; height: 6px;
+      background: linear-gradient(to right, #888, #ddd, #888);
+      border-radius: 2px; border: 1px solid #444;
+    }
+    
+    .hose-line {
+      width: 8px; height: 40px;
+      background-color: #fdfd04;
+      border-left: 1px solid #c8c800; border-right: 1px solid #c8c800;
     }
 
-    .dia-part { font-size: 40px; margin: 0; padding: 0; line-height: 1;}
-    .truck-part { font-size: 55px; } /* Engine 🚒 */
-    .hose-part { color: #fdfd04; } /* Hose (Coupling) */
-    .coupling-part { font-size: 16px; color: #aaa; margin-top: -8px; } /* Coupling ⛓️ */
-    .nozzle-part { margin-top: -10px;} /* Nozzle 🛠️ */
+    .smooth-bore-nozzle {
+      width: 0; height: 0;
+      border-left: 6px solid transparent; border-right: 6px solid transparent;
+      border-bottom: 28px solid #d4af37;
+      transform: rotate(180deg); margin-top: 2px;
+    }
 
+    .fog-nozzle-body { width: 10px; height: 16px; background: linear-gradient(to right, #444, #888, #444); }
+    .fog-nozzle-head { width: 22px; height: 10px; background-color: #222; border-radius: 3px; border: 1px solid #555; }
   </style>
 </head>
 <body>
 
-  <!-- Left Box: Calculator -->
+  <!-- Left Box: PDP Dashboard -->
   <div class="calc-box">
-    <h1>PDP Calculator</h1>
-    
-    <div class="display">
-      PDP: <span id="pdp">0</span> kPa
+    <h1>PUMP DISCHARGE DASHBOARD</h1>
+
+    <!-- 1. Line Selector Buttons -->
+    <div class="line-selector">
+      <div class="line-tab active" id="tab-attack1" onclick="selectLine('attack1')">Attack 1</div>
+      <div class="line-tab" id="tab-attack2" onclick="selectLine('attack2')">Attack 2</div>
+      <div class="line-tab" id="tab-bumper" onclick="selectLine('bumper')">Bumper Line</div>
+      <div class="line-tab" id="tab-monitor" onclick="selectLine('monitor')">Monitor</div>
     </div>
 
-    <!-- Nozzle Selection -->
+    <!-- 2. Active Line PDP Gauge -->
+    <div class="gauge-card">
+      <div class="gauge-title" id="gauge-label">ATTACK LINE 1 - TARGET PDP</div>
+      <div class="gauge-value"><span id="pdp-gauge">0</span> <small style="font-size:18px;">kPa</small></div>
+    </div>
+
+    <!-- 3. Nozzle Selection -->
     <div class="btn-group">
-      <h3>1. Select Nozzle (NP)</h3>
+      <h3>1. Select Nozzle (Nozzle Pressure)</h3>
       <button onclick="setNozzle('Fog Nozzle', 700)">Fog Nozzle (700 kPa)</button>
       <button onclick="setNozzle('Smooth Bore', 350)">Smooth Bore (350 kPa)</button>
     </div>
 
-    <!-- Hose Selection -->
+    <!-- 4. Hose Addition -->
     <div class="btn-group">
-      <h3>2. Add Hose Lengths</h3>
-      <button onclick="addHose('44mm Hose Length', 100)">+ 1 Length 44mm (100 kPa FL)</button>
-      <button onclick="addHose('65mm Hose Length', 30)">+ 1 Length 65mm (30 kPa FL)</button>
+      <h3>2. Add Hose Lengths (Friction Loss)</h3>
+      <button onclick="addHose('44mm', 100)">+ 1 Length 44mm (100 kPa)</button>
+      <button onclick="addHose('65mm', 30)">+ 1 Length 65mm (30 kPa)</button>
     </div>
 
-    <!-- Controls -->
-    <script>
-    let nozzlePressure = 0;
-    let nozzleName = "None";
-    let frictionLoss = 0;
-    let hoses = [];
+    <button class="reset" onclick="resetActiveLine()">Reset Active Line</button>
 
-    function updateDisplay() {
-      let totalPDP = nozzlePressure + frictionLoss;
-      document.getElementById('pdp').innerText = totalPDP;
+    <div class="summary-box">
+      <strong>Active Line Summary:</strong>
+      <div id="line-summary">No nozzle or hose added.</div>
+    </div>
+  </div>
 
-      let listHtml = "";
-      if (nozzleName !== "None") {
-        listHtml += `<li><strong>Nozzle:</strong> ${nozzleName} (${nozzlePressure} kPa)</li>`;
-      } else {
-        listHtml += `<li>No nozzle selected</li>`;
-      }
-      
-      if (hoses.length > 0) {
-        listHtml += `<li><strong>Hose FL:</strong> ${frictionLoss} kPa (${hoses.length} lengths)</li>`;
-      } else {
-        listHtml += `<li>No hose added</li>`;
-      }
-      document.getElementById('summary-list').innerHTML = listHtml;
+  <!-- Right Box: Lay Diagram -->
+  <div class="diagram-box">
+    <h2>Lay Diagram</h2>
+    <div id="diagram-container">
+      <div class="truck-part">🚒</div>
+      <div id="active-diagram"></div>
+    </div>
+  </div>
+
+  <script>
+    // Independent state for all 4 lines
+    const lines = {
+      attack1: { name: "Attack Line 1", np: 0, nozzleName: "None", fl: 0, hoses: [] },
+      attack2: { name: "Attack Line 2", np: 0, nozzleName: "None", fl: 0, hoses: [] },
+      bumper:  { name: "Bumper Line",   np: 0, nozzleName: "None", fl: 0, hoses: [] },
+      monitor: { name: "Monitor",       np: 0, nozzleName: "None", fl: 0, hoses: [] }
+    };
+
+    let currentLineKey = 'attack1';
+
+    function selectLine(lineKey) {
+      currentLineKey = lineKey;
+
+      document.querySelectorAll('.line-tab').forEach(tab => tab.classList.remove('active'));
+      document.getElementById(`tab-${lineKey}`).classList.add('active');
+
+      document.getElementById('gauge-label').innerText = `${lines[lineKey].name.toUpperCase()} - TARGET PDP`;
+
+      updateDashboard();
+    }
+
+    function setNozzle(name, pressure) {
+      lines[currentLineKey].nozzleName = name;
+      lines[currentLineKey].np = pressure;
+      updateDashboard();
+    }
+
+    function addHose(name, flValue) {
+      lines[currentLineKey].hoses.push(name);
+      lines[currentLineKey].fl += flValue;
+      updateDashboard();
+    }
+
+    function resetActiveLine() {
+      lines[currentLineKey] = {
+        name: lines[currentLineKey].name,
+        np: 0,
+        nozzleName: "None",
+        fl: 0,
+        hoses: []
+      };
+      updateDashboard();
+    }
+
+    function updateDashboard() {
+      const activeLine = lines[currentLineKey];
+      const totalPDP = activeLine.np + activeLine.fl;
+
+      document.getElementById('pdp-gauge').innerText = totalPDP;
+
+      let summaryText = `Nozzle: ${activeLine.nozzleName} (${activeLine.np} kPa) | Hoses: ${activeLine.hoses.length} lengths (${activeLine.fl} kPa FL)`;
+      document.getElementById('line-summary').innerText = summaryText;
 
       drawDiagram();
     }
 
     function drawDiagram() {
+      const activeLine = lines[currentLineKey];
       const container = document.getElementById('active-diagram');
       container.innerHTML = "";
 
-      // Draw each hose length with touching couplings
-      hoses.forEach(() => {
+      // Draw Hoses
+      activeLine.hoses.forEach(() => {
         const hoseSection = document.createElement('div');
         hoseSection.className = 'hose-section';
 
-        // Top coupling (connects to truck or previous coupling)
         const topCoupling = document.createElement('div');
         topCoupling.className = 'coupling';
 
-        // Thin yellow hose body
         const hoseLine = document.createElement('div');
         hoseLine.className = 'hose-line';
 
-        // Bottom coupling
         const bottomCoupling = document.createElement('div');
         bottomCoupling.className = 'coupling';
 
         hoseSection.appendChild(topCoupling);
         hoseSection.appendChild(hoseLine);
         hoseSection.appendChild(bottomCoupling);
-
         container.appendChild(hoseSection);
       });
 
-      // Draw custom nozzle attached to the end coupling
-      if (nozzleName === "Fog Nozzle") {
-        const nozzleContainer = document.createElement('div');
-        nozzleContainer.className = 'nozzle-container';
-
+      // Draw Nozzles
+      if (activeLine.nozzleName === "Fog Nozzle") {
         const body = document.createElement('div');
         body.className = 'fog-nozzle-body';
-
         const head = document.createElement('div');
         head.className = 'fog-nozzle-head';
-
-        nozzleContainer.appendChild(body);
-        nozzleContainer.appendChild(head);
-        container.appendChild(nozzleContainer);
-
-      } else if (nozzleName === "Smooth Bore") {
-        const nozzleContainer = document.createElement('div');
-        nozzleContainer.className = 'nozzle-container';
-
+        container.appendChild(body);
+        container.appendChild(head);
+      } else if (activeLine.nozzleName === "Smooth Bore") {
         const smoothBore = document.createElement('div');
         smoothBore.className = 'smooth-bore-nozzle';
-
-        nozzleContainer.appendChild(smoothBore);
-        container.appendChild(nozzleContainer);
+        container.appendChild(smoothBore);
       }
     }
 
-    function setNozzle(name, pressure) {
-      nozzleName = name;
-      nozzlePressure = pressure;
-      updateDisplay();
-    }
-
-    function addHose(name, flValue) {
-      hoses.push(name);
-      frictionLoss += flValue;
-      updateDisplay();
-    }
-
-    function resetCalc() {
-      nozzlePressure = 0;
-      nozzleName = "None";
-      frictionLoss = 0;
-      hoses = [];
-      updateDisplay();
-    }
-  </script>
-    }
-
-    function drawDiagram() {
-      const container = document.getElementById('active-diagram');
-      container.innerHTML = ""; // Clear current diagram
-
-      // --- Draw Hoses ---
-      hoses.forEach(hoseType => {
-        // Hose Section Visual
-        const hoseDiv = document.createElement('div');
-        hoseDiv.className = 'dia-part hose-part';
-        hoseDiv.innerText = '▰'; // Standard visual represention of hose section
-        container.appendChild(hoseDiv);
-
-        // Coupling Visual (⛓️)
-        const couplingDiv = document.createElement('div');
-        couplingDiv.className = 'dia-part coupling-part';
-        couplingDiv.innerText = '⛓️'; // Metal Coupling visual
-        container.appendChild(couplingDiv);
-      });
-
-      // --- Draw Nozzle ---
-      if (nozzleName === "Fog Nozzle") {
-        const nozzleDiv = document.createElement('div');
-        nozzleDiv.className = 'dia-part nozzle-part';
-        nozzleDiv.innerText = '🛠️'; // Fog Nozzle visual (more complex tool shape)
-        nozzleDiv.style.color = '#39ff14'; // specific color for fog nozzle
-        container.appendChild(nozzleDiv);
-      } else if (nozzleName === "Smooth Bore") {
-        const nozzleDiv = document.createElement('div');
-        nozzleDiv.className = 'dia-part nozzle-part';
-        nozzleDiv.innerText = '🗼'; // Smooth bore visual (tower/tapered shape)
-        nozzleDiv.style.color = '#39ff14'; // specific color for smooth bore nozzle
-        container.appendChild(nozzleDiv);
-      }
-    }
-
-    // --- Interaction Functions ---
-    function setNozzle(name, pressure) {
-      nozzleName = name;
-      nozzlePressure = pressure;
-      updateDisplay();
-    }
-
-    function addHose(name, flValue) {
-      hoses.push(name); // Add hose length to the list
-      frictionLoss += flValue;
-      updateDisplay();
-    }
-
-    function resetCalc() {
-      nozzlePressure = 0;
-      nozzleName = "None";
-      frictionLoss = 0;
-      hoses = []; // Clear hose list
-      updateDisplay();
-    }
+    updateDashboard();
   </script>
 
 </body>
