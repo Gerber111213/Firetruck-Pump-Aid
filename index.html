@@ -22,7 +22,7 @@
       padding: 18px;
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
       box-sizing: border-box;
-      height: 750px;
+      height: 780px;
       display: flex;
       flex-direction: column;
     }
@@ -31,7 +31,7 @@
     .calc-box { width: 500px; overflow-y: auto; }
     
     /* 2. Middle Box: Lay Diagram */
-    .diagram-box { width: 380px; align-items: center; }
+    .diagram-box { width: 400px; align-items: center; }
 
     /* 3. Right Box: Tactical Advisor */
     .guidance-box { width: 320px; overflow-y: auto; }
@@ -80,6 +80,7 @@
     }
     button:hover { background-color: #e05200; }
     button.preset-btn { background-color: #0284c7; }
+    button.supply-btn.active { background-color: #38bdf8; color: black; }
     button.remove-btn { background-color: #d9534f; }
     button.reset { background-color: #666; width: 100%; margin-top: 5px; }
 
@@ -90,7 +91,7 @@
       overflow-y: auto; padding-top: 5px;
     }
     .structure-part { font-size: 40px; line-height: 1; }
-    .truck-part { font-size: 45px; line-height: 1; margin-top: 10px; }
+    .truck-part { font-size: 45px; line-height: 1; margin: 5px 0; }
 
     .multi-lines-wrapper { display: flex; justify-content: space-around; width: 100%; }
     .line-column { display: flex; flex-direction: column; align-items: center; width: 23%; }
@@ -114,12 +115,9 @@
     .color-bumper  { background-color: #e53e3e; }
     .color-monitor { background-color: #38a169; }
 
-    /* Improved Water Spray Graphic */
+    /* Water Spray Graphic */
     .water-spray-effect {
-      font-size: 16px;
-      line-height: 1;
-      margin-bottom: -4px;
-      text-align: center;
+      font-size: 16px; line-height: 1; margin-bottom: -4px; text-align: center;
       animation: pulseSpray 0.8s infinite alternate;
     }
     @keyframes pulseSpray {
@@ -127,24 +125,35 @@
       100% { opacity: 1; transform: translateY(-3px); }
     }
 
-    /* Fixed Nozzle Graphics */
     .nozzle-wrapper { display: flex; flex-direction: column; align-items: center; margin-bottom: 2px; }
-    
     .smooth-bore-nozzle {
       width: 0; height: 0;
-      border-left: 4px solid transparent;
-      border-right: 4px solid transparent;
+      border-left: 4px solid transparent; border-right: 4px solid transparent;
       border-bottom: 22px solid #d4af37;
     }
-
-    /* Fog Nozzle: Correct Narrow Point at Hose Coupling, Broad Head facing Up */
     .fog-nozzle {
       width: 0; height: 0;
-      border-left: 8px solid transparent;
-      border-right: 8px solid transparent;
-      border-top: 18px solid #38bdf8; /* Points broad edge upwards toward spray */
+      border-left: 8px solid transparent; border-right: 8px solid transparent;
+      border-top: 18px solid #38bdf8;
       margin-bottom: 2px;
     }
+
+    /* Supply Diagram Area */
+    .supply-area {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 5px;
+      width: 100%;
+    }
+    .supply-hose {
+      width: 12px;
+      height: 35px;
+      background: #0284c7; /* Large Diameter Supply Line Blue */
+      border: 1px solid #0369a1;
+      border-radius: 2px;
+    }
+    .supply-icon { font-size: 35px; line-height: 1; text-align: center; }
 
     .warning-card {
       background: rgba(220, 38, 38, 0.2); border: 1px solid #ef4444;
@@ -193,9 +202,9 @@
     <!-- Water Supply Mode -->
     <div class="btn-group">
       <h3>Supply Mode</h3>
-      <button onclick="setSupply('Hydrant')">Hydrant Supply</button>
-      <button onclick="setSupply('Drafting')">Drafting (Static)</button>
-      <button onclick="setSupply('Nursing')">Nursing (Relay)</button>
+      <button class="supply-btn" id="btn-hydrant" onclick="setSupply('Hydrant')">Hydrant Supply</button>
+      <button class="supply-btn" id="btn-drafting" onclick="setSupply('Drafting')">Drafting (Static)</button>
+      <button class="supply-btn" id="btn-nursing" onclick="setSupply('Nursing')">Nursing (Relay)</button>
     </div>
 
     <!-- Appliances / Standpipe -->
@@ -237,6 +246,7 @@
       <div class="structure-part">🏠🔥</div>
       <div class="multi-lines-wrapper" id="multi-lines-container"></div>
       <div class="truck-part">🚒</div>
+      <div class="supply-area" id="supply-container"></div> <!-- Dynamic Intake Supply -->
     </div>
   </div>
 
@@ -289,7 +299,15 @@
     }
 
     function setSupply(mode) {
-      supplyMode = mode;
+      if (supplyMode === mode) {
+        supplyMode = 'None';
+      } else {
+        supplyMode = mode;
+      }
+      document.querySelectorAll('.supply-btn').forEach(btn => btn.classList.remove('active'));
+      if (supplyMode !== 'None') {
+        document.getElementById(`btn-${supplyMode.toLowerCase()}`).classList.add('active');
+      }
       updateDashboard();
     }
 
@@ -422,6 +440,12 @@
             <div class="warning-title">⚠️ DRAFTING STATIC SOURCE</div>
             Ensure hard suction lift height does not exceed 3 meters (10 ft).
           </div>`;
+      } else if (supplyMode === 'Nursing') {
+        container.innerHTML += `
+          <div class="warning-card" style="background:rgba(234,179,8,0.2); border-color:#eab308;">
+            <div class="warning-title" style="color:#fde047;">🚒 NURSING / RELAY PUMPING</div>
+            Ensure supply engine maintains intake supply pressure buffer above 140 kPa.
+          </div>`;
       }
 
       if (maxPDP > 1750) {
@@ -437,6 +461,7 @@
       const wrapper = document.getElementById('multi-lines-container');
       wrapper.innerHTML = "";
 
+      // Render Discharge Lines
       Object.keys(lines).forEach(key => {
         const line = lines[key];
         let linePDP = line.np + line.fl + line.elev + line.appliance;
@@ -445,7 +470,7 @@
         const col = document.createElement('div');
         col.className = 'line-column';
 
-        // 1. Water Spray Stream (Emoji Graphic)
+        // 1. Water Spray
         if (line.nozzleName !== "None") {
           const spray = document.createElement('div');
           spray.className = 'water-spray-effect';
@@ -467,7 +492,7 @@
           col.appendChild(nozzleWrap);
         }
 
-        // 2. Flow Rate Label
+        // 2. Flow Label
         if (flow.lpm > 0) {
           const flowDiv = document.createElement('div');
           flowDiv.className = 'flow-label';
@@ -496,7 +521,7 @@
           col.appendChild(hoseSection);
         });
 
-        // 4. Line Label & Gate Directive Percentage
+        // 4. Line Label & Gate Directive
         const label = document.createElement('div');
         label.className = 'line-label';
         label.innerHTML = `${line.name}<br><span style="color:#39ff14">${linePDP} kPa</span>`;
@@ -515,6 +540,30 @@
 
         wrapper.appendChild(col);
       });
+
+      // Render Dynamic Water Supply Source at Bottom of Diagram
+      const supplyContainer = document.getElementById('supply-container');
+      supplyContainer.innerHTML = "";
+
+      if (supplyMode === 'Hydrant') {
+        supplyContainer.innerHTML = `
+          <div class="supply-hose"></div>
+          <div class="supply-icon">🚰</div>
+          <div style="font-size:10px; font-weight:bold; color:#38bdf8;">HYDRANT SUPPLY</div>
+        `;
+      } else if (supplyMode === 'Drafting') {
+        supplyContainer.innerHTML = `
+          <div class="supply-hose" style="background:#555; border-color:#888;"></div>
+          <div class="supply-icon">🌊</div>
+          <div style="font-size:10px; font-weight:bold; color:#38bdf8;">STATIC POND / DRAFT</div>
+        `;
+      } else if (supplyMode === 'Nursing') {
+        supplyContainer.innerHTML = `
+          <div class="supply-hose"></div>
+          <div class="supply-icon">🚒</div>
+          <div style="font-size:10px; font-weight:bold; color:#38bdf8;">SUPPLY ENGINE (NURSING)</div>
+        `;
+      }
     }
 
     updateDashboard();
