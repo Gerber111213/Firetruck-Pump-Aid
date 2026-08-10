@@ -353,7 +353,6 @@
       const line = lines[currentLineKey];
       let cFactor = (type === '44mm') ? 3.325 : 0.75; 
       
-      // Push normally; we sort during render so 65mm draws at the bottom (engine side)
       line.hoses.push({ type: type, length: lengthMeters, c: cFactor });
       calculateAll();
     }
@@ -659,14 +658,13 @@
           const l = lines[key];
           const centerX = colWidth * index + colWidth / 2;
 
-          // Skip drawing if the line has no hoses and no nozzle selected
           let isActive = (l.hoses.length > 0 || l.nozzleName !== "None");
           if (!isActive) return;
 
           let lPDP = (l.hoses.length > 0 || l.nozzleName !== "None") ? Math.round(l.np + l.fl + l.elev + l.appliance) : 0;
           let flow = calculateFlow(l);
 
-          // 1. Draw Nozzle Triangle Shape + Water Graphic at Top (Only if nozzle is selected)
+          // 1. Draw Nozzle Triangle Shape + Water Graphic at Top
           if (l.nozzleName !== "None") {
             ctx.fillStyle = document.body.classList.contains('sunlight-mode') ? "#0f172a" : "#f3f4f6";
             ctx.beginPath();
@@ -691,7 +689,7 @@
             ctx.fillText(l.nozzleName === "Fog Nozzle" ? "[FOG]" : "[BORE]", centerX, 54);
           }
 
-          // 2. Draw Flow Rate (Only if flow exists)
+          // 2. Draw Flow Rate
           if (flow.lpm > 0) {
             ctx.fillStyle = "#00b4d8";
             ctx.font = "bold 9px var(--font-mono)";
@@ -765,11 +763,11 @@
           }
         });
 
-        // 6. Centered Fire Engine Station & Water Supply Source Graphics at Bottom (~3x Size)
+        // 6. Centered Fire Engine Station & Water Supply Source Graphics at Bottom
         let centerXCanvas = canvas.width / 2;
         let engineY = 345;
 
-        // Main Fire Engine (~3x size -> 60px font)
+        // Main Fire Engine
         ctx.font = "60px sans-serif";
         ctx.textAlign = "center";
         ctx.fillText("🚒", centerXCanvas, engineY);
@@ -782,12 +780,9 @@
         ctx.arc(centerXCanvas - 10, engineY - 42, 5, 0, Math.PI * 2);
         ctx.fill();
 
-        // Supply sources attached to the REAR (Right side) of the main fire truck graphic
+        // Supply sources attached to the REAR of the main fire truck graphic (NO TEXT)
         if (supplyMode === 'nursing') {
           ctx.fillText("🚒", centerXCanvas + 85, engineY);
-          ctx.fillStyle = "#ef4444";
-          ctx.font = "bold 8px var(--font-mono)";
-          ctx.fillText("NURSING TENDER", centerXCanvas + 85, engineY + 14);
 
           ctx.strokeStyle = "#facc15";
           ctx.lineWidth = 10;
@@ -796,24 +791,39 @@
           ctx.lineTo(centerXCanvas + 55, engineY - 20);
           ctx.stroke();
         } else if (supplyMode === 'hydrant') {
-          ctx.font = "42px sans-serif";
-          ctx.fillText("🚰", centerXCanvas + 75, engineY - 5);
-          ctx.fillStyle = "#00b4d8";
-          ctx.font = "bold 8px var(--font-mono)";
-          ctx.fillText("FIRE HYDRANT", centerXCanvas + 75, engineY + 14);
+          // Custom Drawn Yellow Fire Hydrant Graphic
+          let hx = centerXCanvas + 75;
+          let hy = engineY - 5;
 
+          // Hydrant Base / Lower Body (Yellow)
+          ctx.fillStyle = "#eab308";
+          ctx.fillRect(hx - 10, hy - 14, 20, 18);
+          ctx.fillStyle = "#ca8a04";
+          ctx.fillRect(hx - 12, hy + 2, 24, 6);
+
+          // Hydrant Upper Dome & Cap
+          ctx.beginPath();
+          ctx.arc(hx, hy - 14, 10, Math.PI, 0, false);
+          ctx.fillStyle = "#eab308";
+          ctx.fill();
+          ctx.fillStyle = "#facc15";
+          ctx.fillRect(hx - 3, hy - 26, 6, 12);
+
+          // Side Outlets (Nozzles)
+          ctx.fillStyle = "#ca8a04";
+          ctx.fillRect(hx - 16, hy - 10, 6, 6);
+          ctx.fillRect(hx + 10, hy - 10, 6, 6);
+
+          // Supply Line Hose Connection to Fire Engine
           ctx.strokeStyle = "#00b4d8";
           ctx.lineWidth = 8;
           ctx.beginPath();
           ctx.moveTo(centerXCanvas + 20, engineY - 20);
-          ctx.lineTo(centerXCanvas + 45, engineY - 20);
+          ctx.lineTo(hx - 12, hy - 8);
           ctx.stroke();
         } else if (supplyMode === 'drafting') {
           ctx.font = "42px sans-serif";
           ctx.fillText("💧", centerXCanvas + 75, engineY - 5);
-          ctx.fillStyle = "#eab308";
-          ctx.font = "bold 8px var(--font-mono)";
-          ctx.fillText("STATIC / DRAFT", centerXCanvas + 75, engineY + 14);
 
           ctx.strokeStyle = "#475569";
           ctx.lineWidth = 10;
