@@ -22,7 +22,9 @@
     function toggleSunlightMode() {
       document.body.classList.toggle('sunlight-mode');
       const btn = document.querySelector('.sunlight-btn');
-      btn.innerText = document.body.classList.contains('sunlight-mode') ? "🌙 Night Mode" : "☀️ Sun Mode";
+      if (btn) {
+        btn.innerText = document.body.classList.contains('sunlight-mode') ? "🌙 Night Mode" : "☀️ Sun Mode";
+      }
     }
 
     function selectLine(lineKey) {
@@ -30,8 +32,11 @@
       document.querySelectorAll('.btn-group .btn').forEach(b => {
         if (b.id.startsWith('line-btn-')) b.classList.remove('active');
       });
-      document.getElementById(`line-btn-${lineKey}`).classList.add('active');
-      document.getElementById('active-line-title').innerText = `${lines[lineKey].name.toUpperCase()} - TARGET PDP`;
+      const targetBtn = document.getElementById(`line-btn-${lineKey}`);
+      if (targetBtn) targetBtn.classList.add('active');
+      
+      const titleElem = document.getElementById('active-line-title');
+      if (titleElem) titleElem.innerText = `${lines[lineKey].name.toUpperCase()} - TARGET PDP`;
       
       updateControlPanelStates();
       calculateAll();
@@ -73,11 +78,9 @@
     function addHose(type, lengthMeters) {
       const line = lines[currentLineKey];
       let cFactor = (type === '44mm') ? 3.325 : 0.75; 
-      
       const newSegment = { type: type, length: lengthMeters, c: cFactor };
 
-      // ENFORCEMENT: Large diameter hose (65mm) always sits on the pump/firetruck side (bottom).
-      // 44mm attack lines stack outward toward the nozzle (top).
+      // Large diameter hose (65mm) always sits on the pump/firetruck side (bottom)
       if (type === '65mm') {
         line.hoses.unshift(newSegment);
       } else {
@@ -110,10 +113,12 @@
       const line = lines[currentLineKey];
       line.appliance = line.appliance === 0 ? 70 : 0;
       const btn = document.getElementById('standpipe-btn');
-      if (line.appliance > 0) {
-        btn.classList.add('active');
-      } else {
-        btn.classList.remove('active');
+      if (btn) {
+        if (line.appliance > 0) {
+          btn.classList.add('active');
+        } else {
+          btn.classList.remove('active');
+        }
       }
       calculateAll();
     }
@@ -148,7 +153,8 @@
         addHose('65mm', 15);
         line.elev = 30;
         line.appliance = 70;
-        document.getElementById('standpipe-btn').classList.add('active');
+        const spBtn = document.getElementById('standpipe-btn');
+        if (spBtn) spBtn.classList.add('active');
       }
       updateControlPanelStates();
       calculateAll();
@@ -163,7 +169,8 @@
       line.appliance = 0;
       line.customFlow = 0;
       line.hoses = [];
-      document.getElementById('standpipe-btn').classList.remove('active');
+      const spBtn = document.getElementById('standpipe-btn');
+      if (spBtn) spBtn.classList.remove('active');
       updateControlPanelStates();
       calculateAll();
     }
@@ -191,7 +198,6 @@
         if (l.hoses.length === 0) l.elev = 0;
 
         let flow = calculateFlow(l);
-        
         let totalFL = 0;
         if (flow.lpm > 0 && l.hoses.length > 0) {
           let qFactor = flow.lpm / 100;
@@ -208,30 +214,36 @@
         totalLPM += flow.lpm;
       });
 
-      document.getElementById('master-pdp').innerHTML = `${maxPDP} <span style="font-size: 1.1rem;">kPa</span>`;
+      const masterPdpElem = document.getElementById('master-pdp');
+      if (masterPdpElem) masterPdpElem.innerHTML = `${maxPDP} <span style="font-size: 1.1rem;">kPa</span>`;
 
       const activeLine = lines[currentLineKey];
       let activeFlow = calculateFlow(activeLine);
       let activeFL = activeLine.fl;
       let activeLinePDP = (activeLine.hoses.length > 0 || activeLine.nozzleName !== "None") ? Math.round(activeLine.np + activeFL + activeLine.elev + activeLine.appliance) : 0;
       
-      document.getElementById('target-pdp').innerHTML = `${activeLinePDP} <span style="font-size: 1rem;">kPa</span>`;
+      const targetPdpElem = document.getElementById('target-pdp');
+      if (targetPdpElem) targetPdpElem.innerHTML = `${activeLinePDP} <span style="font-size: 1rem;">kPa</span>`;
       
       let totalFeet = activeLine.hoses.reduce((acc, h) => acc + Math.round(h.length * 3.28084), 0);
       let totalMeters = activeLine.hoses.reduce((acc, h) => acc + h.length, 0);
-      document.getElementById('line-summary-text').innerText = `${activeLine.nozzleName} (${activeFlow.lpm} L/min) | ${totalFeet}ft / ${totalMeters}m | ${activeLine.elev / 10} Floor(s)`;
+      
+      const summaryElem = document.getElementById('line-summary-text');
+      if (summaryElem) summaryElem.innerText = `${activeLine.nozzleName} (${activeFlow.lpm} L/min) | ${totalFeet}ft / ${totalMeters}m | ${activeLine.elev / 10} Floor(s)`;
 
       const gateElem = document.getElementById('line-gate-status');
-      if (activeLinePDP === maxPDP && maxPDP > 0) {
-        gateElem.innerText = "100% FULLY OPEN DISCHARGE";
-        gateElem.style.color = "var(--accent-green)";
-      } else if (activeLinePDP < maxPDP && activeLinePDP > 0) {
-        let pct = Math.round((activeLinePDP / maxPDP) * 100);
-        gateElem.innerText = `GATE DOWN TO ${pct}% OPEN`;
-        gateElem.style.color = "#eab308";
-      } else {
-        gateElem.innerText = "LINE INACTIVE";
-        gateElem.style.color = "var(--text-sub)";
+      if (gateElem) {
+        if (activeLinePDP === maxPDP && maxPDP > 0) {
+          gateElem.innerText = "100% FULLY OPEN DISCHARGE";
+          gateElem.style.color = "var(--accent-green)";
+        } else if (activeLinePDP < maxPDP && activeLinePDP > 0) {
+          let pct = Math.round((activeLinePDP / maxPDP) * 100);
+          gateElem.innerText = `GATE DOWN TO ${pct}% OPEN`;
+          gateElem.style.color = "#eab308";
+        } else {
+          gateElem.innerText = "LINE INACTIVE";
+          gateElem.style.color = "var(--text-sub)";
+        }
       }
 
       updateTacticalWarnings(maxPDP, activeLinePDP, activeFL);
@@ -240,6 +252,7 @@
 
     function updateTacticalWarnings(maxPDP, activePDP, activeFL) {
       const container = document.getElementById('tactical-warning-container');
+      if (!container) return;
       container.innerHTML = "";
 
       const activeLine = lines[currentLineKey];
@@ -296,19 +309,26 @@
       const barElem = document.getElementById('tank-bar');
       const labelElem = document.getElementById('tank-capacity-label');
 
-      totalFlowElem.innerText = `${totalLPM} L/min (${Math.round(totalLPM / 3.785)} GPM)`;
+      if (totalFlowElem) totalFlowElem.innerText = `${totalLPM} L/min (${Math.round(totalLPM / 3.785)} GPM)`;
 
       ['engine', 'draft', 'nursing'].forEach(k => {
         const t = tanks[k];
-        document.getElementById(`${k}-tank-val`).innerText = `${t.current} L (${litersToGallons(t.current)} gal) / ${t.max} L (${litersToGallons(t.max)} gal)`;
+        const tankValElem = document.getElementById(`${k}-tank-val`);
+        if (tankValElem) {
+          tankValElem.innerText = `${t.current} L (${litersToGallons(t.current)} gal) / ${t.max} L (${litersToGallons(t.max)} gal)`;
+        }
       });
 
       if (supplyMode === 'hydrant') {
-        timerElem.innerText = "∞ (HYDRANT)";
-        timerElem.style.color = "var(--accent-green)";
-        labelElem.innerText = "ACTIVE SOURCE: HYDRANT (CONTINUOUS)";
-        barElem.style.width = "100%";
-        barElem.style.backgroundColor = "var(--accent-blue)";
+        if (timerElem) {
+          timerElem.innerText = "∞ (HYDRANT)";
+          timerElem.style.color = "var(--accent-green)";
+        }
+        if (labelElem) labelElem.innerText = "ACTIVE SOURCE: HYDRANT (CONTINUOUS)";
+        if (barElem) {
+          barElem.style.width = "100%";
+          barElem.style.backgroundColor = "var(--accent-blue)";
+        }
         return;
       }
 
@@ -318,15 +338,19 @@
       if (supplyMode === 'nursing') { activeTankKey = 'nursing'; sourceName = "NURSING TENDER"; }
 
       const tank = tanks[activeTankKey];
-      labelElem.innerText = `ACTIVE SOURCE: ${sourceName}`;
+      if (labelElem) labelElem.innerText = `ACTIVE SOURCE: ${sourceName}`;
       
       let pct = Math.round((tank.current / tank.max) * 100);
-      barElem.style.width = `${pct}%`;
-      barElem.style.backgroundColor = pct > 50 ? "var(--accent-green)" : (pct > 20 ? "#eab308" : "#ef4444");
+      if (barElem) {
+        barElem.style.width = `${pct}%`;
+        barElem.style.backgroundColor = pct > 50 ? "var(--accent-green)" : (pct > 20 ? "#eab308" : "#ef4444");
+      }
 
       if (totalLPM <= 0) {
-        timerElem.innerText = "--:--";
-        timerElem.style.color = "var(--accent-blue)";
+        if (timerElem) {
+          timerElem.innerText = "--:--";
+          timerElem.style.color = "var(--accent-blue)";
+        }
         return;
       }
 
@@ -334,8 +358,10 @@
       let mins = Math.floor(totalMinutes);
       let secs = Math.floor((totalMinutes - mins) * 60);
 
-      timerElem.innerText = `${mins < 10 ? '0' + mins : mins}:${secs < 10 ? '0' + secs : secs}`;
-      timerElem.style.color = mins < 2 ? "#ef4444" : "var(--accent-blue)";
+      if (timerElem) {
+        timerElem.innerText = `${mins < 10 ? '0' + mins : mins}:${secs < 10 ? '0' + secs : secs}`;
+        timerElem.style.color = mins < 2 ? "#ef4444" : "var(--accent-blue)";
+      }
     }
 
     function adjustTankCapacity(tankKey, amount) {
@@ -374,7 +400,6 @@
       if (canvas) {
         const ctx = canvas.getContext('2d');
         
-        // Dynamic Height Calculation based on maximum hose segment count across lines to prevent cropping
         let maxSegments = Math.max(1, ...Object.values(lines).map(l => l.hoses.length));
         let requiredHeight = Math.max(380, 140 + (maxSegments * 26));
 
@@ -395,23 +420,21 @@
           let lPDP = (l.hoses.length > 0 || l.nozzleName !== "None") ? Math.round(l.np + l.fl + l.elev + l.appliance) : 0;
           let flow = calculateFlow(l);
 
-          // 1. Draw Hose segments bottom-up starting above the truck header
           let segmentHeight = 26;
           let totalHoseHeight = l.hoses.length * segmentHeight;
           let startY = engineY - 55 - totalHoseHeight;
-          if (startY < 75) startY = 75; // Safety fallback padding
+          if (startY < 75) startY = 75;
 
           let currentY = startY;
 
           if (l.hoses.length > 0) {
             l.hoses.forEach((h) => {
               let hoseColor = '#facc15';
-              let hoseWidth = h.type === '44mm' ? 8 : 18; // 65mm diameter rendered wider at the bottom pump side
+              let hoseWidth = h.type === '44mm' ? 8 : 18;
 
               ctx.fillStyle = hoseColor;
               ctx.fillRect(centerX - hoseWidth / 2, currentY, hoseWidth, segmentHeight);
 
-              // Coupling bands
               ctx.fillStyle = '#64748b';
               ctx.fillRect(centerX - hoseWidth / 2 - 2, currentY, hoseWidth + 4, 3);
               ctx.fillRect(centerX - hoseWidth / 2 - 2, currentY + segmentHeight - 3, hoseWidth + 4, 3);
@@ -419,7 +442,6 @@
               currentY += segmentHeight;
             });
 
-            // Animated water pulse traveling up the hose line
             if (flow.lpm > 0) {
               let pulseY = (startY + totalHoseHeight) - ((pulseOffset * 0.8) % totalHoseHeight);
               ctx.fillStyle = "rgba(255, 255, 255, 0.6)";
@@ -427,7 +449,6 @@
             }
           }
 
-          // 2. Draw Nozzle Triangle Shape + Water Graphic at the Top of the Hose Lay
           if (l.nozzleName !== "None") {
             let nozzleY = startY - 8;
             ctx.fillStyle = document.body.classList.contains('sunlight-mode') ? "#0f172a" : "#f3f4f6";
@@ -453,14 +474,12 @@
             ctx.fillText(l.nozzleName === "Fog Nozzle" ? "[FOG]" : "[BORE]", centerX, nozzleY - 30);
           }
 
-          // 3. Draw Flow Rate
           if (flow.lpm > 0) {
             ctx.fillStyle = "#00b4d8";
             ctx.font = "bold 9px var(--font-mono)";
             ctx.fillText(`${flow.lpm} L/m`, centerX, startY - 42);
           }
 
-          // 4. Draw Line Name & PDP at Base (Just above engine deck)
           ctx.fillStyle = document.body.classList.contains('sunlight-mode') ? "#0f172a" : "#f3f4f6";
           ctx.font = "bold 11px var(--font-sans)";
           ctx.fillText(l.name, centerX, engineY - 25);
@@ -469,7 +488,6 @@
           ctx.font = "bold 12px var(--font-mono)";
           ctx.fillText(`${lPDP} kPa`, centerX, engineY - 12);
 
-          // 5. Gate Directive Indicator
           let maxPDP = 0;
           Object.values(lines).forEach(item => {
             let itemPDP = (item.hoses.length > 0 || item.nozzleName !== "None") ? Math.round(item.np + item.fl + item.elev + item.appliance) : 0;
@@ -492,7 +510,6 @@
           }
         });
 
-        // 6. Centered Fire Engine Station & Water Supply Source Graphics at Bottom
         let centerXCanvas = canvas.width / 2;
 
         ctx.font = "45px sans-serif";
@@ -506,7 +523,6 @@
         ctx.arc(centerXCanvas - 8, engineY - 2, 4, 0, Math.PI * 2);
         ctx.fill();
 
-        // Supply sources attached to the rear/side of the main engine graphic
         if (supplyMode === 'nursing') {
           ctx.fillText("🚒", centerXCanvas + 75, engineY + 28);
           ctx.fillStyle = "#ef4444";
@@ -550,7 +566,6 @@
       requestAnimationFrame(renderLoop);
     }
 
-    // Initialize UI on load
     selectLine('attack1');
     requestAnimationFrame(renderLoop);
   </script>
