@@ -250,7 +250,6 @@
   </div>
 
   <script>
-    // State management: Clean initial state with all lines fully reset
     const lines = {
       attack1: { name: "Attack 1", code: "attack1", np: 0, nozzleName: "None", fl: 0, elev: 0, appliance: 0, customFlow: 0, hoses: [] },
       attack2: { name: "Attack 2", code: "attack2", np: 0, nozzleName: "None", fl: 0, elev: 0, appliance: 0, customFlow: 0, hoses: [] },
@@ -320,9 +319,14 @@
 
     function addHose(type, lengthMeters) {
       const line = lines[currentLineKey];
-      // 50ft (15m) segment C factors normalized from 30m base rates
       let cFactor = (type === '44mm') ? 3.325 : 0.75; 
-      line.hoses.push({ type: type, length: lengthMeters, c: cFactor });
+      
+      // FIX: Always keep 65mm supply hoses at the engine end (index 0) and 44mm attack hoses toward the nozzle end
+      if (type === '65mm') {
+        line.hoses.unshift({ type: type, length: lengthMeters, c: cFactor });
+      } else {
+        line.hoses.push({ type: type, length: lengthMeters, c: cFactor });
+      }
       calculateAll();
     }
 
@@ -376,7 +380,6 @@
         line.nozzleName = "Fog Nozzle";
         line.np = 700;
         line.customFlow = 470;
-        // Four 50ft segments = 200ft (60m) total
         addHose('44mm', 15);
         addHose('44mm', 15);
         addHose('44mm', 15);
@@ -385,7 +388,6 @@
         line.nozzleName = "Smooth Bore";
         line.np = 350;
         line.customFlow = 700;
-        // Two 50ft segments = 100ft (30m) total
         addHose('65mm', 15);
         addHose('65mm', 15);
         line.elev = 30;
@@ -628,98 +630,124 @@
         if (l.nozzleName !== "None") {
           ctx.font = "14px sans-serif";
           ctx.textAlign = "center";
-          ctx.fillText("💧💦", centerX, 32);
+          ctx.fillText("💧💦", centerX, 24);
 
           ctx.fillStyle = l.nozzleName === "Fog Nozzle" ? "#0288d1" : "#eab308";
           ctx.beginPath();
-          ctx.arc(centerX, 48, 6, 0, Math.PI * 2);
+          ctx.arc(centerX, 38, 5, 0, Math.PI * 2);
           ctx.fill();
 
           ctx.fillStyle = document.body.classList.contains('sunlight-mode') ? "#000" : "#fff";
-          ctx.font = "bold 9px sans-serif";
-          ctx.fillText(l.nozzleName === "Fog Nozzle" ? "[FOG]" : "[BORE]", centerX, 62);
+          ctx.font = "bold 8px sans-serif";
+          ctx.fillText(l.nozzleName === "Fog Nozzle" ? "[FOG]" : "[BORE]", centerX, 50);
         }
 
         // 2. Draw Flow Rate
         if (flow.lpm > 0) {
           ctx.fillStyle = "#0288d1";
-          ctx.font = "bold 10px sans-serif";
-          ctx.fillText(`${flow.lpm} L/m`, centerX, 76);
+          ctx.font = "bold 9px sans-serif";
+          ctx.fillText(`${flow.lpm} L/m`, centerX, 62);
         }
 
-        // 3. Draw Connected Continuous Hose Line with Top/Bottom Couplings
-        let hoseTopY = 86;
-        let totalHoseHeight = l.hoses.length * 35;
-        
+        // 3. Draw Segmented Hose Line with Correct Widths Per Segment (65mm wide near bottom, 44mm narrow near top)
+        let currentY = 70;
+        let segmentHeight = 28;
+
         if (l.hoses.length > 0) {
-          let hoseColor = key === 'attack1' ? '#facc15' : (key === 'attack2' ? '#3b82f6' : (key === 'bumper' ? '#ef4444' : '#22c55e'));
-          let hoseWidth = l.hoses[0].type === '44mm' ? 8 : 14;
+          l.hoses.forEach((h) => {
+            let hoseColor = h.type === '44mm' ? '#facc15' : '#3b82f6';
+            let hoseWidth = h.type === '44mm' ? 8 : 16; // 44mm is narrow, 65mm is wide
 
-          ctx.fillStyle = hoseColor;
-          ctx.fillRect(centerX - hoseWidth / 2, hoseTopY, hoseWidth, totalHoseHeight);
+            ctx.fillStyle = hoseColor;
+            ctx.fillRect(centerX - hoseWidth / 2, currentY, hoseWidth, segmentHeight);
 
-          // Couplings at top, bottom, and between segments
-          ctx.fillStyle = '#888';
-          ctx.fillRect(centerX - hoseWidth / 2 - 2, hoseTopY, hoseWidth + 4, 4);
-          ctx.fillRect(centerX - hoseWidth / 2 - 2, hoseTopY + totalHoseHeight - 4, hoseWidth + 4, 4);
+            // Coupling bands at segment joints
+            ctx.fillStyle = '#888';
+            ctx.fillRect(centerX - hoseWidth / 2 - 2, currentY, hoseWidth + 4, 3);
+            ctx.fillRect(centerX - hoseWidth / 2 - 2, currentY + segmentHeight - 3, hoseWidth + 4, 3);
 
-          for (let i = 1; i < l.hoses.length; i++) {
-            ctx.fillRect(centerX - hoseWidth / 2 - 2, hoseTopY + (i * 35) - 2, hoseWidth + 4, 4);
-          }
+            currentY += segmentHeight;
+          });
         }
 
         // 4. Draw Line Name & PDP at Base
         ctx.fillStyle = document.body.classList.contains('sunlight-mode') ? "#000" : "#fff";
         ctx.font = "bold 11px sans-serif";
-        ctx.fillText(l.name, centerX, 290);
+        ctx.fillText(l.name, centerX, 260);
 
         ctx.fillStyle = "var(--accent-green)";
         ctx.font = "bold 12px sans-serif";
-        ctx.fillText(`${lPDP} kPa`, centerX, 306);
+        ctx.fillText(`${lPDP} kPa`, centerX, 276);
 
         // 5. Gate Directive Indicator
         if (lPDP === maxPDP && maxPDP > 0) {
           ctx.fillStyle = "#16a34a";
-          ctx.fillRect(centerX - 35, 316, 70, 18);
+          ctx.fillRect(centerX - 35, 286, 70, 18);
           ctx.fillStyle = "#fff";
           ctx.font = "bold 9px sans-serif";
-          ctx.fillText("100% OPEN", centerX, 328);
+          ctx.fillText("100% OPEN", centerX, 298);
         } else if (lPDP < maxPDP && maxPDP > 0 && lPDP > 0) {
           let pct = Math.round((lPDP / maxPDP) * 100);
           ctx.fillStyle = "#eab308";
-          ctx.fillRect(centerX - 35, 316, 70, 18);
+          ctx.fillRect(centerX - 35, 286, 70, 18);
           ctx.fillStyle = "#000";
           ctx.font = "bold 9px sans-serif";
-          ctx.fillText(`GATE ${pct}%`, centerX, 328);
+          ctx.fillText(`GATE ${pct}%`, centerX, 298);
         }
       });
 
-      // 6. Single Centered Fire Engine Station & Supply Source Graphic at Bottom
+      // 6. Centered Fire Engine Station & Supply Source Graphics at Bottom (~3x Size)
       let centerXCanvas = canvas.width / 2;
-      let engineY = 346;
+      let engineY = 345;
 
-      ctx.font = "22px sans-serif";
+      // Main Fire Engine (approx 3x size -> 60px font)
+      ctx.font = "60px sans-serif";
       ctx.textAlign = "center";
       ctx.fillText("🚒", centerXCanvas, engineY);
 
-      if (supplyMode === 'hydrant') {
-        ctx.font = "16px sans-serif";
-        ctx.fillText("🚰", centerXCanvas - 45, engineY);
-        ctx.fillStyle = "#0288d1";
-        ctx.font = "bold 8px sans-serif";
-        ctx.fillText("HYDRANT", centerXCanvas - 45, engineY + 12);
-      } else if (supplyMode === 'drafting') {
-        ctx.font = "16px sans-serif";
-        ctx.fillText("💧", centerXCanvas - 45, engineY);
-        ctx.fillStyle = "#eab308";
-        ctx.font = "bold 8px sans-serif";
-        ctx.fillText("DRAFT", centerXCanvas - 45, engineY + 12);
-      } else if (supplyMode === 'nursing') {
-        ctx.font = "16px sans-serif";
-        ctx.fillText("🚒", centerXCanvas - 45, engineY);
+      if (supplyMode === 'nursing') {
+        // Nursing Tender Firetruck connected behind/beside it
+        ctx.fillText("🚒", centerXCanvas - 85, engineY - 5);
         ctx.fillStyle = "#ef4444";
-        ctx.font = "bold 8px sans-serif";
-        ctx.fillText("NURSING", centerXCanvas - 45, engineY + 12);
+        ctx.font = "bold 9px sans-serif";
+        ctx.fillText("NURSING TENDER", centerXCanvas - 85, engineY + 14);
+
+        // Yellow large diameter relay hoseline connecting the nursing truck to the primary engine
+        ctx.strokeStyle = "#facc15";
+        ctx.lineWidth = 10;
+        ctx.beginPath();
+        ctx.moveTo(centerXCanvas - 55, engineY - 20);
+        ctx.lineTo(centerXCanvas - 25, engineY - 20);
+        ctx.stroke();
+      } else if (supplyMode === 'hydrant') {
+        // Hydrant graphic connected to the fire engine
+        ctx.font = "42px sans-serif";
+        ctx.fillText("🚰", centerXCanvas - 75, engineY - 5);
+        ctx.fillStyle = "#0288d1";
+        ctx.font = "bold 9px sans-serif";
+        ctx.fillText("FIRE HYDRANT", centerXCanvas - 75, engineY + 14);
+
+        // Supply line connecting hydrant to engine
+        ctx.strokeStyle = "#0288d1";
+        ctx.lineWidth = 8;
+        ctx.beginPath();
+        ctx.moveTo(centerXCanvas - 45, engineY - 20);
+        ctx.lineTo(centerXCanvas - 20, engineY - 20);
+        ctx.stroke();
+      } else if (supplyMode === 'drafting') {
+        ctx.font = "42px sans-serif";
+        ctx.fillText("💧", centerXCanvas - 75, engineY - 5);
+        ctx.fillStyle = "#eab308";
+        ctx.font = "bold 9px sans-serif";
+        ctx.fillText("STATIC / DRAFT", centerXCanvas - 75, engineY + 14);
+
+        // Hard suction hose connecting water source to engine
+        ctx.strokeStyle = "#333333";
+        ctx.lineWidth = 10;
+        ctx.beginPath();
+        ctx.moveTo(centerXCanvas - 45, engineY - 20);
+        ctx.lineTo(centerXCanvas - 20, engineY - 20);
+        ctx.stroke();
       }
     }
 
