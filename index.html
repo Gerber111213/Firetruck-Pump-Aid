@@ -260,23 +260,23 @@
   </div>
 
   <script>
-    // State management: 4 active lines initialized by default with realistic preset defaults
+    // State management: 4 active lines initialized by default with realistic metric defaults
     const lines = {
       attack1: { 
         name: "Attack 1", code: "attack1", np: 700, nozzleName: "Fog Nozzle", fl: 0, elev: 0, appliance: 0, customFlow: 470, 
-        hoses: [{ type: '44mm', length: 30, c: 2.0 }, { type: '44mm', length: 30, c: 2.0 }] 
+        hoses: [{ type: '44mm', length: 30, c: 6.65 }, { type: '44mm', length: 30, c: 6.65 }] 
       },
       attack2: { 
         name: "Attack 2", code: "attack2", np: 350, nozzleName: "Smooth Bore", fl: 0, elev: 0, appliance: 0, customFlow: 700, 
-        hoses: [{ type: '65mm', length: 30, c: 0.5 }] 
+        hoses: [{ type: '65mm', length: 30, c: 1.5 }] 
       },
       bumper:  { 
         name: "Bumper",   code: "bumper",  np: 700, nozzleName: "Fog Nozzle", fl: 0, elev: 0, appliance: 0, customFlow: 570, 
-        hoses: [{ type: '44mm', length: 30, c: 2.0 }] 
+        hoses: [{ type: '44mm', length: 30, c: 6.65 }] 
       },
       monitor: { 
         name: "Monitor",  code: "monitor", np: 700, nozzleName: "Fog Nozzle", fl: 0, elev: 0, appliance: 0, customFlow: 950, 
-        hoses: [{ type: '65mm', length: 30, c: 0.5 }, { type: '65mm', length: 30, c: 0.5 }] 
+        hoses: [{ type: '65mm', length: 30, c: 1.5 }, { type: '65mm', length: 30, c: 1.5 }] 
       }
     };
 
@@ -342,8 +342,8 @@
 
     function addHose(type, lengthMeters) {
       const line = lines[currentLineKey];
-      // Accurate friction loss coefficient assignment (C factor)
-      let cFactor = (type === '44mm') ? 2.0 : 0.5;
+      // Accurate metric friction loss coefficient assignment (C factor)
+      let cFactor = (type === '44mm') ? 6.65 : 1.5;
       line.hoses.push({ type: type, length: lengthMeters, c: cFactor });
       calculateAll();
     }
@@ -451,12 +451,12 @@
 
         let flow = calculateFlow(l);
         
-        // Completely accurate physics formula calculation: FL = C * (Q/100)^2 * (Length / 100)
+        // FIXED: Dynamically calculate friction loss using the active flow rate (L/min)
         let totalFL = 0;
         if (flow.lpm > 0 && l.hoses.length > 0) {
           let qFactor = flow.lpm / 100;
           l.hoses.forEach(h => {
-            let segmentFL = h.c * Math.pow(qFactor, 2) * (h.length / 30); // normalized per 30m segment blocks
+            let segmentFL = h.c * Math.pow(qFactor, 2) * (h.length / 30);
             totalFL += segmentFL;
           });
         }
