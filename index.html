@@ -3,74 +3,92 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Engine PDP Dashboard</title>
+  <title>Engine PDP Dashboard - Tactical Edition</title>
   
   <!-- PWA Manifest embedded via Data URI -->
-  <link rel="manifest" href='data:application/manifest+json,{"name":"Engine PDP Dashboard","short_name":"PDP Dash","start_url":".","display":"standalone","background_color":"#121212","theme_color":"#121212","icons":[{"src":"https://fav.farm/🚒","sizes":"192x192","type":"image/png"}]}' />
-  <meta name="theme-color" content="#121212" />
+  <link rel="manifest" href='data:application/manifest+json,{"name":"Engine PDP Dashboard","short_name":"PDP Dash","start_url":".","display":"standalone","background_color":"#0d0f12","theme_color":"#0d0f12","icons":[{"src":"https://fav.farm/🚒","sizes":"192x192","type":"image/png"}]}' />
+  <meta name="theme-color" content="#0d0f12" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 
+  <!-- Google Font: Share Tech Mono for tactical HUD look -->
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+
   <style>
     :root {
-      --bg-color: #121212;
-      --card-bg: #1e1e1e;
-      --card-border: #333333;
-      --text-main: #ffffff;
-      --text-sub: #b0b0b0;
+      --bg-color: #0d0f12;
+      --card-bg: #161922;
+      --card-border: #272c38;
+      --text-main: #f3f4f6;
+      --text-sub: #9ca3af;
       --accent-orange: #ff6b00;
       --accent-green: #00e676;
-      --accent-blue: #0288d1;
+      --accent-blue: #00b4d8;
       --active-border: #00ff66;
-      --button-bg: #2a2a2a;
-      --button-hover: #3a3a3a;
-      --btn-red: #8b0000;
-      --btn-red-hover: #a50000;
-      --shadow-color: rgba(0, 0, 0, 0.5);
+      --button-bg: #1e2330;
+      --button-hover: #293042;
+      --btn-red: #991b1b;
+      --btn-red-hover: #b91c1c;
+      --shadow-color: rgba(0, 0, 0, 0.6);
+      --font-mono: 'Share Tech Mono', monospace;
+      --font-sans: 'Inter', sans-serif;
     }
 
     body.sunlight-mode {
-      --bg-color: #ffffff;
-      --card-bg: #f4f4f6;
-      --card-border: #000000;
-      --text-main: #000000;
-      --text-sub: #333333;
-      --accent-orange: #d84315;
-      --accent-green: #1b5e20;
-      --accent-blue: #0d47a1;
-      --active-border: #000000;
-      --button-bg: #e0e0e0;
-      --button-hover: #cccccc;
-      --btn-red: #c62828;
-      --btn-red-hover: #b71c1c;
-      --shadow-color: rgba(0, 0, 0, 0.1);
+      --bg-color: #f0f2f5;
+      --card-bg: #ffffff;
+      --card-border: #cbd5e1;
+      --text-main: #0f172a;
+      --text-sub: #475569;
+      --accent-orange: #ea580c;
+      --accent-green: #15803d;
+      --accent-blue: #0284c7;
+      --active-border: #0f172a;
+      --button-bg: #e2e8f0;
+      --button-hover: #cbd5e1;
+      --btn-red: #dc2626;
+      --btn-red-hover: #b91c1c;
+      --shadow-color: rgba(0, 0, 0, 0.08);
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; user-select: none; }
-    body { background-color: var(--bg-color); color: var(--text-main); padding: 12px; transition: background-color 0.2s ease, color 0.2s ease; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--font-sans); user-select: none; }
+    body { background-color: var(--bg-color); color: var(--text-main); padding: 14px; transition: background-color 0.2s ease, color 0.2s ease; }
 
     .dashboard-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
     @media (max-width: 1024px) { .dashboard-grid { grid-template-columns: 1fr; } }
 
     .panel {
       background-color: var(--card-bg); border: 1px solid var(--card-border);
-      border-radius: 10px; padding: 14px; box-shadow: 0 4px 10px var(--shadow-color);
-      display: flex; flex-direction: column; gap: 12px;
+      border-radius: 12px; padding: 16px; box-shadow: 0 8px 24px var(--shadow-color);
+      display: flex; flex-direction: column; gap: 12px; position: relative; overflow: hidden;
     }
+    .panel::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+      background: linear-gradient(90deg, transparent, var(--card-border), transparent);
+    }
+
     .panel-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--card-border); padding-bottom: 8px; }
-    .panel-title { font-size: 1.1rem; font-weight: 700; color: var(--text-main); }
+    .panel-title { font-size: 1.1rem; font-weight: 700; color: var(--text-main); letter-spacing: 0.5px; }
     
     .sunlight-btn {
-      background-color: var(--button-bg); color: var(--text-main); border: 2px solid var(--card-border);
-      padding: 6px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: bold; cursor: pointer;
+      background-color: var(--button-bg); color: var(--text-main); border: 1px solid var(--card-border);
+      padding: 6px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: bold; cursor: pointer; transition: background 0.15s;
     }
+    .sunlight-btn:hover { background-color: var(--button-hover); }
 
-    .master-pdp-box { border: 2px solid var(--accent-orange); border-radius: 8px; padding: 10px; text-align: center; background-color: rgba(255, 107, 0, 0.08); margin-bottom: 4px; }
-    .master-pdp-label { font-size: 0.75rem; font-weight: bold; color: var(--accent-orange); text-transform: uppercase; }
-    .master-pdp-value { font-size: 2.2rem; font-weight: 900; color: var(--accent-orange); line-height: 1.1; }
+    .master-pdp-box { 
+      border: 2px solid var(--accent-orange); border-radius: 8px; padding: 12px; text-align: center; 
+      background: linear-gradient(135deg, rgba(255, 107, 0, 0.12), rgba(255, 107, 0, 0.02)); 
+      box-shadow: 0 0 15px rgba(255, 107, 0, 0.15); margin-bottom: 4px; 
+    }
+    .master-pdp-label { font-size: 0.75rem; font-weight: 700; color: var(--accent-orange); text-transform: uppercase; letter-spacing: 1px; }
+    .master-pdp-value { font-family: var(--font-mono); font-size: 2.4rem; font-weight: 900; color: var(--accent-orange); line-height: 1.1; }
 
-    .target-pdp-box { border: 2px solid var(--accent-green); border-radius: 8px; padding: 10px; text-align: center; background-color: rgba(0, 230, 118, 0.05); }
-    .target-pdp-value { font-size: 1.8rem; font-weight: 800; color: var(--accent-green); }
+    .target-pdp-box { 
+      border: 2px solid var(--accent-green); border-radius: 8px; padding: 10px; text-align: center; 
+      background: linear-gradient(135deg, rgba(0, 230, 118, 0.08), rgba(0, 230, 118, 0.01)); 
+    }
+    .target-pdp-value { font-family: var(--font-mono); font-size: 2rem; font-weight: 800; color: var(--accent-green); }
 
     .btn-group { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 8px; }
     .btn {
@@ -79,25 +97,26 @@
       text-align: center; transition: all 0.15s ease; min-height: 44px; display: flex; align-items: center; justify-content: center;
     }
     .btn:active { transform: scale(0.97); }
-    .btn.active { background-color: var(--accent-orange); color: #ffffff; border: 2px solid var(--active-border); box-shadow: 0 0 8px rgba(255, 107, 0, 0.5); font-weight: 800; }
-    .btn-blue.active { background-color: var(--accent-blue); box-shadow: 0 0 8px rgba(2, 136, 209, 0.5); }
-    .btn-red { background-color: var(--btn-red) !important; color: #ffffff !important; border: 1px solid #ff4444 !important; }
+    .btn.active { background-color: var(--accent-orange); color: #ffffff; border: 2px solid var(--active-border); box-shadow: 0 0 10px rgba(255, 107, 0, 0.4); font-weight: 800; }
+    .btn-blue.active { background-color: var(--accent-blue); box-shadow: 0 0 10px rgba(0, 180, 216, 0.4); }
+    .btn-red { background-color: var(--btn-red) !important; color: #ffffff !important; border: 1px solid #ef4444 !important; }
     .btn-red:hover { background-color: var(--btn-red-hover) !important; }
 
-    .section-label { font-size: 0.8rem; font-weight: bold; color: var(--text-sub); margin-top: 4px; }
+    .section-label { font-size: 0.75rem; font-weight: 700; color: var(--text-sub); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
 
     .warning-card {
-      background: rgba(220, 38, 38, 0.15); border: 1px solid #ef4444;
-      border-radius: 6px; padding: 8px; font-size: 0.8rem;
+      background: rgba(239, 68, 68, 0.12); border: 1px solid #ef4444;
+      border-radius: 6px; padding: 8px; font-size: 0.8rem; animation: pulseWarning 2s infinite;
     }
-    .warning-title { font-weight: bold; color: #fca5a5; margin-bottom: 2px; }
+    @keyframes pulseWarning { 0% { opacity: 0.9; } 50% { opacity: 1; border-color: #f87171; } 100% { opacity: 0.9; } }
+    .warning-title { font-weight: bold; color: #fca5a5; margin-bottom: 2px; display: flex; align-items: center; gap: 4px; }
 
-    .lay-diagram-container { background: rgba(0, 0, 0, 0.25); border-radius: 8px; padding: 8px; display: flex; flex-direction: column; border: 1px dashed var(--card-border); position: relative; }
-    .scene-top-icons { display: flex; justify-content: center; align-items: center; gap: 20px; font-size: 2rem; padding: 4px 0; }
-    #hoseCanvas { width: 100%; height: 380px; background: rgba(0, 0, 0, 0.15); border-radius: 6px; }
+    .lay-diagram-container { background: rgba(0, 0, 0, 0.2); border-radius: 8px; padding: 8px; display: flex; flex-direction: column; border: 1px dashed var(--card-border); position: relative; }
+    .scene-top-icons { display: flex; justify-content: center; align-items: center; gap: 20px; font-size: 1.8rem; padding: 4px 0; }
+    #hoseCanvas { width: 100%; height: 380px; background: rgba(0, 0, 0, 0.1); border-radius: 6px; }
 
-    .timer-display { text-align: center; font-size: 2.2rem; font-weight: 900; color: var(--accent-blue); }
-    .tank-row { display: flex; flex-direction: column; gap: 4px; background: rgba(0,0,0,0.15); padding: 8px; border-radius: 6px; }
+    .timer-display { font-family: var(--font-mono); text-align: center; font-size: 2.4rem; font-weight: 900; color: var(--accent-blue); text-shadow: 0 0 10px rgba(0, 180, 216, 0.3); }
+    .tank-row { display: flex; flex-direction: column; gap: 4px; background: rgba(0,0,0,0.15); padding: 8px; border-radius: 6px; border: 1px solid var(--card-border); }
     .tank-controls { display: flex; gap: 6px; }
     .tank-controls .btn { flex: 1; padding: 6px; font-size: 0.75rem; }
     .flow-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
@@ -124,10 +143,10 @@
       </div>
 
       <div class="target-pdp-box">
-        <div style="font-size: 0.75rem; font-weight: bold; color: var(--accent-green);" id="active-line-title">ATTACK 1 - TARGET PDP</div>
-        <div class="target-pdp-value" id="target-pdp">0 <span style="font-size: 0.9rem;">kPa</span></div>
+        <div style="font-size: 0.75rem; font-weight: 700; color: var(--accent-green); letter-spacing: 0.5px;" id="active-line-title">ATTACK 1 - TARGET PDP</div>
+        <div class="target-pdp-value" id="target-pdp">0 <span style="font-size: 1rem;">kPa</span></div>
         <div style="font-size: 0.75rem; color: var(--text-sub); margin-top: 2px;" id="line-summary-text">INACTIVE</div>
-        <div style="font-size: 0.75rem; font-weight: bold; margin-top: 6px; color: var(--accent-orange);" id="line-gate-status">LINE INACTIVE</div>
+        <div style="font-family: var(--font-mono); font-size: 0.8rem; font-weight: bold; margin-top: 6px; color: var(--accent-orange);" id="line-gate-status">LINE INACTIVE</div>
       </div>
 
       <div class="section-label">Quick Preconnect Short-Cuts</div>
@@ -178,7 +197,7 @@
 
       <div class="master-pdp-box">
         <div class="master-pdp-label">Master Pump Discharge Pressure (Highest Required)</div>
-        <div class="master-pdp-value" id="master-pdp">0 <span style="font-size: 1rem;">kPa</span></div>
+        <div class="master-pdp-value" id="master-pdp">0 <span style="font-size: 1.1rem;">kPa</span></div>
       </div>
 
       <div class="lay-diagram-container">
@@ -199,7 +218,7 @@
       <div style="text-align: center;">
         <div class="section-label">TIME TO EMPTY WATER SUPPLY</div>
         <div class="timer-display" id="empty-timer">--:--</div>
-        <div style="font-size: 0.8rem; color: var(--text-sub);">Total Combined Flow: <strong id="total-flow">0 L/min</strong></div>
+        <div style="font-size: 0.8rem; color: var(--text-sub);">Total Combined Flow: <strong id="total-flow" style="font-family: var(--font-mono);">0 L/min</strong></div>
       </div>
 
       <div class="section-label" id="tank-capacity-label">ACTIVE SOURCE: ON-BOARD TANK</div>
@@ -208,7 +227,10 @@
       </div>
 
       <div class="tank-row">
-        <div style="font-size: 0.85rem; font-weight: bold;">On-Board Engine Tank: <span id="engine-tank-val">2500 L / 2500 L</span></div>
+        <div style="font-size: 0.85rem; font-weight: bold; display: flex; justify-content: space-between;">
+          <span>On-Board Engine Tank:</span>
+          <span id="engine-tank-val" style="font-family: var(--font-mono); color: var(--accent-blue);">2500 L (660 gal) / 2500 L (660 gal)</span>
+        </div>
         <div class="tank-controls">
           <button class="btn btn-red" onclick="adjustTankCapacity('engine', -500)">- 500L</button>
           <button class="btn" onclick="adjustTankCapacity('engine', 500)">+ 500L</button>
@@ -217,7 +239,10 @@
       </div>
 
       <div class="tank-row">
-        <div style="font-size: 0.85rem; font-weight: bold;">Draft Dump Tank: <span id="draft-tank-val">10000 L / 10000 L</span></div>
+        <div style="font-size: 0.85rem; font-weight: bold; display: flex; justify-content: space-between;">
+          <span>Draft Dump Tank:</span>
+          <span id="draft-tank-val" style="font-family: var(--font-mono); color: var(--accent-blue);">10000 L (2642 gal) / 10000 L (2642 gal)</span>
+        </div>
         <div class="tank-controls">
           <button class="btn btn-red" onclick="adjustTankCapacity('draft', -500)">- 500L</button>
           <button class="btn" onclick="adjustTankCapacity('draft', 500)">+ 500L</button>
@@ -226,7 +251,10 @@
       </div>
 
       <div class="tank-row">
-        <div style="font-size: 0.85rem; font-weight: bold;">Nursing Tender: <span id="nursing-tank-val">12000 L / 12000 L</span></div>
+        <div style="font-size: 0.85rem; font-weight: bold; display: flex; justify-content: space-between;">
+          <span>Nursing Tender:</span>
+          <span id="nursing-tank-val" style="font-family: var(--font-mono); color: var(--accent-blue);">12000 L (3170 gal) / 12000 L (3170 gal)</span>
+        </div>
         <div class="tank-controls">
           <button class="btn btn-red" onclick="adjustTankCapacity('nursing', -500)">- 500L</button>
           <button class="btn" onclick="adjustTankCapacity('nursing', 500)">+ 500L</button>
@@ -265,6 +293,10 @@
       draft: { current: 10000, max: 10000, name: "Draft Dump Tank" },
       nursing: { current: 12000, max: 12000, name: "Nursing Tender" }
     };
+
+    function litersToGallons(liters) {
+      return Math.round(liters * 0.264172);
+    }
 
     function toggleSunlightMode() {
       document.body.classList.toggle('sunlight-mode');
@@ -321,7 +353,6 @@
       const line = lines[currentLineKey];
       let cFactor = (type === '44mm') ? 3.325 : 0.75; 
       
-      // FIX: Always keep 65mm supply hoses at the engine end (index 0 / bottom near truck) and 44mm attack hoses toward the nozzle end (top)
       if (type === '65mm') {
         line.hoses.unshift({ type: type, length: lengthMeters, c: cFactor });
       } else {
@@ -333,7 +364,6 @@
     function removeHose() {
       const line = lines[currentLineKey];
       if (line.hoses.length > 0) {
-        // Removes from nozzle end (top)
         line.hoses.pop();
       }
       if (line.hoses.length === 0) {
@@ -453,14 +483,14 @@
         totalLPM += flow.lpm;
       });
 
-      document.getElementById('master-pdp').innerHTML = `${maxPDP} <span style="font-size: 1rem;">kPa</span>`;
+      document.getElementById('master-pdp').innerHTML = `${maxPDP} <span style="font-size: 1.1rem;">kPa</span>`;
 
       const activeLine = lines[currentLineKey];
       let activeFlow = calculateFlow(activeLine);
       let activeFL = activeLine.fl;
       let activeLinePDP = (activeLine.hoses.length > 0 || activeLine.nozzleName !== "None") ? Math.round(activeLine.np + activeFL + activeLine.elev + activeLine.appliance) : 0;
       
-      document.getElementById('target-pdp').innerHTML = `${activeLinePDP} <span style="font-size: 0.9rem;">kPa</span>`;
+      document.getElementById('target-pdp').innerHTML = `${activeLinePDP} <span style="font-size: 1rem;">kPa</span>`;
       
       let totalFeet = activeLine.hoses.length * 50;
       let totalMeters = activeLine.hoses.length * 15;
@@ -529,7 +559,7 @@
 
       if (maxPDP > 1750) {
         container.innerHTML += `
-          <div class="warning-card" style="border-color: #ff4444; background: rgba(255,0,0,0.2);">
+          <div class="warning-card" style="border-color: #ef4444; background: rgba(239, 68, 68, 0.2);">
             <div class="warning-title">🚨 OVERPRESSURE DANGER (${maxPDP} kPa)</div>
             Target PDP exceeds safety thresholds (1750 kPa / 250 psi). Verify structural hose ratings!
           </div>`;
@@ -542,7 +572,12 @@
       const barElem = document.getElementById('tank-bar');
       const labelElem = document.getElementById('tank-capacity-label');
 
-      totalFlowElem.innerText = `${totalLPM} L/min`;
+      totalFlowElem.innerText = `${totalLPM} L/min (${Math.round(totalLPM / 3.785)} GPM)`;
+
+      ['engine', 'draft', 'nursing'].forEach(k => {
+        const t = tanks[k];
+        document.getElementById(`${k}-tank-val`).innerText = `${t.current} L (${litersToGallons(t.current)} gal) / ${t.max} L (${litersToGallons(t.max)} gal)`;
+      });
 
       if (supplyMode === 'hydrant') {
         timerElem.innerText = "∞ (HYDRANT)";
@@ -584,14 +619,12 @@
       tank.max += amount;
       if (tank.max < 500) tank.max = 500;
       if (tank.current > tank.max) tank.current = tank.max;
-      document.getElementById(`${tankKey}-tank-val`).innerText = `${tank.current} L / ${tank.max} L`;
       calculateAll();
     }
 
     function refillTank(tankKey) {
       const tank = tanks[tankKey];
       tank.current = tank.max;
-      document.getElementById(`${tankKey}-tank-val`).innerText = `${tank.current} L / ${tank.max} L`;
       calculateAll();
     }
 
@@ -627,43 +660,54 @@
         let lPDP = (l.hoses.length > 0 || l.nozzleName !== "None") ? Math.round(l.np + l.fl + l.elev + l.appliance) : 0;
         let flow = calculateFlow(l);
 
-        // 1. Draw Nozzle at Top
+        // 1. Draw Nozzle Triangle Shape + Water Graphic at Top
         if (l.nozzleName !== "None") {
-          ctx.font = "14px sans-serif";
-          ctx.textAlign = "center";
-          ctx.fillText("💧💦", centerX, 24);
-
-          ctx.fillStyle = l.nozzleName === "Fog Nozzle" ? "#0288d1" : "#eab308";
+          ctx.fillStyle = document.body.classList.contains('sunlight-mode') ? "#0f172a" : "#f3f4f6";
           ctx.beginPath();
-          ctx.arc(centerX, 38, 5, 0, Math.PI * 2);
+          if (l.nozzleName === "Fog Nozzle") {
+            // Triangle pointing DOWN (wide top, pointy bottom)
+            ctx.moveTo(centerX - 10, 18);
+            ctx.lineTo(centerX + 10, 18);
+            ctx.lineTo(centerX, 32);
+          } else {
+            // Smooth Bore: narrower triangle pointing UP (pointy top, wide bottom)
+            ctx.moveTo(centerX, 16);
+            ctx.lineTo(centerX + 6, 30);
+            ctx.lineTo(centerX - 6, 30);
+          }
+          ctx.closePath();
           ctx.fill();
 
-          ctx.fillStyle = document.body.classList.contains('sunlight-mode') ? "#000" : "#fff";
-          ctx.font = "bold 8px sans-serif";
-          ctx.fillText(l.nozzleName === "Fog Nozzle" ? "[FOG]" : "[BORE]", centerX, 50);
+          ctx.font = "12px sans-serif";
+          ctx.textAlign = "center";
+          ctx.fillText("💧💦", centerX, 44);
+
+          ctx.fillStyle = document.body.classList.contains('sunlight-mode') ? "#475569" : "#9ca3af";
+          ctx.font = "bold 8px var(--font-mono)";
+          ctx.fillText(l.nozzleName === "Fog Nozzle" ? "[FOG]" : "[BORE]", centerX, 54);
         }
 
         // 2. Draw Flow Rate
         if (flow.lpm > 0) {
-          ctx.fillStyle = "#0288d1";
-          ctx.font = "bold 9px sans-serif";
-          ctx.fillText(`${flow.lpm} L/m`, centerX, 62);
+          ctx.fillStyle = "#00b4d8";
+          ctx.font = "bold 9px var(--font-mono)";
+          ctx.fillText(`${flow.lpm} L/m`, centerX, 66);
         }
 
-        // 3. Draw Segmented Hose Line (65mm yellow wide hose defaults at bottom near truck, 44mm yellow narrow toward top nozzle)
-        let currentY = 70;
-        let segmentHeight = 28;
+        // 3. Draw Segmented Hose Line (65mm yellow wide hose at bottom near truck, 44mm narrow yellow toward top nozzle)
+        let currentY = 74;
+        let segmentHeight = 26;
 
         if (l.hoses.length > 0) {
           l.hoses.forEach((h) => {
-            let hoseColor = '#facc15'; // Yellow for both 44mm and 65mm as requested
-            let hoseWidth = h.type === '44mm' ? 8 : 18; // 44mm narrow, 65mm wide yellow line
+            let hoseColor = '#facc15';
+            let hoseWidth = h.type === '44mm' ? 8 : 18;
 
             ctx.fillStyle = hoseColor;
             ctx.fillRect(centerX - hoseWidth / 2, currentY, hoseWidth, segmentHeight);
 
-            // Coupling bands at segment joints
-            ctx.fillStyle = '#888';
+            // Coupling bands
+            ctx.fillStyle = '#64748b';
             ctx.fillRect(centerX - hoseWidth / 2 - 2, currentY, hoseWidth + 4, 3);
             ctx.fillRect(centerX - hoseWidth / 2 - 2, currentY + segmentHeight - 3, hoseWidth + 4, 3);
 
@@ -672,27 +716,27 @@
         }
 
         // 4. Draw Line Name & PDP at Base
-        ctx.fillStyle = document.body.classList.contains('sunlight-mode') ? "#000" : "#fff";
-        ctx.font = "bold 11px sans-serif";
+        ctx.fillStyle = document.body.classList.contains('sunlight-mode') ? "#0f172a" : "#f3f4f6";
+        ctx.font = "bold 11px var(--font-sans)";
         ctx.fillText(l.name, centerX, 260);
 
         ctx.fillStyle = "var(--accent-green)";
-        ctx.font = "bold 12px sans-serif";
+        ctx.font = "bold 12px var(--font-mono)";
         ctx.fillText(`${lPDP} kPa`, centerX, 276);
 
         // 5. Gate Directive Indicator
         if (lPDP === maxPDP && maxPDP > 0) {
-          ctx.fillStyle = "#16a34a";
+          ctx.fillStyle = "#15803d";
           ctx.fillRect(centerX - 35, 286, 70, 18);
           ctx.fillStyle = "#fff";
-          ctx.font = "bold 9px sans-serif";
+          ctx.font = "bold 9px var(--font-mono)";
           ctx.fillText("100% OPEN", centerX, 298);
         } else if (lPDP < maxPDP && maxPDP > 0 && lPDP > 0) {
           let pct = Math.round((lPDP / maxPDP) * 100);
-          ctx.fillStyle = "#eab308";
+          ctx.fillStyle = "#ca8a04";
           ctx.fillRect(centerX - 35, 286, 70, 18);
-          ctx.fillStyle = "#000";
-          ctx.font = "bold 9px sans-serif";
+          ctx.fillStyle = "#fff";
+          ctx.font = "bold 9px var(--font-mono)";
           ctx.fillText(`GATE ${pct}%`, centerX, 298);
         }
       });
@@ -708,13 +752,11 @@
 
       // Supply sources attached to the REAR (Right side) of the main fire truck graphic
       if (supplyMode === 'nursing') {
-        // Nursing Tender Firetruck connected directly to the right/rear of the main engine
         ctx.fillText("🚒", centerXCanvas + 85, engineY);
         ctx.fillStyle = "#ef4444";
-        ctx.font = "bold 9px sans-serif";
+        ctx.font = "bold 8px var(--font-mono)";
         ctx.fillText("NURSING TENDER", centerXCanvas + 85, engineY + 14);
 
-        // Yellow large diameter relay hoseline connecting the main engine to the nursing truck on the right
         ctx.strokeStyle = "#facc15";
         ctx.lineWidth = 10;
         ctx.beginPath();
@@ -722,15 +764,13 @@
         ctx.lineTo(centerXCanvas + 55, engineY - 20);
         ctx.stroke();
       } else if (supplyMode === 'hydrant') {
-        // Hydrant graphic connected to the right/rear of the fire engine
         ctx.font = "42px sans-serif";
         ctx.fillText("🚰", centerXCanvas + 75, engineY - 5);
-        ctx.fillStyle = "#0288d1";
-        ctx.font = "bold 9px sans-serif";
+        ctx.fillStyle = "#00b4d8";
+        ctx.font = "bold 8px var(--font-mono)";
         ctx.fillText("FIRE HYDRANT", centerXCanvas + 75, engineY + 14);
 
-        // Supply line connecting engine to hydrant on the right
-        ctx.strokeStyle = "#0288d1";
+        ctx.strokeStyle = "#00b4d8";
         ctx.lineWidth = 8;
         ctx.beginPath();
         ctx.moveTo(centerXCanvas + 20, engineY - 20);
@@ -740,11 +780,10 @@
         ctx.font = "42px sans-serif";
         ctx.fillText("💧", centerXCanvas + 75, engineY - 5);
         ctx.fillStyle = "#eab308";
-        ctx.font = "bold 9px sans-serif";
+        ctx.font = "bold 8px var(--font-mono)";
         ctx.fillText("STATIC / DRAFT", centerXCanvas + 75, engineY + 14);
 
-        // Hard suction hose connecting engine to water source on the right
-        ctx.strokeStyle = "#333333";
+        ctx.strokeStyle = "#475569";
         ctx.lineWidth = 10;
         ctx.beginPath();
         ctx.moveTo(centerXCanvas + 20, engineY - 20);
