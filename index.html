@@ -19,7 +19,7 @@
       --bg-color: #0d0f12;
       --card-bg: #161922;
       --card-border: #272c38;
-      --text-main: #f3f4f6;
+      --text-main: #ffffff;
       --text-sub: #9ca3af;
       --accent-orange: #ff6b00;
       --accent-green: #00e676;
@@ -203,7 +203,7 @@
       <div class="lay-diagram-container">
         <div class="scene-top-icons">
           <span>🏠</span>
-          <span>🔥</span>
+          <span id="fireEmoji">🔥</span>
         </div>
         <canvas id="hoseCanvas"></canvas>
       </div>
@@ -227,9 +227,9 @@
       </div>
 
       <div class="tank-row">
-        <div style="font-size: 0.85rem; font-weight: bold; display: flex; justify-content: space-between;">
+        <div style="font-size: 0.85rem; font-weight: bold; display: flex; flex-direction: column; gap: 2px;">
           <span>On-Board Engine Tank:</span>
-          <span id="engine-tank-val" style="font-family: var(--font-mono); color: var(--accent-blue);">2500 L (660 gal) / 2500 L (660 gal)</span>
+          <span id="engine-tank-val" style="color: var(--text-main); font-weight: normal; font-size: 0.8rem;">2500 L (660 gal) / 2500 L (660 gal)</span>
         </div>
         <div class="tank-controls">
           <button class="btn btn-red" onclick="adjustTankCapacity('engine', -500)">- 500L</button>
@@ -239,9 +239,9 @@
       </div>
 
       <div class="tank-row">
-        <div style="font-size: 0.85rem; font-weight: bold; display: flex; justify-content: space-between;">
+        <div style="font-size: 0.85rem; font-weight: bold; display: flex; flex-direction: column; gap: 2px;">
           <span>Draft Dump Tank:</span>
-          <span id="draft-tank-val" style="font-family: var(--font-mono); color: var(--accent-blue);">10000 L (2642 gal) / 10000 L (2642 gal)</span>
+          <span id="draft-tank-val" style="color: var(--text-main); font-weight: normal; font-size: 0.8rem;">10000 L (2642 gal) / 10000 L (2642 gal)</span>
         </div>
         <div class="tank-controls">
           <button class="btn btn-red" onclick="adjustTankCapacity('draft', -500)">- 500L</button>
@@ -251,9 +251,9 @@
       </div>
 
       <div class="tank-row">
-        <div style="font-size: 0.85rem; font-weight: bold; display: flex; justify-content: space-between;">
+        <div style="font-size: 0.85rem; font-weight: bold; display: flex; flex-direction: column; gap: 2px;">
           <span>Nursing Tender:</span>
-          <span id="nursing-tank-val" style="font-family: var(--font-mono); color: var(--accent-blue);">12000 L (3170 gal) / 12000 L (3170 gal)</span>
+          <span id="nursing-tank-val" style="color: var(--text-main); font-weight: normal; font-size: 0.8rem;">12000 L (3170 gal) / 12000 L (3170 gal)</span>
         </div>
         <div class="tank-controls">
           <button class="btn btn-red" onclick="adjustTankCapacity('nursing', -500)">- 500L</button>
@@ -511,7 +511,6 @@
 
       updateTacticalWarnings(maxPDP, activeLinePDP, activeFL);
       updateTankAndTimer(totalLPM);
-      drawCanvas(maxPDP);
     }
 
     function updateTacticalWarnings(maxPDP, activePDP, activeFL) {
@@ -642,158 +641,188 @@
       }
     }
 
-    function drawCanvas(maxPDP) {
+    // --- ANIMATED CANVAS PULSE LOOP ---
+    let pulseOffset = 0;
+
+    function renderLoop() {
       const canvas = document.getElementById('hoseCanvas');
-      const ctx = canvas.getContext('2d');
-      
-      canvas.width = canvas.parentElement.clientWidth - 16;
-      canvas.height = 380;
+      if (canvas) {
+        const ctx = canvas.getContext('2d');
+        if (canvas.width !== canvas.parentElement.clientWidth - 16) {
+          canvas.width = canvas.parentElement.clientWidth - 16;
+          canvas.height = 380;
+        }
 
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      const lineKeys = Object.keys(lines);
-      const colWidth = canvas.width / lineKeys.length;
+        const lineKeys = Object.keys(lines);
+        const colWidth = canvas.width / lineKeys.length;
+        let anyActive = false;
 
-      lineKeys.forEach((key, index) => {
-        const l = lines[key];
-        const centerX = colWidth * index + colWidth / 2;
-        let lPDP = (l.hoses.length > 0 || l.nozzleName !== "None") ? Math.round(l.np + l.fl + l.elev + l.appliance) : 0;
-        let flow = calculateFlow(l);
+        lineKeys.forEach((key, index) => {
+          const l = lines[key];
+          const centerX = colWidth * index + colWidth / 2;
+          let lPDP = (l.hoses.length > 0 || l.nozzleName !== "None") ? Math.round(l.np + l.fl + l.elev + l.appliance) : 0;
+          let flow = calculateFlow(l);
+          if (flow.lpm > 0) anyActive = true;
 
-        // 1. Draw Nozzle Triangle Shape + Water Graphic at Top
-        if (l.nozzleName !== "None") {
-          ctx.fillStyle = document.body.classList.contains('sunlight-mode') ? "#0f172a" : "#f3f4f6";
-          ctx.beginPath();
-          if (l.nozzleName === "Fog Nozzle") {
-            // Triangle pointing DOWN (wide top, pointy bottom)
-            ctx.moveTo(centerX - 10, 18);
-            ctx.lineTo(centerX + 10, 18);
-            ctx.lineTo(centerX, 32);
-          } else {
-            // Smooth Bore: narrower triangle pointing UP (pointy top, wide bottom)
-            ctx.moveTo(centerX, 16);
-            ctx.lineTo(centerX + 6, 30);
-            ctx.lineTo(centerX - 6, 30);
+          // 1. Draw Nozzle Triangle Shape + Water Graphic at Top
+          if (l.nozzleName !== "None") {
+            ctx.fillStyle = document.body.classList.contains('sunlight-mode') ? "#0f172a" : "#f3f4f6";
+            ctx.beginPath();
+            if (l.nozzleName === "Fog Nozzle") {
+              ctx.moveTo(centerX - 10, 18);
+              ctx.lineTo(centerX + 10, 18);
+              ctx.lineTo(centerX, 32);
+            } else {
+              ctx.moveTo(centerX, 16);
+              ctx.lineTo(centerX + 6, 30);
+              ctx.lineTo(centerX - 6, 30);
+            }
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.font = "12px sans-serif";
+            ctx.textAlign = "center";
+            ctx.fillText("💧💦", centerX, 44);
+
+            ctx.fillStyle = document.body.classList.contains('sunlight-mode') ? "#475569" : "#9ca3af";
+            ctx.font = "bold 8px var(--font-mono)";
+            ctx.fillText(l.nozzleName === "Fog Nozzle" ? "[FOG]" : "[BORE]", centerX, 54);
           }
-          ctx.closePath();
-          ctx.fill();
 
-          ctx.font = "12px sans-serif";
-          ctx.textAlign = "center";
-          ctx.fillText("💧💦", centerX, 44);
+          // 2. Draw Flow Rate
+          if (flow.lpm > 0) {
+            ctx.fillStyle = "#00b4d8";
+            ctx.font = "bold 9px var(--font-mono)";
+            ctx.fillText(`${flow.lpm} L/m`, centerX, 66);
+          }
 
-          ctx.fillStyle = document.body.classList.contains('sunlight-mode') ? "#475569" : "#9ca3af";
-          ctx.font = "bold 8px var(--font-mono)";
-          ctx.fillText(l.nozzleName === "Fog Nozzle" ? "[FOG]" : "[BORE]", centerX, 54);
-        }
+          // 3. Draw Segmented Hose Line with Animated Water Pulse
+          let currentY = 74;
+          let segmentHeight = 26;
 
-        // 2. Draw Flow Rate
-        if (flow.lpm > 0) {
-          ctx.fillStyle = "#00b4d8";
-          ctx.font = "bold 9px var(--font-mono)";
-          ctx.fillText(`${flow.lpm} L/m`, centerX, 66);
-        }
+          if (l.hoses.length > 0) {
+            l.hoses.forEach((h) => {
+              let hoseColor = '#facc15';
+              let hoseWidth = h.type === '44mm' ? 8 : 18;
 
-        // 3. Draw Segmented Hose Line (65mm yellow wide hose at bottom near truck, 44mm narrow yellow toward top nozzle)
-        let currentY = 74;
-        let segmentHeight = 26;
+              ctx.fillStyle = hoseColor;
+              ctx.fillRect(centerX - hoseWidth / 2, currentY, hoseWidth, segmentHeight);
 
-        if (l.hoses.length > 0) {
-          l.hoses.forEach((h) => {
-            let hoseColor = '#facc15';
-            let hoseWidth = h.type === '44mm' ? 8 : 18;
+              // Coupling bands
+              ctx.fillStyle = '#64748b';
+              ctx.fillRect(centerX - hoseWidth / 2 - 2, currentY, hoseWidth + 4, 3);
+              ctx.fillRect(centerX - hoseWidth / 2 - 2, currentY + segmentHeight - 3, hoseWidth + 4, 3);
 
-            ctx.fillStyle = hoseColor;
-            ctx.fillRect(centerX - hoseWidth / 2, currentY, hoseWidth, segmentHeight);
+              currentY += segmentHeight;
+            });
 
-            // Coupling bands
-            ctx.fillStyle = '#64748b';
-            ctx.fillRect(centerX - hoseWidth / 2 - 2, currentY, hoseWidth + 4, 3);
-            ctx.fillRect(centerX - hoseWidth / 2 - 2, currentY + segmentHeight - 3, hoseWidth + 4, 3);
+            // Animated Water Pulse traveling up the hose line
+            if (flow.lpm > 0) {
+              let totalHeight = l.hoses.length * segmentHeight;
+              let pulseY = (74 + totalHeight) - ((pulseOffset * 2) % totalHeight);
+              ctx.fillStyle = "rgba(255, 255, 255, 0.6)";
+              ctx.fillRect(centerX - 3, pulseY, 6, 8);
+            }
+          }
 
-            currentY += segmentHeight;
+          // 4. Draw Line Name & PDP at Base
+          ctx.fillStyle = document.body.classList.contains('sunlight-mode') ? "#0f172a" : "#f3f4f6";
+          ctx.font = "bold 11px var(--font-sans)";
+          ctx.fillText(l.name, centerX, 260);
+
+          ctx.fillStyle = "var(--accent-green)";
+          ctx.font = "bold 12px var(--font-mono)";
+          ctx.fillText(`${lPDP} kPa`, centerX, 276);
+
+          // 5. Gate Directive Indicator
+          let maxPDP = 0;
+          Object.values(lines).forEach(item => {
+            let itemPDP = (item.hoses.length > 0 || item.nozzleName !== "None") ? Math.round(item.np + item.fl + item.elev + item.appliance) : 0;
+            if (itemPDP > maxPDP) maxPDP = itemPDP;
           });
+
+          if (lPDP === maxPDP && maxPDP > 0) {
+            ctx.fillStyle = "#15803d";
+            ctx.fillRect(centerX - 35, 286, 70, 18);
+            ctx.fillStyle = "#fff";
+            ctx.font = "bold 9px var(--font-mono)";
+            ctx.fillText("100% OPEN", centerX, 298);
+          } else if (lPDP < maxPDP && maxPDP > 0 && lPDP > 0) {
+            let pct = Math.round((lPDP / maxPDP) * 100);
+            ctx.fillStyle = "#ca8a04";
+            ctx.fillRect(centerX - 35, 286, 70, 18);
+            ctx.fillStyle = "#fff";
+            ctx.font = "bold 9px var(--font-mono)";
+            ctx.fillText(`GATE ${pct}%`, centerX, 298);
+          }
+        });
+
+        // 6. Centered Fire Engine Station & Water Supply Source Graphics at Bottom (~3x Size)
+        let centerXCanvas = canvas.width / 2;
+        let engineY = 345;
+
+        // Main Fire Engine (~3x size -> 60px font)
+        ctx.font = "60px sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText("🚒", centerXCanvas, engineY);
+
+        // Supply sources attached to the REAR (Right side) of the main fire truck graphic
+        if (supplyMode === 'nursing') {
+          ctx.fillText("🚒", centerXCanvas + 85, engineY);
+          ctx.fillStyle = "#ef4444";
+          ctx.font = "bold 8px var(--font-mono)";
+          ctx.fillText("NURSING TENDER", centerXCanvas + 85, engineY + 14);
+
+          ctx.strokeStyle = "#facc15";
+          ctx.lineWidth = 10;
+          ctx.beginPath();
+          ctx.moveTo(centerXCanvas + 25, engineY - 20);
+          ctx.lineTo(centerXCanvas + 55, engineY - 20);
+          ctx.stroke();
+        } else if (supplyMode === 'hydrant') {
+          ctx.font = "42px sans-serif";
+          ctx.fillText("🚰", centerXCanvas + 75, engineY - 5);
+          ctx.fillStyle = "#00b4d8";
+          ctx.font = "bold 8px var(--font-mono)";
+          ctx.fillText("FIRE HYDRANT", centerXCanvas + 75, engineY + 14);
+
+          ctx.strokeStyle = "#00b4d8";
+          ctx.lineWidth = 8;
+          ctx.beginPath();
+          ctx.moveTo(centerXCanvas + 20, engineY - 20);
+          ctx.lineTo(centerXCanvas + 45, engineY - 20);
+          ctx.stroke();
+        } else if (supplyMode === 'drafting') {
+          ctx.font = "42px sans-serif";
+          ctx.fillText("💧", centerXCanvas + 75, engineY - 5);
+          ctx.fillStyle = "#eab308";
+          ctx.font = "bold 8px var(--font-mono)";
+          ctx.fillText("STATIC / DRAFT", centerXCanvas + 75, engineY + 14);
+
+          ctx.strokeStyle = "#475569";
+          ctx.lineWidth = 10;
+          ctx.beginPath();
+          ctx.moveTo(centerXCanvas + 20, engineY - 20);
+          ctx.lineTo(centerXCanvas + 45, engineY - 20);
+          ctx.stroke();
         }
 
-        // 4. Draw Line Name & PDP at Base
-        ctx.fillStyle = document.body.classList.contains('sunlight-mode') ? "#0f172a" : "#f3f4f6";
-        ctx.font = "bold 11px var(--font-sans)";
-        ctx.fillText(l.name, centerX, 260);
-
-        ctx.fillStyle = "var(--accent-green)";
-        ctx.font = "bold 12px var(--font-mono)";
-        ctx.fillText(`${lPDP} kPa`, centerX, 276);
-
-        // 5. Gate Directive Indicator
-        if (lPDP === maxPDP && maxPDP > 0) {
-          ctx.fillStyle = "#15803d";
-          ctx.fillRect(centerX - 35, 286, 70, 18);
-          ctx.fillStyle = "#fff";
-          ctx.font = "bold 9px var(--font-mono)";
-          ctx.fillText("100% OPEN", centerX, 298);
-        } else if (lPDP < maxPDP && maxPDP > 0 && lPDP > 0) {
-          let pct = Math.round((lPDP / maxPDP) * 100);
-          ctx.fillStyle = "#ca8a04";
-          ctx.fillRect(centerX - 35, 286, 70, 18);
-          ctx.fillStyle = "#fff";
-          ctx.font = "bold 9px var(--font-mono)";
-          ctx.fillText(`GATE ${pct}%`, centerX, 298);
+        // Fire ember pulse effect on active flow
+        if (anyActive) {
+          pulseOffset += 3;
+          document.getElementById('fireEmoji').style.transform = `scale(${1 + Math.sin(pulseOffset * 0.1) * 0.15})`;
+        } else {
+          document.getElementById('fireEmoji').style.transform = 'scale(1)';
         }
-      });
-
-      // 6. Centered Fire Engine Station & Water Supply Source Graphics at Bottom (~3x Size)
-      let centerXCanvas = canvas.width / 2;
-      let engineY = 345;
-
-      // Main Fire Engine (~3x size -> 60px font)
-      ctx.font = "60px sans-serif";
-      ctx.textAlign = "center";
-      ctx.fillText("🚒", centerXCanvas, engineY);
-
-      // Supply sources attached to the REAR (Right side) of the main fire truck graphic
-      if (supplyMode === 'nursing') {
-        ctx.fillText("🚒", centerXCanvas + 85, engineY);
-        ctx.fillStyle = "#ef4444";
-        ctx.font = "bold 8px var(--font-mono)";
-        ctx.fillText("NURSING TENDER", centerXCanvas + 85, engineY + 14);
-
-        ctx.strokeStyle = "#facc15";
-        ctx.lineWidth = 10;
-        ctx.beginPath();
-        ctx.moveTo(centerXCanvas + 25, engineY - 20);
-        ctx.lineTo(centerXCanvas + 55, engineY - 20);
-        ctx.stroke();
-      } else if (supplyMode === 'hydrant') {
-        ctx.font = "42px sans-serif";
-        ctx.fillText("🚰", centerXCanvas + 75, engineY - 5);
-        ctx.fillStyle = "#00b4d8";
-        ctx.font = "bold 8px var(--font-mono)";
-        ctx.fillText("FIRE HYDRANT", centerXCanvas + 75, engineY + 14);
-
-        ctx.strokeStyle = "#00b4d8";
-        ctx.lineWidth = 8;
-        ctx.beginPath();
-        ctx.moveTo(centerXCanvas + 20, engineY - 20);
-        ctx.lineTo(centerXCanvas + 45, engineY - 20);
-        ctx.stroke();
-      } else if (supplyMode === 'drafting') {
-        ctx.font = "42px sans-serif";
-        ctx.fillText("💧", centerXCanvas + 75, engineY - 5);
-        ctx.fillStyle = "#eab308";
-        ctx.font = "bold 8px var(--font-mono)";
-        ctx.fillText("STATIC / DRAFT", centerXCanvas + 75, engineY + 14);
-
-        ctx.strokeStyle = "#475569";
-        ctx.lineWidth = 10;
-        ctx.beginPath();
-        ctx.moveTo(centerXCanvas + 20, engineY - 20);
-        ctx.lineTo(centerXCanvas + 45, engineY - 20);
-        ctx.stroke();
       }
+      requestAnimationFrame(renderLoop);
     }
 
     // Initialize UI on load
     selectLine('attack1');
+    requestAnimationFrame(renderLoop);
   </script>
 </body>
 </html>
