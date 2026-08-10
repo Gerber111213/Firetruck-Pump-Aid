@@ -155,13 +155,6 @@
         <button class="btn btn-blue" onclick="applyPreset('highrise')">High-Rise Standpipe (100ft / 30m 65mm + SB)</button>
       </div>
 
-      <div class="section-label">Supply Mode</div>
-      <div class="btn-group">
-        <button class="btn" id="sup-btn-hydrant" onclick="setSupply('hydrant')">Hydrant Supply</button>
-        <button class="btn" id="sup-btn-drafting" onclick="setSupply('drafting')">Drafting (Static)</button>
-        <button class="btn" id="sup-btn-nursing" onclick="setSupply('nursing')">Nursing (Relay)</button>
-      </div>
-
       <div class="section-label">1. Nozzle Selection</div>
       <div class="btn-group">
         <button class="btn" id="nozzle-btn-fog" onclick="setNozzle('Fog Nozzle', 700)">Fog Nozzle (700 kPa / 100 psi)</button>
@@ -215,7 +208,14 @@
         <span class="panel-title">Water Supply & Tank Manager</span>
       </div>
 
-      <div style="text-align: center;">
+      <div class="section-label">Supply Mode</div>
+      <div class="btn-group">
+        <button class="btn" id="sup-btn-hydrant" onclick="setSupply('hydrant')">Hydrant Supply</button>
+        <button class="btn" id="sup-btn-drafting" onclick="setSupply('drafting')">Drafting (Static)</button>
+        <button class="btn" id="sup-btn-nursing" onclick="setSupply('nursing')">Nursing (Relay)</button>
+      </div>
+
+      <div style="text-align: center; margin-top: 4px;">
         <div class="section-label">TIME TO EMPTY WATER SUPPLY</div>
         <div class="timer-display" id="empty-timer">--:--</div>
         <div style="font-size: 0.8rem; color: var(--text-sub);">Total Combined Flow: <strong id="total-flow" style="font-family: var(--font-mono);">0 L/min</strong></div>
@@ -226,7 +226,8 @@
         <div id="tank-bar" style="width: 100%; height: 100%; background-color: var(--accent-green); transition: width 0.3s ease;"></div>
       </div>
 
-      <div class="tank-row">
+      <!-- Engine Tank Card (Always Visible) -->
+      <div class="tank-row" id="row-engine">
         <div style="font-size: 0.85rem; font-weight: bold; display: flex; flex-direction: column; gap: 2px;">
           <span>On-Board Engine Tank:</span>
           <span id="engine-tank-val" style="color: var(--text-main); font-weight: normal; font-size: 0.8rem;">2500 L (660 gal) / 2500 L (660 gal)</span>
@@ -238,7 +239,8 @@
         </div>
       </div>
 
-      <div class="tank-row">
+      <!-- Draft Tank Card (Visible only when drafting or none) -->
+      <div class="tank-row" id="row-draft">
         <div style="font-size: 0.85rem; font-weight: bold; display: flex; flex-direction: column; gap: 2px;">
           <span>Draft Dump Tank:</span>
           <span id="draft-tank-val" style="color: var(--text-main); font-weight: normal; font-size: 0.8rem;">10000 L (2642 gal) / 10000 L (2642 gal)</span>
@@ -250,7 +252,8 @@
         </div>
       </div>
 
-      <div class="tank-row">
+      <!-- Nursing Tender Card (Visible only when nursing or none) -->
+      <div class="tank-row" id="row-nursing">
         <div style="font-size: 0.85rem; font-weight: bold; display: flex; flex-direction: column; gap: 2px;">
           <span>Nursing Tender:</span>
           <span id="nursing-tank-val" style="color: var(--text-main); font-weight: normal; font-size: 0.8rem;">12000 L (3170 gal) / 12000 L (3170 gal)</span>
@@ -326,6 +329,31 @@
         const activeBtn = document.getElementById(`sup-btn-${supplyMode}`);
         if (activeBtn) activeBtn.classList.add('active');
       }
+      
+      // Update visibility of contextual water supply boxes
+      const rowEngine = document.getElementById('row-engine');
+      const rowDraft = document.getElementById('row-draft');
+      const rowNursing = document.getElementById('row-nursing');
+
+      if (supplyMode === 'hydrant') {
+        rowEngine.style.display = 'none';
+        rowDraft.style.display = 'none';
+        rowNursing.style.display = 'none';
+      } else if (supplyMode === 'drafting') {
+        rowEngine.style.display = 'flex';
+        rowDraft.style.display = 'flex';
+        rowNursing.style.display = 'none';
+      } else if (supplyMode === 'nursing') {
+        rowEngine.style.display = 'flex';
+        rowDraft.style.display = 'none';
+        rowNursing.style.display = 'flex';
+      } else {
+        // none / default
+        rowEngine.style.display = 'flex';
+        rowDraft.style.display = 'flex';
+        rowNursing.style.display = 'flex';
+      }
+
       calculateAll();
     }
 
@@ -570,8 +598,11 @@
       totalFlowElem.innerText = `${totalLPM} L/min (${Math.round(totalLPM / 3.785)} GPM)`;
 
       ['engine', 'draft', 'nursing'].forEach(k => {
-        const t = tanks[k];
-        document.getElementById(`${k}-tank-val`).innerText = `${t.current} L (${litersToGallons(t.current)} gal) / ${t.max} L (${litersToGallons(t.max)} gal)`;
+        const valElem = document.getElementById(`${k}-tank-val`);
+        if (valElem) {
+          const t = tanks[k];
+          valElem.innerText = `${t.current} L (${litersToGallons(t.current)} gal) / ${t.max} L (${litersToGallons(t.max)} gal)`;
+        }
       });
 
       if (supplyMode === 'hydrant') {
