@@ -161,7 +161,7 @@
         <button class="btn" id="sup-btn-drafting" onclick="setSupply('drafting')">Drafting (Static)</button>
         <button class="btn" id="sup-btn-nursing" onclick="setSupply('nursing')">Nursing (Relay)</button>
       </div>
-      <div class="section-label" id="supply-definition-label" style="color: var(--text-main); font-size: 0.8rem; font-weight: normal; margin-top: 2px;"></div>
+      <div id="supply-definition-label" style="color: var(--text-main); font-size: 0.8rem; font-weight: normal; margin-top: 2px;"></div>
 
       <div class="section-label">1. Nozzle Selection</div>
       <div class="btn-group">
@@ -366,7 +366,7 @@
       const line = lines[currentLineKey];
       let cFactor = (type === '44mm') ? 3.325 : 0.75; 
       
-      // 65mm hose segments populate on the bottom (firetruck side)
+      // 65mm hose segments populate on the bottom (firetruck side) -> using unshift so they stack at the bottom
       if (type === '65mm') {
         line.hoses.unshift({ type: type, length: lengthMeters, c: cFactor });
       } else {
@@ -378,7 +378,6 @@
     function removeHose() {
       const line = lines[currentLineKey];
       if (line.hoses.length > 0) {
-        // Remove from nozzle side if 44mm, or pop bottom if only 65mm remain
         line.hoses.pop();
       }
       if (line.hoses.length === 0) {
@@ -656,7 +655,7 @@
       }
     }
 
-    // --- ANIMATED CANVAS PULSE LOOP ---
+    // --- ANIMATED CANVAS LOOP ---
     let pulseOffset = 0;
 
     function renderLoop() {
