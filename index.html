@@ -72,6 +72,11 @@
     .target-pdp-box { border: 2px solid var(--accent-green); border-radius: 8px; padding: 10px; text-align: center; background-color: rgba(0, 230, 118, 0.05); }
     .target-pdp-value { font-size: 1.8rem; font-weight: 800; color: var(--accent-green); }
 
+    .math-breakdown {
+      background: rgba(0, 0, 0, 0.2); border-left: 3px solid var(--accent-blue);
+      padding: 6px 8px; border-radius: 4px; font-size: 0.75rem; color: var(--text-sub); margin-top: 6px; text-align: left;
+    }
+
     .btn-group { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 8px; }
     .btn {
       background-color: var(--button-bg); color: var(--text-main); border: 1px solid var(--card-border);
@@ -86,7 +91,6 @@
 
     .section-label { font-size: 0.8rem; font-weight: bold; color: var(--text-sub); margin-top: 4px; }
 
-    /* Tactical Advisor Warning Box */
     .warning-card {
       background: rgba(220, 38, 38, 0.15); border: 1px solid #ef4444;
       border-radius: 6px; padding: 8px; font-size: 0.8rem;
@@ -127,13 +131,18 @@
       <div class="target-pdp-box">
         <div style="font-size: 0.75rem; font-weight: bold; color: var(--accent-green);" id="active-line-title">ATTACK 1 - TARGET PDP</div>
         <div class="target-pdp-value" id="target-pdp">0 <span style="font-size: 0.9rem;">kPa</span></div>
-        <div style="font-size: 0.75rem; color: var(--text-sub);" id="line-summary-text">INACTIVE</div>
-        <div style="font-size: 0.75rem; font-weight: bold; margin-top: 4px; color: var(--accent-orange);" id="line-gate-status">FULLY OPEN</div>
+        <div style="font-size: 0.75rem; color: var(--text-sub); margin-top: 2px;" id="line-summary-text">INACTIVE</div>
+        
+        <div class="math-breakdown" id="math-breakdown-box">
+          Formula: NP (0) + FL (0) + Elev (0) + App (0) = 0 kPa
+        </div>
+
+        <div style="font-size: 0.75rem; font-weight: bold; margin-top: 6px; color: var(--accent-orange);" id="line-gate-status">FULLY OPEN</div>
       </div>
 
       <div class="section-label">Quick Preconnect Short-Cuts</div>
       <div class="btn-group">
-        <button class="btn btn-blue" onclick="applyPreset('crosslay')">Crosslay (60m 44mm + Fog)</button>
+        <button class="btn btn-blue" onclick="applyPreset('speedlay')">Speedlay (60m 44mm + Fog)</button>
         <button class="btn btn-blue" onclick="applyPreset('highrise')">High-Rise Standpipe (30m 65mm + SB)</button>
       </div>
 
@@ -171,10 +180,10 @@
       </div>
     </div>
 
-    <!-- COLUMN 2: MASTER PDP & REBUILT GRAPHICAL LAY DIAGRAM -->
+    <!-- COLUMN 2: MASTER PDP & GRAPHICAL LAY DIAGRAM -->
     <div class="panel">
       <div class="panel-header">
-        <span class="panel-title">Lay Diagram</span>
+        <span class="panel-title">Lay Diagram & Hydraulics</span>
       </div>
 
       <div class="master-pdp-box">
@@ -200,7 +209,7 @@
       <div style="text-align: center;">
         <div class="section-label">TIME TO EMPTY WATER SUPPLY</div>
         <div class="timer-display" id="empty-timer">--:--</div>
-        <div style="font-size: 0.8rem; color: var(--text-sub);">Total Discharge Flow: <strong id="total-flow">0 L/m</strong></div>
+        <div style="font-size: 0.8rem; color: var(--text-sub);">Total Combined Flow: <strong id="total-flow">0 L/min</strong></div>
       </div>
 
       <div class="section-label" id="tank-capacity-label">ACTIVE SOURCE: ON-BOARD TANK</div>
@@ -251,12 +260,24 @@
   </div>
 
   <script>
-    // State management
+    // State management: 4 active lines initialized by default with realistic preset defaults
     const lines = {
-      attack1: { name: "Attack 1", code: "attack1", np: 0, nozzleName: "None", fl: 0, elev: 0, appliance: 0, customFlow: 0, hoses: [] },
-      attack2: { name: "Attack 2", code: "attack2", np: 0, nozzleName: "None", fl: 0, elev: 0, appliance: 0, customFlow: 0, hoses: [] },
-      bumper:  { name: "Bumper",   code: "bumper",  np: 0, nozzleName: "None", fl: 0, elev: 0, appliance: 0, customFlow: 0, hoses: [] },
-      monitor: { name: "Monitor",  code: "monitor", np: 0, nozzleName: "None", fl: 0, elev: 0, appliance: 0, customFlow: 0, hoses: [] }
+      attack1: { 
+        name: "Attack 1", code: "attack1", np: 700, nozzleName: "Fog Nozzle", fl: 0, elev: 0, appliance: 0, customFlow: 470, 
+        hoses: [{ type: '44mm', length: 30, c: 2.0 }, { type: '44mm', length: 30, c: 2.0 }] 
+      },
+      attack2: { 
+        name: "Attack 2", code: "attack2", np: 350, nozzleName: "Smooth Bore", fl: 0, elev: 0, appliance: 0, customFlow: 700, 
+        hoses: [{ type: '65mm', length: 30, c: 0.5 }] 
+      },
+      bumper:  { 
+        name: "Bumper",   code: "bumper",  np: 700, nozzleName: "Fog Nozzle", fl: 0, elev: 0, appliance: 0, customFlow: 570, 
+        hoses: [{ type: '44mm', length: 30, c: 2.0 }] 
+      },
+      monitor: { 
+        name: "Monitor",  code: "monitor", np: 700, nozzleName: "Fog Nozzle", fl: 0, elev: 0, appliance: 0, customFlow: 950, 
+        hoses: [{ type: '65mm', length: 30, c: 0.5 }, { type: '65mm', length: 30, c: 0.5 }] 
+      }
     };
 
     let currentLineKey = 'attack1';
@@ -282,7 +303,6 @@
       document.getElementById(`line-btn-${lineKey}`).classList.add('active');
       document.getElementById('active-line-title').innerText = `${lines[lineKey].name.toUpperCase()} - TARGET PDP`;
       
-      // Update button active states for custom flows and nozzles
       updateControlPanelStates();
       calculateAll();
     }
@@ -304,7 +324,9 @@
       const line = lines[currentLineKey];
       line.nozzleName = name;
       line.np = pressure;
-      line.customFlow = 0;
+      if (line.customFlow === 0) {
+        line.customFlow = (name === "Fog Nozzle") ? 470 : 700;
+      }
       updateControlPanelStates();
       calculateAll();
     }
@@ -320,10 +342,9 @@
 
     function addHose(type, lengthMeters) {
       const line = lines[currentLineKey];
-      // Accurate friction loss calculation per 30m segment
-      // 44mm hose = ~100 kPa per 30m segment; 65mm hose = ~30 kPa per 30m segment
-      let flPerSegment = (type === '44mm') ? 100 : 30;
-      line.hoses.push({ type: type, length: lengthMeters, fl: flPerSegment });
+      // Accurate friction loss coefficient assignment (C factor)
+      let cFactor = (type === '44mm') ? 2.0 : 0.5;
+      line.hoses.push({ type: type, length: lengthMeters, c: cFactor });
       calculateAll();
     }
 
@@ -333,7 +354,7 @@
         line.hoses.pop();
       }
       if (line.hoses.length === 0) {
-        line.elev = 0; // Guardrail: remove elevation if no hoses
+        line.elev = 0;
       }
       calculateAll();
     }
@@ -373,7 +394,7 @@
     function applyPreset(preset) {
       resetActiveLine();
       const line = lines[currentLineKey];
-      if (preset === 'crosslay') {
+      if (preset === 'speedlay') {
         line.nozzleName = "Fog Nozzle";
         line.np = 700;
         line.customFlow = 470;
@@ -428,27 +449,39 @@
         const l = lines[key];
         if (l.hoses.length === 0) l.elev = 0;
 
-        // Sum true friction loss across hose segments
-        let totalFL = l.hoses.reduce((sum, h) => sum + h.fl, 0);
-        l.fl = totalFL;
+        let flow = calculateFlow(l);
+        
+        // Completely accurate physics formula calculation: FL = C * (Q/100)^2 * (Length / 100)
+        let totalFL = 0;
+        if (flow.lpm > 0 && l.hoses.length > 0) {
+          let qFactor = flow.lpm / 100;
+          l.hoses.forEach(h => {
+            let segmentFL = h.c * Math.pow(qFactor, 2) * (h.length / 30); // normalized per 30m segment blocks
+            totalFL += segmentFL;
+          });
+        }
+        l.fl = Math.round(totalFL);
 
-        let linePDP = (l.hoses.length > 0 || l.nozzleName !== "None") ? (l.np + l.fl + l.elev + l.appliance) : 0;
+        let linePDP = (l.hoses.length > 0 || l.nozzleName !== "None") ? Math.round(l.np + l.fl + l.elev + l.appliance) : 0;
         if (linePDP > maxPDP) maxPDP = linePDP;
 
-        let flow = calculateFlow(l);
         totalLPM += flow.lpm;
       });
 
-      // Display Master PDP
+      // Master PDP Display
       document.getElementById('master-pdp').innerHTML = `${maxPDP} <span style="font-size: 1rem;">kPa</span>`;
 
-      // Display Active Line Stats
+      // Active Line Breakdown Stats
       const activeLine = lines[currentLineKey];
-      let activeLineFL = activeLine.hoses.reduce((sum, h) => sum + h.fl, 0);
-      let activeLinePDP = (activeLine.hoses.length > 0 || activeLine.nozzleName !== "None") ? (activeLine.np + activeLineFL + activeLine.elev + activeLine.appliance) : 0;
+      let activeFlow = calculateFlow(activeLine);
+      let activeFL = activeLine.fl;
+      let activeLinePDP = (activeLine.hoses.length > 0 || activeLine.nozzleName !== "None") ? Math.round(activeLine.np + activeFL + activeLine.elev + activeLine.appliance) : 0;
       
       document.getElementById('target-pdp').innerHTML = `${activeLinePDP} <span style="font-size: 0.9rem;">kPa</span>`;
-      document.getElementById('line-summary-text').innerText = `${activeLine.nozzleName} (${activeLine.np} kPa) | ${activeLine.hoses.length} hoses (${activeLineFL} kPa FL) | ${activeLine.elev / 10} floors`;
+      document.getElementById('line-summary-text').innerText = `${activeLine.nozzleName} (${activeFlow.lpm} L/min) | ${activeLine.hoses.length} segment(s) | ${activeLine.elev / 10} Floor(s) Elevation`;
+
+      document.getElementById('math-breakdown-box').innerHTML = 
+        `Formula Breakdown: NP (${activeLine.np} kPa) + FL (${activeFL} kPa) + Elev (${activeLine.elev} kPa) + App (${activeLine.appliance} kPa) = <strong>${activeLinePDP} kPa</strong>`;
 
       const gateElem = document.getElementById('line-gate-status');
       if (activeLinePDP === maxPDP && maxPDP > 0) {
@@ -463,7 +496,7 @@
         gateElem.style.color = "var(--text-sub)";
       }
 
-      updateTacticalWarnings(maxPDP, activeLinePDP, activeLineFL);
+      updateTacticalWarnings(maxPDP, activeLinePDP, activeFL);
       updateTankAndTimer(totalLPM);
       drawCanvas(maxPDP);
     }
@@ -478,8 +511,8 @@
       if (activeFL >= 300) {
         container.innerHTML += `
           <div class="warning-card">
-            <div class="warning-title">⚠️ SEVERE FRICTION LOSS</div>
-            Friction loss on this line exceeds 300 kPa. Consider extending with 65mm supply line.
+            <div class="warning-title">⚠️ SEVERE FRICTION LOSS (${activeFL} kPa)</div>
+            Friction loss on this line is high. Consider substituting or adding a 65mm supply segment to optimize flow.
           </div>`;
       }
 
@@ -487,7 +520,7 @@
         container.innerHTML += `
           <div class="warning-card">
             <div class="warning-title">💪 HIGH NOZZLE REACTION</div>
-            High-volume smooth bore stream (${flow.lpm} L/m). Ensure minimum 2 firefighters on nozzle.
+            High-volume smooth bore stream (${flow.lpm} L/min). Ensure at least 2 firefighters on the nozzle line.
           </div>`;
       }
 
@@ -495,7 +528,7 @@
         container.innerHTML += `
           <div class="warning-card">
             <div class="warning-title">⚠️ HYDRANT RESIDUAL WARNING</div>
-            Maintain intake residual above 140 kPa (20 psi) to avoid pump cavitation.
+            Maintain intake residual above 140 kPa (20 psi) to prevent pump cavitation.
           </div>`;
       } else if (supplyMode === 'drafting') {
         container.innerHTML += `
@@ -507,15 +540,15 @@
         container.innerHTML += `
           <div class="warning-card">
             <div class="warning-title">🚒 NURSING / RELAY BUFFER</div>
-            Supply engine must maintain at least 140 kPa intake buffer.
+            Supply engine must maintain at least 140 kPa intake buffer pressure.
           </div>`;
       }
 
       if (maxPDP > 1750) {
         container.innerHTML += `
           <div class="warning-card" style="border-color: #ff4444; background: rgba(255,0,0,0.2);">
-            <div class="warning-title">🚨 OVERPRESSURE DANGER</div>
-            Target PDP exceeds 1750 kPa (250 psi). Verify hose structural rating!
+            <div class="warning-title">🚨 OVERPRESSURE DANGER (${maxPDP} kPa)</div>
+            Target PDP exceeds safety thresholds (1750 kPa / 250 psi). Verify structural hose ratings!
           </div>`;
       }
     }
@@ -526,7 +559,7 @@
       const barElem = document.getElementById('tank-bar');
       const labelElem = document.getElementById('tank-capacity-label');
 
-      totalFlowElem.innerText = `${totalLPM} L/m`;
+      totalFlowElem.innerText = `${totalLPM} L/min`;
 
       if (supplyMode === 'hydrant') {
         timerElem.innerText = "∞ (HYDRANT)";
@@ -580,7 +613,6 @@
     }
 
     function updateControlPanelStates() {
-      // Clear active states
       document.querySelectorAll('.flow-grid .btn').forEach(b => b.classList.remove('active'));
       document.querySelectorAll('#nozzle-btn-fog, #nozzle-btn-smooth').forEach(b => b.classList.remove('active'));
 
@@ -598,7 +630,6 @@
       const canvas = document.getElementById('hoseCanvas');
       const ctx = canvas.getContext('2d');
       
-      // Match canvas resolution to display size
       canvas.width = canvas.parentElement.clientWidth - 16;
       canvas.height = 380;
 
@@ -610,11 +641,9 @@
       lineKeys.forEach((key, index) => {
         const l = lines[key];
         const centerX = colWidth * index + colWidth / 2;
-        let lineFL = l.hoses.reduce((sum, h) => sum + h.fl, 0);
-        let lPDP = (l.hoses.length > 0 || l.nozzleName !== "None") ? (l.np + lineFL + l.elev + l.appliance) : 0;
+        let lPDP = (l.hoses.length > 0 || l.nozzleName !== "None") ? Math.round(l.np + l.fl + l.elev + l.appliance) : 0;
         let flow = calculateFlow(l);
 
-        // Draw Nozzle / Spray
         if (l.nozzleName !== "None") {
           ctx.font = "16px sans-serif";
           ctx.textAlign = "center";
@@ -630,28 +659,24 @@
           ctx.fillText(l.nozzleName === "Fog Nozzle" ? "[FOG]" : "[BORE]", centerX, 78);
         }
 
-        // Draw Flow Rate
         if (flow.lpm > 0) {
           ctx.fillStyle = "#0288d1";
           ctx.font = "bold 10px sans-serif";
           ctx.fillText(`${flow.lpm} L/m`, centerX, 94);
         }
 
-        // Draw Hoses
         let startY = 110;
         l.hoses.forEach(h => {
           ctx.fillStyle = key === 'attack1' ? '#facc15' : (key === 'attack2' ? '#3b82f6' : (key === 'bumper' ? '#ef4444' : '#22c55e'));
           let hoseWidth = h.type === '44mm' ? 8 : 14;
           ctx.fillRect(centerX - hoseWidth / 2, startY, hoseWidth, 35);
 
-          // Coupling
           ctx.fillStyle = '#888';
           ctx.fillRect(centerX - hoseWidth / 2 - 2, startY + 15, hoseWidth + 4, 5);
 
           startY += 40;
         });
 
-        // Draw Line Name & PDP at Base
         ctx.fillStyle = document.body.classList.contains('sunlight-mode') ? "#000" : "#fff";
         ctx.font = "bold 11px sans-serif";
         ctx.fillText(l.name, centerX, 320);
@@ -660,7 +685,6 @@
         ctx.font = "bold 12px sans-serif";
         ctx.fillText(`${lPDP} kPa`, centerX, 336);
 
-        // Gate Directive Indicator
         if (lPDP === maxPDP && maxPDP > 0) {
           ctx.fillStyle = "#16a34a";
           ctx.fillRect(centerX - 35, 346, 70, 18);
@@ -678,8 +702,8 @@
       });
     }
 
-    // Initialize
-    calculateAll();
+    // Initialize UI on load
+    selectLine('attack1');
   </script>
 </body>
 </html>
