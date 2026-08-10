@@ -203,7 +203,7 @@
       <div class="lay-diagram-container">
         <div class="scene-top-icons">
           <span>🏠</span>
-          <span id="fireEmoji">🔥</span>
+          <span>🔥</span>
         </div>
         <canvas id="hoseCanvas"></canvas>
       </div>
@@ -657,16 +657,14 @@
 
         const lineKeys = Object.keys(lines);
         const colWidth = canvas.width / lineKeys.length;
-        let anyActive = false;
 
         lineKeys.forEach((key, index) => {
           const l = lines[key];
           const centerX = colWidth * index + colWidth / 2;
           let lPDP = (l.hoses.length > 0 || l.nozzleName !== "None") ? Math.round(l.np + l.fl + l.elev + l.appliance) : 0;
           let flow = calculateFlow(l);
-          if (flow.lpm > 0) anyActive = true;
 
-          // 1. Draw Nozzle Triangle Shape + Water Graphic at Top
+          // 1. Draw Nozzle Triangle Shape + Water Graphic at Top (Only if nozzle is selected)
           if (l.nozzleName !== "None") {
             ctx.fillStyle = document.body.classList.contains('sunlight-mode') ? "#0f172a" : "#f3f4f6";
             ctx.beginPath();
@@ -691,14 +689,14 @@
             ctx.fillText(l.nozzleName === "Fog Nozzle" ? "[FOG]" : "[BORE]", centerX, 54);
           }
 
-          // 2. Draw Flow Rate
+          // 2. Draw Flow Rate (Only if flow exists)
           if (flow.lpm > 0) {
             ctx.fillStyle = "#00b4d8";
             ctx.font = "bold 9px var(--font-mono)";
             ctx.fillText(`${flow.lpm} L/m`, centerX, 66);
           }
 
-          // 3. Draw Segmented Hose Line with Animated Water Pulse
+          // 3. Draw Segmented Hose Line with Slower Animated Water Pulse
           let currentY = 74;
           let segmentHeight = 26;
 
@@ -718,10 +716,10 @@
               currentY += segmentHeight;
             });
 
-            // Animated Water Pulse traveling up the hose line
+            // Slower animated Water Pulse traveling up the hose line
             if (flow.lpm > 0) {
               let totalHeight = l.hoses.length * segmentHeight;
-              let pulseY = (74 + totalHeight) - ((pulseOffset * 2) % totalHeight);
+              let pulseY = (74 + totalHeight) - ((pulseOffset * 0.8) % totalHeight);
               ctx.fillStyle = "rgba(255, 255, 255, 0.6)";
               ctx.fillRect(centerX - 3, pulseY, 6, 8);
             }
@@ -768,6 +766,14 @@
         ctx.textAlign = "center";
         ctx.fillText("🚒", centerXCanvas, engineY);
 
+        // Flashing Emergency Light on top of Firetruck Logo
+        pulseOffset += 1.5;
+        let flashState = Math.sin(pulseOffset * 0.25) > 0;
+        ctx.fillStyle = flashState ? "#ef4444" : "#3b82f6";
+        ctx.beginPath();
+        ctx.arc(centerXCanvas - 10, engineY - 42, 5, 0, Math.PI * 2);
+        ctx.fill();
+
         // Supply sources attached to the REAR (Right side) of the main fire truck graphic
         if (supplyMode === 'nursing') {
           ctx.fillText("🚒", centerXCanvas + 85, engineY);
@@ -807,14 +813,6 @@
           ctx.moveTo(centerXCanvas + 20, engineY - 20);
           ctx.lineTo(centerXCanvas + 45, engineY - 20);
           ctx.stroke();
-        }
-
-        // Fire ember pulse effect on active flow
-        if (anyActive) {
-          pulseOffset += 3;
-          document.getElementById('fireEmoji').style.transform = `scale(${1 + Math.sin(pulseOffset * 0.1) * 0.15})`;
-        } else {
-          document.getElementById('fireEmoji').style.transform = 'scale(1)';
         }
       }
       requestAnimationFrame(renderLoop);
