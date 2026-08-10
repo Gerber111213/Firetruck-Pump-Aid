@@ -72,11 +72,6 @@
     .target-pdp-box { border: 2px solid var(--accent-green); border-radius: 8px; padding: 10px; text-align: center; background-color: rgba(0, 230, 118, 0.05); }
     .target-pdp-value { font-size: 1.8rem; font-weight: 800; color: var(--accent-green); }
 
-    .math-breakdown {
-      background: rgba(0, 0, 0, 0.2); border-left: 3px solid var(--accent-blue);
-      padding: 6px 8px; border-radius: 4px; font-size: 0.75rem; color: var(--text-sub); margin-top: 6px; text-align: left;
-    }
-
     .btn-group { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 8px; }
     .btn {
       background-color: var(--button-bg); color: var(--text-main); border: 1px solid var(--card-border);
@@ -132,18 +127,13 @@
         <div style="font-size: 0.75rem; font-weight: bold; color: var(--accent-green);" id="active-line-title">ATTACK 1 - TARGET PDP</div>
         <div class="target-pdp-value" id="target-pdp">0 <span style="font-size: 0.9rem;">kPa</span></div>
         <div style="font-size: 0.75rem; color: var(--text-sub); margin-top: 2px;" id="line-summary-text">INACTIVE</div>
-        
-        <div class="math-breakdown" id="math-breakdown-box">
-          Formula: NP (0) + FL (0) + Elev (0) + App (0) = 0 kPa
-        </div>
-
-        <div style="font-size: 0.75rem; font-weight: bold; margin-top: 6px; color: var(--accent-orange);" id="line-gate-status">FULLY OPEN</div>
+        <div style="font-size: 0.75rem; font-weight: bold; margin-top: 6px; color: var(--accent-orange);" id="line-gate-status">LINE INACTIVE</div>
       </div>
 
       <div class="section-label">Quick Preconnect Short-Cuts</div>
       <div class="btn-group">
-        <button class="btn btn-blue" onclick="applyPreset('speedlay')">Speedlay (60m 44mm + Fog)</button>
-        <button class="btn btn-blue" onclick="applyPreset('highrise')">High-Rise Standpipe (30m 65mm + SB)</button>
+        <button class="btn btn-blue" onclick="applyPreset('speedlay')">Speedlay (200ft / 60m 44mm + Fog)</button>
+        <button class="btn btn-blue" onclick="applyPreset('highrise')">High-Rise Standpipe (100ft / 30m 65mm + SB)</button>
       </div>
 
       <div class="section-label">Supply Mode</div>
@@ -155,16 +145,16 @@
 
       <div class="section-label">1. Nozzle Selection</div>
       <div class="btn-group">
-        <button class="btn" id="nozzle-btn-fog" onclick="setNozzle('Fog Nozzle', 700)">Fog Nozzle (700 kPa)</button>
-        <button class="btn" id="nozzle-btn-smooth" onclick="setNozzle('Smooth Bore', 350)">Smooth Bore (350 kPa)</button>
+        <button class="btn" id="nozzle-btn-fog" onclick="setNozzle('Fog Nozzle', 700)">Fog Nozzle (700 kPa / 100 psi)</button>
+        <button class="btn" id="nozzle-btn-smooth" onclick="setNozzle('Smooth Bore', 350)">Smooth Bore (350 kPa / 50 psi)</button>
         <button class="btn btn-red" onclick="clearNozzle()">- Nozzle</button>
       </div>
 
-      <div class="section-label">2. Hose Lengths (30m Segments)</div>
+      <div class="section-label">2. Hose Lengths (50ft / 15m Segments)</div>
       <div class="btn-group">
-        <button class="btn" onclick="addHose('44mm', 30)">+ 1x 30m 44mm</button>
-        <button class="btn" onclick="addHose('65mm', 30)">+ 1x 30m 65mm</button>
-        <button class="btn btn-red" onclick="removeHose()">- Hose</button>
+        <button class="btn" onclick="addHose('44mm', 15)">+ 50ft (15m) 44mm</button>
+        <button class="btn" onclick="addHose('65mm', 15)">+ 50ft (15m) 65mm</button>
+        <button class="btn btn-red" onclick="removeHose()">- Hose Segment</button>
       </div>
 
       <div class="section-label">3. Elevation Adjustment</div>
@@ -260,24 +250,12 @@
   </div>
 
   <script>
-    // State management: 4 active lines initialized by default with realistic metric defaults
+    // State management: Clean initial state with all lines fully reset
     const lines = {
-      attack1: { 
-        name: "Attack 1", code: "attack1", np: 700, nozzleName: "Fog Nozzle", fl: 0, elev: 0, appliance: 0, customFlow: 470, 
-        hoses: [{ type: '44mm', length: 30, c: 6.65 }, { type: '44mm', length: 30, c: 6.65 }] 
-      },
-      attack2: { 
-        name: "Attack 2", code: "attack2", np: 350, nozzleName: "Smooth Bore", fl: 0, elev: 0, appliance: 0, customFlow: 700, 
-        hoses: [{ type: '65mm', length: 30, c: 1.5 }] 
-      },
-      bumper:  { 
-        name: "Bumper",   code: "bumper",  np: 700, nozzleName: "Fog Nozzle", fl: 0, elev: 0, appliance: 0, customFlow: 570, 
-        hoses: [{ type: '44mm', length: 30, c: 6.65 }] 
-      },
-      monitor: { 
-        name: "Monitor",  code: "monitor", np: 700, nozzleName: "Fog Nozzle", fl: 0, elev: 0, appliance: 0, customFlow: 950, 
-        hoses: [{ type: '65mm', length: 30, c: 1.5 }, { type: '65mm', length: 30, c: 1.5 }] 
-      }
+      attack1: { name: "Attack 1", code: "attack1", np: 0, nozzleName: "None", fl: 0, elev: 0, appliance: 0, customFlow: 0, hoses: [] },
+      attack2: { name: "Attack 2", code: "attack2", np: 0, nozzleName: "None", fl: 0, elev: 0, appliance: 0, customFlow: 0, hoses: [] },
+      bumper:  { name: "Bumper",   code: "bumper",  np: 0, nozzleName: "None", fl: 0, elev: 0, appliance: 0, customFlow: 0, hoses: [] },
+      monitor: { name: "Monitor",  code: "monitor", np: 0, nozzleName: "None", fl: 0, elev: 0, appliance: 0, customFlow: 0, hoses: [] }
     };
 
     let currentLineKey = 'attack1';
@@ -342,7 +320,8 @@
 
     function addHose(type, lengthMeters) {
       const line = lines[currentLineKey];
-      let cFactor = (type === '44mm') ? 6.65 : 1.5;
+      // 50ft (15m) segment C factors normalized from 30m base rates
+      let cFactor = (type === '44mm') ? 3.325 : 0.75; 
       line.hoses.push({ type: type, length: lengthMeters, c: cFactor });
       calculateAll();
     }
@@ -397,13 +376,18 @@
         line.nozzleName = "Fog Nozzle";
         line.np = 700;
         line.customFlow = 470;
-        addHose('44mm', 30);
-        addHose('44mm', 30);
+        // Four 50ft segments = 200ft (60m) total
+        addHose('44mm', 15);
+        addHose('44mm', 15);
+        addHose('44mm', 15);
+        addHose('44mm', 15);
       } else if (preset === 'highrise') {
         line.nozzleName = "Smooth Bore";
         line.np = 350;
         line.customFlow = 700;
-        addHose('65mm', 30);
+        // Two 50ft segments = 100ft (30m) total
+        addHose('65mm', 15);
+        addHose('65mm', 15);
         line.elev = 30;
         line.appliance = 70;
         document.getElementById('standpipe-btn').classList.add('active');
@@ -454,7 +438,7 @@
         if (flow.lpm > 0 && l.hoses.length > 0) {
           let qFactor = flow.lpm / 100;
           l.hoses.forEach(h => {
-            let segmentFL = h.c * Math.pow(qFactor, 2) * (h.length / 30);
+            let segmentFL = h.c * Math.pow(qFactor, 2) * (h.length / 15);
             totalFL += segmentFL;
           });
         }
@@ -474,10 +458,10 @@
       let activeLinePDP = (activeLine.hoses.length > 0 || activeLine.nozzleName !== "None") ? Math.round(activeLine.np + activeFL + activeLine.elev + activeLine.appliance) : 0;
       
       document.getElementById('target-pdp').innerHTML = `${activeLinePDP} <span style="font-size: 0.9rem;">kPa</span>`;
-      document.getElementById('line-summary-text').innerText = `${activeLine.nozzleName} (${activeFlow.lpm} L/min) | ${activeLine.hoses.length} segment(s) | ${activeLine.elev / 10} Floor(s) Elevation`;
-
-      document.getElementById('math-breakdown-box').innerHTML = 
-        `Formula Breakdown: NP (${activeLine.np} kPa) + FL (${activeFL} kPa) + Elev (${activeLine.elev} kPa) + App (${activeLine.appliance} kPa) = <strong>${activeLinePDP} kPa</strong>`;
+      
+      let totalFeet = activeLine.hoses.length * 50;
+      let totalMeters = activeLine.hoses.length * 15;
+      document.getElementById('line-summary-text').innerText = `${activeLine.nozzleName} (${activeFlow.lpm} L/min) | ${totalFeet}ft / ${totalMeters}m | ${activeLine.elev / 10} Floor(s)`;
 
       const gateElem = document.getElementById('line-gate-status');
       if (activeLinePDP === maxPDP && maxPDP > 0) {
@@ -644,99 +628,99 @@
         if (l.nozzleName !== "None") {
           ctx.font = "14px sans-serif";
           ctx.textAlign = "center";
-          ctx.fillText("💧💦", centerX, 36);
+          ctx.fillText("💧💦", centerX, 32);
 
           ctx.fillStyle = l.nozzleName === "Fog Nozzle" ? "#0288d1" : "#eab308";
           ctx.beginPath();
-          ctx.arc(centerX, 54, 7, 0, Math.PI * 2);
+          ctx.arc(centerX, 48, 6, 0, Math.PI * 2);
           ctx.fill();
 
           ctx.fillStyle = document.body.classList.contains('sunlight-mode') ? "#000" : "#fff";
           ctx.font = "bold 9px sans-serif";
-          ctx.fillText(l.nozzleName === "Fog Nozzle" ? "[FOG]" : "[BORE]", centerX, 70);
+          ctx.fillText(l.nozzleName === "Fog Nozzle" ? "[FOG]" : "[BORE]", centerX, 62);
         }
 
         // 2. Draw Flow Rate
         if (flow.lpm > 0) {
           ctx.fillStyle = "#0288d1";
           ctx.font = "bold 10px sans-serif";
-          ctx.fillText(`${flow.lpm} L/m`, centerX, 84);
+          ctx.fillText(`${flow.lpm} L/m`, centerX, 76);
         }
 
         // 3. Draw Connected Continuous Hose Line with Top/Bottom Couplings
-        let hoseTopY = 94;
-        let totalHoseHeight = l.hoses.length * 40;
+        let hoseTopY = 86;
+        let totalHoseHeight = l.hoses.length * 35;
         
         if (l.hoses.length > 0) {
           let hoseColor = key === 'attack1' ? '#facc15' : (key === 'attack2' ? '#3b82f6' : (key === 'bumper' ? '#ef4444' : '#22c55e'));
           let hoseWidth = l.hoses[0].type === '44mm' ? 8 : 14;
 
-          // Solid connected hose body
           ctx.fillStyle = hoseColor;
           ctx.fillRect(centerX - hoseWidth / 2, hoseTopY, hoseWidth, totalHoseHeight);
 
           // Couplings at top, bottom, and between segments
           ctx.fillStyle = '#888';
-          ctx.fillRect(centerX - hoseWidth / 2 - 2, hoseTopY, hoseWidth + 4, 4); // Top coupling
-          ctx.fillRect(centerX - hoseWidth / 2 - 2, hoseTopY + totalHoseHeight - 4, hoseWidth + 4, 4); // Bottom coupling
+          ctx.fillRect(centerX - hoseWidth / 2 - 2, hoseTopY, hoseWidth + 4, 4);
+          ctx.fillRect(centerX - hoseWidth / 2 - 2, hoseTopY + totalHoseHeight - 4, hoseWidth + 4, 4);
 
           for (let i = 1; i < l.hoses.length; i++) {
-            ctx.fillRect(centerX - hoseWidth / 2 - 2, hoseTopY + (i * 40) - 2, hoseWidth + 4, 4); // Mid joints
+            ctx.fillRect(centerX - hoseWidth / 2 - 2, hoseTopY + (i * 35) - 2, hoseWidth + 4, 4);
           }
         }
 
-        // 4. Draw Fire Engine Graphic & Connected Water Supply Source at Bottom
-        let engineY = 270;
-        ctx.font = "20px sans-serif";
-        ctx.textAlign = "center";
-        ctx.fillText("🚒", centerX, engineY);
-
-        // Connected water source icon popup
-        if (supplyMode === 'hydrant') {
-          ctx.font = "14px sans-serif";
-          ctx.fillText("🚰", centerX - 24, engineY + 2);
-          ctx.fillStyle = "#0288d1";
-          ctx.font = "bold 8px sans-serif";
-          ctx.fillText("HYDRANT", centerX - 24, engineY + 14);
-        } else if (supplyMode === 'drafting') {
-          ctx.font = "14px sans-serif";
-          ctx.fillText("💧", centerX - 24, engineY + 2);
-          ctx.fillStyle = "#eab308";
-          ctx.font = "bold 8px sans-serif";
-          ctx.fillText("DRAFT", centerX - 24, engineY + 14);
-        } else if (supplyMode === 'nursing') {
-          ctx.font = "14px sans-serif";
-          ctx.fillText("🚒", centerX - 24, engineY + 2);
-          ctx.fillStyle = "#ef4444";
-          ctx.font = "bold 8px sans-serif";
-          ctx.fillText("NURSING", centerX - 24, engineY + 14);
-        }
-
-        // 5. Draw Line Name & PDP at Base
+        // 4. Draw Line Name & PDP at Base
         ctx.fillStyle = document.body.classList.contains('sunlight-mode') ? "#000" : "#fff";
         ctx.font = "bold 11px sans-serif";
-        ctx.fillText(l.name, centerX, 310);
+        ctx.fillText(l.name, centerX, 290);
 
         ctx.fillStyle = "var(--accent-green)";
         ctx.font = "bold 12px sans-serif";
-        ctx.fillText(`${lPDP} kPa`, centerX, 326);
+        ctx.fillText(`${lPDP} kPa`, centerX, 306);
 
-        // 6. Gate Directive Indicator
+        // 5. Gate Directive Indicator
         if (lPDP === maxPDP && maxPDP > 0) {
           ctx.fillStyle = "#16a34a";
-          ctx.fillRect(centerX - 35, 336, 70, 18);
+          ctx.fillRect(centerX - 35, 316, 70, 18);
           ctx.fillStyle = "#fff";
           ctx.font = "bold 9px sans-serif";
-          ctx.fillText("100% OPEN", centerX, 348);
+          ctx.fillText("100% OPEN", centerX, 328);
         } else if (lPDP < maxPDP && maxPDP > 0 && lPDP > 0) {
           let pct = Math.round((lPDP / maxPDP) * 100);
           ctx.fillStyle = "#eab308";
-          ctx.fillRect(centerX - 35, 336, 70, 18);
+          ctx.fillRect(centerX - 35, 316, 70, 18);
           ctx.fillStyle = "#000";
           ctx.font = "bold 9px sans-serif";
-          ctx.fillText(`GATE ${pct}%`, centerX, 348);
+          ctx.fillText(`GATE ${pct}%`, centerX, 328);
         }
       });
+
+      // 6. Single Centered Fire Engine Station & Supply Source Graphic at Bottom
+      let centerXCanvas = canvas.width / 2;
+      let engineY = 346;
+
+      ctx.font = "22px sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText("🚒", centerXCanvas, engineY);
+
+      if (supplyMode === 'hydrant') {
+        ctx.font = "16px sans-serif";
+        ctx.fillText("🚰", centerXCanvas - 45, engineY);
+        ctx.fillStyle = "#0288d1";
+        ctx.font = "bold 8px sans-serif";
+        ctx.fillText("HYDRANT", centerXCanvas - 45, engineY + 12);
+      } else if (supplyMode === 'drafting') {
+        ctx.font = "16px sans-serif";
+        ctx.fillText("💧", centerXCanvas - 45, engineY);
+        ctx.fillStyle = "#eab308";
+        ctx.font = "bold 8px sans-serif";
+        ctx.fillText("DRAFT", centerXCanvas - 45, engineY + 12);
+      } else if (supplyMode === 'nursing') {
+        ctx.font = "16px sans-serif";
+        ctx.fillText("🚒", centerXCanvas - 45, engineY);
+        ctx.fillStyle = "#ef4444";
+        ctx.font = "bold 8px sans-serif";
+        ctx.fillText("NURSING", centerXCanvas - 45, engineY + 12);
+      }
     }
 
     // Initialize UI on load
