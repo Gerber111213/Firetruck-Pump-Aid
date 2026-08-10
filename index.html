@@ -353,11 +353,8 @@
       const line = lines[currentLineKey];
       let cFactor = (type === '44mm') ? 3.325 : 0.75; 
       
-      if (type === '65mm') {
-        line.hoses.unshift({ type: type, length: lengthMeters, c: cFactor });
-      } else {
-        line.hoses.push({ type: type, length: lengthMeters, c: cFactor });
-      }
+      // Push normally; we sort during render so 65mm draws at the bottom (engine side)
+      line.hoses.push({ type: type, length: lengthMeters, c: cFactor });
       calculateAll();
     }
 
@@ -661,6 +658,11 @@
         lineKeys.forEach((key, index) => {
           const l = lines[key];
           const centerX = colWidth * index + colWidth / 2;
+
+          // Skip drawing if the line has no hoses and no nozzle selected
+          let isActive = (l.hoses.length > 0 || l.nozzleName !== "None");
+          if (!isActive) return;
+
           let lPDP = (l.hoses.length > 0 || l.nozzleName !== "None") ? Math.round(l.np + l.fl + l.elev + l.appliance) : 0;
           let flow = calculateFlow(l);
 
@@ -696,12 +698,18 @@
             ctx.fillText(`${flow.lpm} L/m`, centerX, 66);
           }
 
-          // 3. Draw Segmented Hose Line with Slower Animated Water Pulse
+          // 3. Draw Segmented Hose Line (Sorted so 65mm supply lines sit at bottom near engine)
           let currentY = 74;
           let segmentHeight = 26;
 
           if (l.hoses.length > 0) {
-            l.hoses.forEach((h) => {
+            let sortedHoses = [...l.hoses].sort((a, b) => {
+              if (a.type === '65mm' && b.type !== '65mm') return -1;
+              if (a.type !== '65mm' && b.type === '65mm') return 1;
+              return 0;
+            });
+
+            sortedHoses.forEach((h) => {
               let hoseColor = '#facc15';
               let hoseWidth = h.type === '44mm' ? 8 : 18;
 
