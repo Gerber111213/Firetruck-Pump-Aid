@@ -321,7 +321,7 @@
       const line = lines[currentLineKey];
       let cFactor = (type === '44mm') ? 3.325 : 0.75; 
       
-      // FIX: Always keep 65mm supply hoses at the engine end (index 0) and 44mm attack hoses toward the nozzle end
+      // FIX: Always keep 65mm supply hoses at the engine end (index 0 / bottom near truck) and 44mm attack hoses toward the nozzle end (top)
       if (type === '65mm') {
         line.hoses.unshift({ type: type, length: lengthMeters, c: cFactor });
       } else {
@@ -333,6 +333,7 @@
     function removeHose() {
       const line = lines[currentLineKey];
       if (line.hoses.length > 0) {
+        // Removes from nozzle end (top)
         line.hoses.pop();
       }
       if (line.hoses.length === 0) {
@@ -649,14 +650,14 @@
           ctx.fillText(`${flow.lpm} L/m`, centerX, 62);
         }
 
-        // 3. Draw Segmented Hose Line with Correct Widths Per Segment (65mm wide near bottom, 44mm narrow near top)
+        // 3. Draw Segmented Hose Line (65mm yellow wide hose defaults at bottom near truck, 44mm yellow narrow toward top nozzle)
         let currentY = 70;
         let segmentHeight = 28;
 
         if (l.hoses.length > 0) {
           l.hoses.forEach((h) => {
-            let hoseColor = h.type === '44mm' ? '#facc15' : '#3b82f6';
-            let hoseWidth = h.type === '44mm' ? 8 : 16; // 44mm is narrow, 65mm is wide
+            let hoseColor = '#facc15'; // Yellow for both 44mm and 65mm as requested
+            let hoseWidth = h.type === '44mm' ? 8 : 18; // 44mm narrow, 65mm wide yellow line
 
             ctx.fillStyle = hoseColor;
             ctx.fillRect(centerX - hoseWidth / 2, currentY, hoseWidth, segmentHeight);
@@ -696,57 +697,58 @@
         }
       });
 
-      // 6. Centered Fire Engine Station & Supply Source Graphics at Bottom (~3x Size)
+      // 6. Centered Fire Engine Station & Water Supply Source Graphics at Bottom (~3x Size)
       let centerXCanvas = canvas.width / 2;
       let engineY = 345;
 
-      // Main Fire Engine (approx 3x size -> 60px font)
+      // Main Fire Engine (~3x size -> 60px font)
       ctx.font = "60px sans-serif";
       ctx.textAlign = "center";
       ctx.fillText("🚒", centerXCanvas, engineY);
 
+      // Supply sources attached to the REAR (Right side) of the main fire truck graphic
       if (supplyMode === 'nursing') {
-        // Nursing Tender Firetruck connected behind/beside it
-        ctx.fillText("🚒", centerXCanvas - 85, engineY - 5);
+        // Nursing Tender Firetruck connected directly to the right/rear of the main engine
+        ctx.fillText("🚒", centerXCanvas + 85, engineY);
         ctx.fillStyle = "#ef4444";
         ctx.font = "bold 9px sans-serif";
-        ctx.fillText("NURSING TENDER", centerXCanvas - 85, engineY + 14);
+        ctx.fillText("NURSING TENDER", centerXCanvas + 85, engineY + 14);
 
-        // Yellow large diameter relay hoseline connecting the nursing truck to the primary engine
+        // Yellow large diameter relay hoseline connecting the main engine to the nursing truck on the right
         ctx.strokeStyle = "#facc15";
         ctx.lineWidth = 10;
         ctx.beginPath();
-        ctx.moveTo(centerXCanvas - 55, engineY - 20);
-        ctx.lineTo(centerXCanvas - 25, engineY - 20);
+        ctx.moveTo(centerXCanvas + 25, engineY - 20);
+        ctx.lineTo(centerXCanvas + 55, engineY - 20);
         ctx.stroke();
       } else if (supplyMode === 'hydrant') {
-        // Hydrant graphic connected to the fire engine
+        // Hydrant graphic connected to the right/rear of the fire engine
         ctx.font = "42px sans-serif";
-        ctx.fillText("🚰", centerXCanvas - 75, engineY - 5);
+        ctx.fillText("🚰", centerXCanvas + 75, engineY - 5);
         ctx.fillStyle = "#0288d1";
         ctx.font = "bold 9px sans-serif";
-        ctx.fillText("FIRE HYDRANT", centerXCanvas - 75, engineY + 14);
+        ctx.fillText("FIRE HYDRANT", centerXCanvas + 75, engineY + 14);
 
-        // Supply line connecting hydrant to engine
+        // Supply line connecting engine to hydrant on the right
         ctx.strokeStyle = "#0288d1";
         ctx.lineWidth = 8;
         ctx.beginPath();
-        ctx.moveTo(centerXCanvas - 45, engineY - 20);
-        ctx.lineTo(centerXCanvas - 20, engineY - 20);
+        ctx.moveTo(centerXCanvas + 20, engineY - 20);
+        ctx.lineTo(centerXCanvas + 45, engineY - 20);
         ctx.stroke();
       } else if (supplyMode === 'drafting') {
         ctx.font = "42px sans-serif";
-        ctx.fillText("💧", centerXCanvas - 75, engineY - 5);
+        ctx.fillText("💧", centerXCanvas + 75, engineY - 5);
         ctx.fillStyle = "#eab308";
         ctx.font = "bold 9px sans-serif";
-        ctx.fillText("STATIC / DRAFT", centerXCanvas - 75, engineY + 14);
+        ctx.fillText("STATIC / DRAFT", centerXCanvas + 75, engineY + 14);
 
-        // Hard suction hose connecting water source to engine
+        // Hard suction hose connecting engine to water source on the right
         ctx.strokeStyle = "#333333";
         ctx.lineWidth = 10;
         ctx.beginPath();
-        ctx.moveTo(centerXCanvas - 45, engineY - 20);
-        ctx.lineTo(centerXCanvas - 20, engineY - 20);
+        ctx.moveTo(centerXCanvas + 20, engineY - 20);
+        ctx.lineTo(centerXCanvas + 45, engineY - 20);
         ctx.stroke();
       }
     }
