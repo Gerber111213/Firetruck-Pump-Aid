@@ -342,7 +342,6 @@
 
     function addHose(type, lengthMeters) {
       const line = lines[currentLineKey];
-      // Accurate metric friction loss coefficient assignment (C factor)
       let cFactor = (type === '44mm') ? 6.65 : 1.5;
       line.hoses.push({ type: type, length: lengthMeters, c: cFactor });
       calculateAll();
@@ -451,7 +450,6 @@
 
         let flow = calculateFlow(l);
         
-        // FIXED: Dynamically calculate friction loss using the active flow rate (L/min)
         let totalFL = 0;
         if (flow.lpm > 0 && l.hoses.length > 0) {
           let qFactor = flow.lpm / 100;
@@ -468,10 +466,8 @@
         totalLPM += flow.lpm;
       });
 
-      // Master PDP Display
       document.getElementById('master-pdp').innerHTML = `${maxPDP} <span style="font-size: 1rem;">kPa</span>`;
 
-      // Active Line Breakdown Stats
       const activeLine = lines[currentLineKey];
       let activeFlow = calculateFlow(activeLine);
       let activeFL = activeLine.fl;
@@ -644,60 +640,101 @@
         let lPDP = (l.hoses.length > 0 || l.nozzleName !== "None") ? Math.round(l.np + l.fl + l.elev + l.appliance) : 0;
         let flow = calculateFlow(l);
 
+        // 1. Draw Nozzle at Top
         if (l.nozzleName !== "None") {
-          ctx.font = "16px sans-serif";
+          ctx.font = "14px sans-serif";
           ctx.textAlign = "center";
-          ctx.fillText("💧💦", centerX, 40);
+          ctx.fillText("💧💦", centerX, 36);
 
           ctx.fillStyle = l.nozzleName === "Fog Nozzle" ? "#0288d1" : "#eab308";
           ctx.beginPath();
-          ctx.arc(centerX, 60, 8, 0, Math.PI * 2);
+          ctx.arc(centerX, 54, 7, 0, Math.PI * 2);
           ctx.fill();
 
           ctx.fillStyle = document.body.classList.contains('sunlight-mode') ? "#000" : "#fff";
-          ctx.font = "bold 10px sans-serif";
-          ctx.fillText(l.nozzleName === "Fog Nozzle" ? "[FOG]" : "[BORE]", centerX, 78);
+          ctx.font = "bold 9px sans-serif";
+          ctx.fillText(l.nozzleName === "Fog Nozzle" ? "[FOG]" : "[BORE]", centerX, 70);
         }
 
+        // 2. Draw Flow Rate
         if (flow.lpm > 0) {
           ctx.fillStyle = "#0288d1";
           ctx.font = "bold 10px sans-serif";
-          ctx.fillText(`${flow.lpm} L/m`, centerX, 94);
+          ctx.fillText(`${flow.lpm} L/m`, centerX, 84);
         }
 
-        let startY = 110;
-        l.hoses.forEach(h => {
-          ctx.fillStyle = key === 'attack1' ? '#facc15' : (key === 'attack2' ? '#3b82f6' : (key === 'bumper' ? '#ef4444' : '#22c55e'));
-          let hoseWidth = h.type === '44mm' ? 8 : 14;
-          ctx.fillRect(centerX - hoseWidth / 2, startY, hoseWidth, 35);
+        // 3. Draw Connected Continuous Hose Line with Top/Bottom Couplings
+        let hoseTopY = 94;
+        let totalHoseHeight = l.hoses.length * 40;
+        
+        if (l.hoses.length > 0) {
+          let hoseColor = key === 'attack1' ? '#facc15' : (key === 'attack2' ? '#3b82f6' : (key === 'bumper' ? '#ef4444' : '#22c55e'));
+          let hoseWidth = l.hoses[0].type === '44mm' ? 8 : 14;
 
+          // Solid connected hose body
+          ctx.fillStyle = hoseColor;
+          ctx.fillRect(centerX - hoseWidth / 2, hoseTopY, hoseWidth, totalHoseHeight);
+
+          // Couplings at top, bottom, and between segments
           ctx.fillStyle = '#888';
-          ctx.fillRect(centerX - hoseWidth / 2 - 2, startY + 15, hoseWidth + 4, 5);
+          ctx.fillRect(centerX - hoseWidth / 2 - 2, hoseTopY, hoseWidth + 4, 4); // Top coupling
+          ctx.fillRect(centerX - hoseWidth / 2 - 2, hoseTopY + totalHoseHeight - 4, hoseWidth + 4, 4); // Bottom coupling
 
-          startY += 40;
-        });
+          for (let i = 1; i < l.hoses.length; i++) {
+            ctx.fillRect(centerX - hoseWidth / 2 - 2, hoseTopY + (i * 40) - 2, hoseWidth + 4, 4); // Mid joints
+          }
+        }
 
+        // 4. Draw Fire Engine Graphic & Connected Water Supply Source at Bottom
+        let engineY = 270;
+        ctx.font = "20px sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText("🚒", centerX, engineY);
+
+        // Connected water source icon popup
+        if (supplyMode === 'hydrant') {
+          ctx.font = "14px sans-serif";
+          ctx.fillText("🚰", centerX - 24, engineY + 2);
+          ctx.fillStyle = "#0288d1";
+          ctx.font = "bold 8px sans-serif";
+          ctx.fillText("HYDRANT", centerX - 24, engineY + 14);
+        } else if (supplyMode === 'drafting') {
+          ctx.font = "14px sans-serif";
+          ctx.fillText("💧", centerX - 24, engineY + 2);
+          ctx.fillStyle = "#eab308";
+          ctx.font = "bold 8px sans-serif";
+          ctx.fillText("DRAFT", centerX - 24, engineY + 14);
+        } else if (supplyMode === 'nursing') {
+          ctx.font = "14px sans-serif";
+          ctx.fillText("🚒", centerX - 24, engineY + 2);
+          ctx.fillStyle = "#ef4444";
+          ctx.font = "bold 8px sans-serif";
+          ctx.fillText("NURSING", centerX - 24, engineY + 14);
+        }
+
+        // 5. Draw Line Name & PDP at Base
         ctx.fillStyle = document.body.classList.contains('sunlight-mode') ? "#000" : "#fff";
         ctx.font = "bold 11px sans-serif";
-        ctx.fillText(l.name, centerX, 320);
+        ctx.fillText(l.name, centerX, 310);
 
         ctx.fillStyle = "var(--accent-green)";
         ctx.font = "bold 12px sans-serif";
-        ctx.fillText(`${lPDP} kPa`, centerX, 336);
+        ctx.fillText(`${lPDP} kPa`, centerX, 326);
 
+        // 6. Gate Directive Indicator
         if (lPDP === maxPDP && maxPDP > 0) {
           ctx.fillStyle = "#16a34a";
-          ctx.fillRect(centerX - 35, 346, 70, 18);
+          ctx.fillRect(centerX - 35, 336, 70, 18);
           ctx.fillStyle = "#fff";
           ctx.font = "bold 9px sans-serif";
-          ctx.fillText("100% OPEN", centerX, 358);
+          ctx.fillText("100% OPEN", centerX, 348);
         } else if (lPDP < maxPDP && maxPDP > 0 && lPDP > 0) {
           let pct = Math.round((lPDP / maxPDP) * 100);
           ctx.fillStyle = "#eab308";
-          ctx.fillRect(centerX - 35, 346, 70, 18);
+          ctx.fillRect(centerX - 35, 336, 70, 18);
           ctx.fillStyle = "#000";
           ctx.font = "bold 9px sans-serif";
-          ctx.fillText(`GATE ${pct}%`, centerX, 358);
+          ctx.fillText(`GATE ${pct}%`, centerX, 348);
         }
       });
     }
