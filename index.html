@@ -161,7 +161,6 @@
         <button class="btn" id="sup-btn-drafting" onclick="setSupply('drafting')">Drafting (Static)</button>
         <button class="btn" id="sup-btn-nursing" onclick="setSupply('nursing')">Nursing (Relay)</button>
       </div>
-      <div id="supply-definition-label" style="color: var(--text-main); font-size: 0.8rem; font-weight: normal; margin-top: 2px;"></div>
 
       <div class="section-label">1. Nozzle Selection</div>
       <div class="btn-group">
@@ -323,21 +322,9 @@
         const b = document.getElementById(`sup-btn-${m}`);
         if (b) b.classList.remove('active');
       });
-      
-      const defLabel = document.getElementById('supply-definition-label');
       if (supplyMode !== 'none') {
         const activeBtn = document.getElementById(`sup-btn-${supplyMode}`);
         if (activeBtn) activeBtn.classList.add('active');
-
-        if (supplyMode === 'drafting') {
-          defLabel.innerText = "Draft Dump Tank: Static water source supplying continuous water via portable folding tanks or static bodies of water.";
-        } else if (supplyMode === 'nursing') {
-          defLabel.innerText = "Nursing Tender: Water tender shuttles feeding water directly into the attack engine intake buffer.";
-        } else if (supplyMode === 'hydrant') {
-          defLabel.innerText = "Engine Tank: Pressurized municipal or private hydrant connection maintaining positive intake pressure.";
-        }
-      } else {
-        defLabel.innerText = "";
       }
       calculateAll();
     }
@@ -366,7 +353,6 @@
       const line = lines[currentLineKey];
       let cFactor = (type === '44mm') ? 3.325 : 0.75; 
       
-      // 65mm hose segments populate on the bottom (firetruck side) -> using unshift so they stack at the bottom
       if (type === '65mm') {
         line.hoses.unshift({ type: type, length: lengthMeters, c: cFactor });
       } else {
@@ -655,7 +641,7 @@
       }
     }
 
-    // --- ANIMATED CANVAS LOOP ---
+    // --- ANIMATED CANVAS PULSE LOOP ---
     let pulseOffset = 0;
 
     function renderLoop() {
@@ -678,7 +664,39 @@
           let lPDP = (l.hoses.length > 0 || l.nozzleName !== "None") ? Math.round(l.np + l.fl + l.elev + l.appliance) : 0;
           let flow = calculateFlow(l);
 
-          // 1. Draw Segmented Hose Line with Slower Animated Water Pulse (Only when hoses exist)
+          // 1. Draw Nozzle Triangle Shape + Water Graphic at Top (Only if nozzle is selected)
+          if (l.nozzleName !== "None") {
+            ctx.fillStyle = document.body.classList.contains('sunlight-mode') ? "#0f172a" : "#f3f4f6";
+            ctx.beginPath();
+            if (l.nozzleName === "Fog Nozzle") {
+              ctx.moveTo(centerX - 10, 18);
+              ctx.lineTo(centerX + 10, 18);
+              ctx.lineTo(centerX, 32);
+            } else {
+              ctx.moveTo(centerX, 16);
+              ctx.lineTo(centerX + 6, 30);
+              ctx.lineTo(centerX - 6, 30);
+            }
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.font = "12px sans-serif";
+            ctx.textAlign = "center";
+            ctx.fillText("💧💦", centerX, 44);
+
+            ctx.fillStyle = document.body.classList.contains('sunlight-mode') ? "#475569" : "#9ca3af";
+            ctx.font = "bold 8px var(--font-mono)";
+            ctx.fillText(l.nozzleName === "Fog Nozzle" ? "[FOG]" : "[BORE]", centerX, 54);
+          }
+
+          // 2. Draw Flow Rate (Only if flow exists)
+          if (flow.lpm > 0) {
+            ctx.fillStyle = "#00b4d8";
+            ctx.font = "bold 9px var(--font-mono)";
+            ctx.fillText(`${flow.lpm} L/m`, centerX, 66);
+          }
+
+          // 3. Draw Segmented Hose Line with Slower Animated Water Pulse
           let currentY = 74;
           let segmentHeight = 26;
 
@@ -701,48 +719,45 @@
             // Slower animated Water Pulse traveling up the hose line
             if (flow.lpm > 0) {
               let totalHeight = l.hoses.length * segmentHeight;
-              let pulseY = (74 + totalHeight) - ((pulseOffset * 0.4) % totalHeight);
+              let pulseY = (74 + totalHeight) - ((pulseOffset * 0.8) % totalHeight);
               ctx.fillStyle = "rgba(255, 255, 255, 0.6)";
               ctx.fillRect(centerX - 3, pulseY, 6, 8);
             }
           }
 
-          // 2. Draw Line Name & PDP at Base (Only if line is active)
-          if (lPDP > 0 || l.hoses.length > 0 || l.nozzleName !== "None") {
-            ctx.fillStyle = document.body.classList.contains('sunlight-mode') ? "#0f172a" : "#f3f4f6";
-            ctx.font = "bold 11px var(--font-sans)";
-            ctx.textAlign = "center";
-            ctx.fillText(l.name, centerX, 260);
+          // 4. Draw Line Name & PDP at Base
+          ctx.fillStyle = document.body.classList.contains('sunlight-mode') ? "#0f172a" : "#f3f4f6";
+          ctx.font = "bold 11px var(--font-sans)";
+          ctx.fillText(l.name, centerX, 260);
 
-            ctx.fillStyle = "var(--accent-green)";
-            ctx.font = "bold 12px var(--font-mono)";
-            ctx.fillText(`${lPDP} kPa`, centerX, 276);
+          ctx.fillStyle = "var(--accent-green)";
+          ctx.font = "bold 12px var(--font-mono)";
+          ctx.fillText(`${lPDP} kPa`, centerX, 276);
 
-            // Gate Directive Indicator
-            let maxPDP = 0;
-            Object.values(lines).forEach(item => {
-              let itemPDP = (item.hoses.length > 0 || item.nozzleName !== "None") ? Math.round(item.np + item.fl + item.elev + item.appliance) : 0;
-              if (itemPDP > maxPDP) maxPDP = itemPDP;
-            });
+          // 5. Gate Directive Indicator
+          let maxPDP = 0;
+          Object.values(lines).forEach(item => {
+            let itemPDP = (item.hoses.length > 0 || item.nozzleName !== "None") ? Math.round(item.np + item.fl + item.elev + item.appliance) : 0;
+            if (itemPDP > maxPDP) maxPDP = itemPDP;
+          });
 
-            if (lPDP === maxPDP && maxPDP > 0) {
-              ctx.fillStyle = "#15803d";
-              ctx.fillRect(centerX - 35, 286, 70, 18);
-              ctx.fillStyle = "#fff";
-              ctx.font = "bold 9px var(--font-mono)";
-              ctx.fillText("100% OPEN", centerX, 298);
-            } else if (lPDP < maxPDP && maxPDP > 0 && lPDP > 0) {
-              let pct = Math.round((lPDP / maxPDP) * 100);
-              ctx.fillStyle = "#ca8a04";
-              ctx.fillRect(centerX - 35, 286, 70, 18);
-              ctx.fillStyle = "#fff";
-              ctx.font = "bold 9px var(--font-mono)";
-              ctx.fillText(`GATE ${pct}%`, centerX, 298);
-            }
+          if (lPDP === maxPDP && maxPDP > 0) {
+            ctx.fillStyle = "#15803d";
+            ctx.fillRect(centerX - 35, 286, 70, 18);
+            ctx.fillStyle = "#fff";
+            ctx.font = "bold 9px var(--font-mono)";
+            ctx.fillText("100% OPEN", centerX, 298);
+          } else if (lPDP < maxPDP && maxPDP > 0 && lPDP > 0) {
+            let pct = Math.round((lPDP / maxPDP) * 100);
+            ctx.fillStyle = "#ca8a04";
+            ctx.fillRect(centerX - 35, 286, 70, 18);
+            ctx.fillStyle = "#fff";
+            ctx.font = "bold 9px var(--font-mono)";
+            ctx.fillText(`GATE ${pct}%`, centerX, 298);
           }
         });
 
-        // 3. Centered Fire Engine Station & Water Supply Source Graphics at Bottom (~3x Size)
+        // 6. Centered Fire Engine Station & Water Supply Source Graphics at Bottom (~3x Size)
         let centerXCanvas = canvas.width / 2;
         let engineY = 345;
 
@@ -762,6 +777,10 @@
         // Supply sources attached to the REAR (Right side) of the main fire truck graphic
         if (supplyMode === 'nursing') {
           ctx.fillText("🚒", centerXCanvas + 85, engineY);
+          ctx.fillStyle = "#ef4444";
+          ctx.font = "bold 8px var(--font-mono)";
+          ctx.fillText("NURSING TENDER", centerXCanvas + 85, engineY + 14);
+
           ctx.strokeStyle = "#facc15";
           ctx.lineWidth = 10;
           ctx.beginPath();
@@ -771,6 +790,10 @@
         } else if (supplyMode === 'hydrant') {
           ctx.font = "42px sans-serif";
           ctx.fillText("🚰", centerXCanvas + 75, engineY - 5);
+          ctx.fillStyle = "#00b4d8";
+          ctx.font = "bold 8px var(--font-mono)";
+          ctx.fillText("FIRE HYDRANT", centerXCanvas + 75, engineY + 14);
+
           ctx.strokeStyle = "#00b4d8";
           ctx.lineWidth = 8;
           ctx.beginPath();
@@ -780,6 +803,10 @@
         } else if (supplyMode === 'drafting') {
           ctx.font = "42px sans-serif";
           ctx.fillText("💧", centerXCanvas + 75, engineY - 5);
+          ctx.fillStyle = "#eab308";
+          ctx.font = "bold 8px var(--font-mono)";
+          ctx.fillText("STATIC / DRAFT", centerXCanvas + 75, engineY + 14);
+
           ctx.strokeStyle = "#475569";
           ctx.lineWidth = 10;
           ctx.beginPath();
