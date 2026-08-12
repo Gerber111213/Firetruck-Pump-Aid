@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <!-- Link the Web App Manifest -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#cc0000">
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Engine PDP Dashboard - Tactical Edition</title>
@@ -281,6 +284,15 @@
   </div>
 
   <script>
+    <script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js')
+        .then((reg) => console.log('Service Worker registered!', reg))
+        .catch((err) => console.log('Service Worker registration failed:', err));
+    });
+  }
+</script>
     const lines = {
       attack1: { name: "Attack 1", code: "attack1", np: 0, nozzleName: "None", fl: 0, elev: 0, appliance: 0, customFlow: 0, hoses: [] },
       attack2: { name: "Attack 2", code: "attack2", np: 0, nozzleName: "None", fl: 0, elev: 0, appliance: 0, customFlow: 0, hoses: [] },
