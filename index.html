@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
   <!-- Link the Web App Manifest -->
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#cc0000">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#cc0000">
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Engine PDP Dashboard - Tactical Edition</title>
@@ -284,14 +284,14 @@
   </div>
 
   <script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./sw.js')
-        .then((reg) => console.log('Service Worker registered!', reg))
-        .catch((err) => console.log('Service Worker registration failed:', err));
-    });
-  }
-</script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+          .then((reg) => console.log('Service Worker registered!', reg))
+          .catch((err) => console.log('Service Worker registration failed:', err));
+      });
+    }
+
     const lines = {
       attack1: { name: "Attack 1", code: "attack1", np: 0, nozzleName: "None", fl: 0, elev: 0, appliance: 0, customFlow: 0, hoses: [] },
       attack2: { name: "Attack 2", code: "attack2", np: 0, nozzleName: "None", fl: 0, elev: 0, appliance: 0, customFlow: 0, hoses: [] },
@@ -341,7 +341,6 @@
         if (activeBtn) activeBtn.classList.add('active');
       }
       
-      // Update visibility of contextual water supply boxes
       const rowEngine = document.getElementById('row-engine');
       const rowDraft = document.getElementById('row-draft');
       const rowNursing = document.getElementById('row-nursing');
@@ -359,7 +358,6 @@
         rowDraft.style.display = 'none';
         rowNursing.style.display = 'flex';
       } else {
-        // none / default
         rowEngine.style.display = 'flex';
         rowDraft.style.display = 'flex';
         rowNursing.style.display = 'flex';
@@ -706,7 +704,6 @@
           let lPDP = (l.hoses.length > 0 || l.nozzleName !== "None") ? Math.round(l.np + l.fl + l.elev + l.appliance) : 0;
           let flow = calculateFlow(l);
 
-          // 1. Draw Nozzle Triangle Shape + Water Graphic at Top
           if (l.nozzleName !== "None") {
             ctx.fillStyle = document.body.classList.contains('sunlight-mode') ? "#0f172a" : "#f3f4f6";
             ctx.beginPath();
@@ -731,14 +728,12 @@
             ctx.fillText(l.nozzleName === "Fog Nozzle" ? "[FOG]" : "[BORE]", centerX, 54);
           }
 
-          // 2. Draw Flow Rate
           if (flow.lpm > 0) {
             ctx.fillStyle = "#00b4d8";
             ctx.font = "bold 9px var(--font-mono)";
             ctx.fillText(`${flow.lpm} L/m`, centerX, 66);
           }
 
-          // 3. Draw Segmented Hose Line (Sorted so 65mm supply lines sit at bottom near engine)
           let currentY = 74;
           let segmentHeight = 26;
 
@@ -756,7 +751,6 @@
               ctx.fillStyle = hoseColor;
               ctx.fillRect(centerX - hoseWidth / 2, currentY, hoseWidth, segmentHeight);
 
-              // Coupling bands
               ctx.fillStyle = '#64748b';
               ctx.fillRect(centerX - hoseWidth / 2 - 2, currentY, hoseWidth + 4, 3);
               ctx.fillRect(centerX - hoseWidth / 2 - 2, currentY + segmentHeight - 3, hoseWidth + 4, 3);
@@ -764,7 +758,6 @@
               currentY += segmentHeight;
             });
 
-            // Slower animated Water Pulse traveling up the hose line
             if (flow.lpm > 0) {
               let totalHeight = l.hoses.length * segmentHeight;
               let pulseY = (74 + totalHeight) - ((pulseOffset * 0.8) % totalHeight);
@@ -773,7 +766,6 @@
             }
           }
 
-          // 4. Draw Line Name & PDP at Base
           ctx.fillStyle = document.body.classList.contains('sunlight-mode') ? "#0f172a" : "#f3f4f6";
           ctx.font = "bold 11px var(--font-sans)";
           ctx.fillText(l.name, centerX, 260);
@@ -782,7 +774,6 @@
           ctx.font = "bold 12px var(--font-mono)";
           ctx.fillText(`${lPDP} kPa`, centerX, 276);
 
-          // 5. Gate Directive Indicator
           let maxPDP = 0;
           Object.values(lines).forEach(item => {
             let itemPDP = (item.hoses.length > 0 || item.nozzleName !== "None") ? Math.round(item.np + item.fl + item.elev + item.appliance) : 0;
@@ -805,16 +796,13 @@
           }
         });
 
-        // 6. Centered Fire Engine Station & Water Supply Source Graphics at Bottom
         let centerXCanvas = canvas.width / 2;
         let engineY = 345;
 
-        // Main Fire Engine
         ctx.font = "60px sans-serif";
         ctx.textAlign = "center";
         ctx.fillText("🚒", centerXCanvas, engineY);
 
-        // Flashing Emergency Light on top of Firetruck Logo
         pulseOffset += 1.5;
         let flashState = Math.sin(pulseOffset * 0.25) > 0;
         ctx.fillStyle = flashState ? "#ef4444" : "#3b82f6";
@@ -822,7 +810,6 @@
         ctx.arc(centerXCanvas - 10, engineY - 42, 5, 0, Math.PI * 2);
         ctx.fill();
 
-        // Supply sources attached to the REAR of the main fire truck graphic (NO TEXT)
         if (supplyMode === 'nursing') {
           ctx.fillText("🚒", centerXCanvas + 85, engineY);
 
@@ -833,17 +820,14 @@
           ctx.lineTo(centerXCanvas + 55, engineY - 20);
           ctx.stroke();
         } else if (supplyMode === 'hydrant') {
-          // Custom Drawn Yellow Fire Hydrant Graphic
           let hx = centerXCanvas + 75;
           let hy = engineY - 5;
 
-          // Hydrant Base / Lower Body (Yellow)
           ctx.fillStyle = "#eab308";
           ctx.fillRect(hx - 10, hy - 14, 20, 18);
           ctx.fillStyle = "#ca8a04";
           ctx.fillRect(hx - 12, hy + 2, 24, 6);
 
-          // Hydrant Upper Dome & Cap
           ctx.beginPath();
           ctx.arc(hx, hy - 14, 10, Math.PI, 0, false);
           ctx.fillStyle = "#eab308";
@@ -851,12 +835,10 @@
           ctx.fillStyle = "#facc15";
           ctx.fillRect(hx - 3, hy - 26, 6, 12);
 
-          // Side Outlets (Nozzles)
           ctx.fillStyle = "#ca8a04";
           ctx.fillRect(hx - 16, hy - 10, 6, 6);
           ctx.fillRect(hx + 10, hy - 10, 6, 6);
 
-          // Supply Line Hose Connection to Fire Engine
           ctx.strokeStyle = "#00b4d8";
           ctx.lineWidth = 8;
           ctx.beginPath();
@@ -876,6 +858,7 @@
         }
       }
       requestAnimationFrame(renderLoop);
+    }
 
     // Initialize UI on load
     selectLine('attack1');
